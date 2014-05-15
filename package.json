@@ -1,0 +1,19 @@
+{
+  "name": "webapp-project-skeleton",
+  "version": "0.0.0",
+  "private": true,
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt": "*",
+    "grunt-contrib-coffee": "*",
+    "grunt-contrib-less": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-contrib-copy": "*"
+  }
+}
