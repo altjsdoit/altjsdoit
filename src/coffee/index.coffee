@@ -10,6 +10,21 @@ document.addEventListener "DOMContentLoaded", ->
       document.getElementById("jsCode").value = js
       document.getElementById("htmlCode").value = html
       document.getElementById("cssCode").value = css
+      ###
+      opt = {
+        'theme': 'solarized dark',
+        'lineNumbers': true,
+        'matchBrackets': true,
+        'electricChars': true,
+        'persist': true,
+        'styleActiveLine': true,
+        'autoClearEmptyLines': true,
+        'extraKeys': { 'Tab': 'indentSelection' },
+      }
+      a = CodeMirror.fromTextArea(document.getElementById("jsCode"), mix(opt, {mode:"javascript"}))
+      b = CodeMirror.fromTextArea(document.getElementById("htmlCode"), mix(opt, {mode:"htmlmixed"}))
+      c = CodeMirror.fromTextArea(document.getElementById("cssCode"), mix(opt, {mode:"css"}))
+      ###
 
   document.getElementById("makeLink").addEventListener "click", ->
     a = new Promise (resolve, reject)->
@@ -30,6 +45,12 @@ document.addEventListener "DOMContentLoaded", ->
     toDataURL make(js, html, css), "text/html", (a)->
       document.getElementById("sandbox").setAttribute "src", a
 
+  document.getElementById("download").addEventListener "click", ->
+    js   = document.getElementById("jsCode").value
+    html = document.getElementById("htmlCode").value
+    css  = document.getElementById("cssCode").value
+    toDataURL make(js, html, css), "text/plain", (a)->
+      location.href = a
 
 make = (js, html, css)->
   """
@@ -41,10 +62,16 @@ make = (js, html, css)->
   </head>
   <body>
     #{html}
-    <script>#{js}</script>
+    <script>#{js+"</"}script>
   </body>
   </html>
   """
+
+mix = (a, b)->
+  c = {}
+  for key, val of a then c[key] = val
+  for key, val of b then c[key] = val
+  c
 
 getURLParameter = (query, name)->
   decodeURIComponent(

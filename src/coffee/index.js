@@ -1,4 +1,4 @@
-var base64ToString, getURLParameter, make, stringToBase64, toDataURL;
+var base64ToString, getURLParameter, make, mix, stringToBase64, toDataURL;
 
 document.addEventListener("DOMContentLoaded", function() {
   (function() {
@@ -24,6 +24,22 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("jsCode").value = js;
       document.getElementById("htmlCode").value = html;
       return document.getElementById("cssCode").value = css;
+
+      /*
+      opt = {
+        'theme': 'solarized dark',
+        'lineNumbers': true,
+        'matchBrackets': true,
+        'electricChars': true,
+        'persist': true,
+        'styleActiveLine': true,
+        'autoClearEmptyLines': true,
+        'extraKeys': { 'Tab': 'indentSelection' },
+      }
+      a = CodeMirror.fromTextArea(document.getElementById("jsCode"), mix(opt, {mode:"javascript"}))
+      b = CodeMirror.fromTextArea(document.getElementById("htmlCode"), mix(opt, {mode:"htmlmixed"}))
+      c = CodeMirror.fromTextArea(document.getElementById("cssCode"), mix(opt, {mode:"css"}))
+       */
     });
   })();
   document.getElementById("makeLink").addEventListener("click", function() {
@@ -51,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function() {
       return history.pushState(null, null, link);
     });
   });
-  return document.getElementById("run").addEventListener("click", function() {
+  document.getElementById("run").addEventListener("click", function() {
     var css, html, js;
     js = document.getElementById("jsCode").value;
     html = document.getElementById("htmlCode").value;
@@ -60,10 +76,33 @@ document.addEventListener("DOMContentLoaded", function() {
       return document.getElementById("sandbox").setAttribute("src", a);
     });
   });
+  return document.getElementById("download").addEventListener("click", function() {
+    var css, html, js;
+    js = document.getElementById("jsCode").value;
+    html = document.getElementById("htmlCode").value;
+    css = document.getElementById("cssCode").value;
+    return toDataURL(make(js, html, css), "text/plain", function(a) {
+      return location.href = a;
+    });
+  });
 });
 
 make = function(js, html, css) {
-  return "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\" />\n  <style>" + css + "</style>\n</head>\n<body>\n  " + html + "\n  <script>" + js + "</script>\n</body>\n</html>";
+  return "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\" />\n  <style>" + css + "</style>\n</head>\n<body>\n  " + html + "\n  <script>" + (js + "</") + "script>\n</body>\n</html>";
+};
+
+mix = function(a, b) {
+  var c, key, val;
+  c = {};
+  for (key in a) {
+    val = a[key];
+    c[key] = val;
+  }
+  for (key in b) {
+    val = b[key];
+    c[key] = val;
+  }
+  return c;
 };
 
 getURLParameter = function(query, name) {
