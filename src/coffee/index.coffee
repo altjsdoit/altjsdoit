@@ -1,37 +1,70 @@
 document.addEventListener "DOMContentLoaded", ->
   do ->
-    a = $.Deferred (dfd)-> base64ToString getURLParameter(location.search, "js"),   (a)-> dfd.resolve a
-    b = $.Deferred (dfd)-> base64ToString getURLParameter(location.search, "html"), (a)-> dfd.resolve a
-    c = $.Deferred (dfd)-> base64ToString getURLParameter(location.search, "css"),  (a)-> dfd.resolve a
-    $.when(a, b, c).then (js, html, css)->
-      document.getElementById("jsCode").value   = js
-      document.getElementById("htmlCode").value = html
-      document.getElementById("cssCode").value  = css
+    {js:a, html:b, css:c} = decodeURIQuery(location.search)
+    decodeDataURI a, (js)->
+      decodeDataURI b, (html)->
+        decodeDataURI c, (css)->
+          document.getElementById("jsCode").value   = js   or ""
+          document.getElementById("htmlCode").value = html or ""
+          document.getElementById("cssCode").value  = css  or ""
+
 
   document.getElementById("makeLink").addEventListener "click", ->
-    a = $.Deferred (dfd)-> stringToBase64 document.getElementById("jsCode").value,   (a)-> dfd.resolve encodeURIComponent a
-    b = $.Deferred (dfd)-> stringToBase64 document.getElementById("htmlCode").value, (a)-> dfd.resolve encodeURIComponent a
-    c = $.Deferred (dfd)-> stringToBase64 document.getElementById("cssCode").value,  (a)-> dfd.resolve encodeURIComponent a
-    $.when(a, b, c).then (js, html, css)->
-      link = location.href.split("?")[0]+ "?html="+html+"&css="+css+"&js="+js
-      document.getElementById("makedLink").value = link
-      history.pushState(null, null, link)
+    {js, html, css} = getData(document)
+    encodeDataURI js, "text/plain", (a)->
+      encodeDataURI html, "text/plain", (b)->
+        encodeDataURI css, "text/plain", (c)->
+          url = location.href.split("?")[0] + encodeURIQuery({js:a, html:b, css:c})
+          document.getElementById("makedLink").value = url
+          history.pushState(null, null, url)
+          console.log url.length
 
   document.getElementById("run").addEventListener "click", ->
-    js   = document.getElementById("jsCode").value
-    html = document.getElementById("htmlCode").value
-    css  = document.getElementById("cssCode").value
-    toDataURL makeHTML(js, html, css), "text/html", (a)->
-      document.getElementById("sandbox").setAttribute "src", a
+    html = makeHTML(getData(document))
+    encodeDataURI html, "text/html", (a)-> document.getElementById("sandbox").setAttribute "src", a
 
-  document.getElementById("download").addEventListener "click", ->
-    js   = document.getElementById("jsCode").value
-    html = document.getElementById("htmlCode").value
-    css  = document.getElementById("cssCode").value
-    toDataURL makeHTML(js, html, css), "text/plain", (a)->
-      location.href = a
+decodeDataURI = (base64, cb)->
+  if !base64? then return setTimeout cb
+  tmp = base64.split(',')
+  mimeString = tmp[0].split(':')[1].split(';')[0]
+  byteString = atob(tmp[1])
+  ab = new ArrayBuffer(byteString.length)
+  ia = new Uint8Array(ab)
+  for i in [0..byteString.length]
+    ia[i] = byteString.charCodeAt(i)
+  reader = new FileReader()
+  reader.readAsText(new Blob([ab], {type: mimeString}))
+  reader.onloadend = -> cb(reader.result)
 
-makeHTML = (js, html, css)->
+encodeDataURI = (data, mime, cb)->
+  reader = new FileReader()
+  reader.readAsDataURL(new Blob([data], {type: mime}))
+  reader.onloadend = -> cb(reader.result)
+  reader.onerror = (err)-> throw new Error err
+
+decodeURIQuery = (str)->
+  str
+    .replace("?", "")
+    .split("&")
+    .map((a)->
+      b = a.split("=")
+      [b[0], b.slice(1).join("=")]
+    )
+    .reduce(((a, b)->
+      a[b[0]] = decodeURIComponent(b[1])
+      a
+    ), {})
+
+encodeURIQuery = (o)->
+  "?"+((key+"="+encodeURIComponent(val) for key, val of o).join("&"))
+
+getData = (_document)->
+  js   = _document.getElementById("jsCode").value   or ""
+  html = _document.getElementById("htmlCode").value or ""
+  css  = _document.getElementById("cssCode").value  or ""
+  {js, html, css}
+
+makeHTML = ({js, html, css})->
   """
   <!DOCTYPE html>
   <html>
@@ -45,32 +78,3 @@ makeHTML = (js, html, css)->
   </body>
   </html>
   """
-
-getURLParameter = (query, name)->
-  decodeURIComponent(
-    (new RegExp(
-       '[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)')
-    .exec(query)||["",""])[1]
-    .replace(/\+/g, '%20')) or ""
-
-base64ToString = (base64, cb)->
-  tmp = base64.split(',')
-  mimeString = (tmp[0].split(':')[1] or "").split(';')[0]
-  byteString = atob(tmp[1] or "")
-  ab = new ArrayBuffer(byteString.length)
-  ia = new Uint8Array(ab)
-  for i in [0..byteString.length] then ia[i] = byteString.charCodeAt(i)
-  reader = new window.FileReader()
-  reader.readAsText(new Blob([ab], {type: mimeString}))
-  reader.onloadend = ->
-    cb(reader.result)
-  reader.onerror = (err)-> throw new Error err
-
-stringToBase64 = (str, cb)->
-  toDataURL(str, "text/plain", cb)
-
-toDataURL = (data, mime, cb)->
-  reader = new window.FileReader()
-  reader.readAsDataURL(new Blob([data], {type: mime}))
-  reader.onloadend = -> cb(reader.result)
-  reader.onerror = (err)-> throw new Error err

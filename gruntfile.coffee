@@ -38,14 +38,14 @@ module.exports = (grunt) ->
           {src: "./src/index.html", dest: "./public/index.html"}
           {expand: true, cwd: "./src/coffee/", src: '**', dest: './public/js/'}
           {expand: true, cwd: "./src/less/", src: '**', dest: './public/css/'}
-          {expand: true, cwd: "./bower_components/jquery/dist/", src: '*.js', dest: './public/js/'}
+          #{expand: true, cwd: "./bower_components/jquery/dist/", src: '*.js', dest: './public/js/'}
           #{expand: true, cwd: "./bower_components/codemirror/lib/", src: '*.js', dest: './public/js/'}
           #{expand: true, cwd: "./bower_components/codemirror/lib/", src: '*.css', dest: './public/css/'}
           #{src: "./bower_components/codemirror/theme/solarized.css", dest: './public/css/solarized.css'}
           #{src: "./bower_components/codemirror/mode/javascript/javascript.js", dest: './public/js/javascript.js'}
           #{src: "./bower_components/codemirror/mode/htmlmixed/htmlmixed.js", dest: './public/js/htmlmixed.js'}
           #{src: "./bower_components/codemirror/mode/css/css.js", dest: './public/js/css.js'}
-          {src: "./bower_components/jszip/jszip.min.js", dest: './public/js/jszip.min.js'}
+          #{src: "./bower_components/jszip/jszip.min.js", dest: './public/js/jszip.min.js'}
         ]
     watch:
       coffee:
