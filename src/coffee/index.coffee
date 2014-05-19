@@ -1,20 +1,37 @@
 document.addEventListener "DOMContentLoaded", ->
   do ->
-    {zip} = decodeURIQuery(location.search)
+    {zip, altjs, althtml, altcss} = decodeURIQuery(location.search)
     {js, html, css} = unzipDataURI(zip)
-    document.getElementById("jsCode").value   = js   or ""
-    document.getElementById("htmlCode").value = html or ""
-    document.getElementById("cssCode").value  = css  or ""
+    document.getElementById("altJS"   ).value = altjs   or "JavaScript"
+    document.getElementById("altHTML" ).value = althtml or "HTML"
+    document.getElementById("altCSS"  ).value = altcss  or "CSS"
+    document.getElementById("jsCode"  ).value = js      or ""
+    document.getElementById("htmlCode").value = html    or ""
+    document.getElementById("cssCode" ).value = css     or ""
 
   document.getElementById("makeLink").addEventListener "click", ->
-    url = location.href.split("?")[0] + "?zip=" + zipDataURI(getData(document))
+    opt =
+      zip:     zipDataURI(getData(document))
+      altjs:   document.getElementById("altJS"  ).value
+      althtml: document.getElementById("altHTML").value
+      altcss:  document.getElementById("altCSS" ).value
+    url = location.href.split("?")[0] + encodeURIQuery(opt)
     document.getElementById("makedLink").value = url
     history.pushState(null, null, url)
     console.log url.length
 
   document.getElementById("run").addEventListener "click", ->
-    html = makeHTML(getData(document))
+    {js, html, css} = getData(document)
+    _js   = compile document.getElementById("altJS"  ).value, js
+    _html = compile document.getElementById("altHTML").value, html
+    _css  = compile document.getElementById("altCSS" ).value, css
+    html = makeHTML({js:_js, html:_html, css:_css})
     encodeDataURI html, "text/html", (a)-> document.getElementById("sandbox").setAttribute "src", a
+
+compile = (type, code)->
+  switch type
+    when "CoffeeScript" then CoffeeScript.compile(code)
+    else code
 
 getData = (_document)->
   js   = _document.getElementById("jsCode").value   or ""
@@ -45,11 +62,12 @@ zipDataURI = ({js, html, css})->
   zip.generate({compression: "DEFLATE"})
 
 unzipDataURI = (data)->
-  zip = new JSZip()
-  zip.load(data,{base64: true})
-  js = zip.file("js")?.asText()
-  html = zip.file("html")?.asText()
-  css = zip.file("css")?.asText()
+  try
+    zip = new JSZip()
+    zip.load(data,{base64: true})
+    js = zip.file("js")?.asText()
+    html = zip.file("html")?.asText()
+    css = zip.file("css")?.asText()
   {js, html, css}
 
 encodeDataURI = (data, mime, cb)->

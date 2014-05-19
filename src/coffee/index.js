@@ -1,29 +1,55 @@
-var decodeDataURI, decodeURIQuery, encodeDataURI, encodeURIQuery, getData, makeHTML, unzipDataURI, zipDataURI;
+var compile, decodeDataURI, decodeURIQuery, encodeDataURI, encodeURIQuery, getData, makeHTML, unzipDataURI, zipDataURI;
 
 document.addEventListener("DOMContentLoaded", function() {
   (function() {
-    var css, html, js, zip, _ref;
-    zip = decodeURIQuery(location.search).zip;
-    _ref = unzipDataURI(zip), js = _ref.js, html = _ref.html, css = _ref.css;
+    var altcss, althtml, altjs, css, html, js, zip, _ref, _ref1;
+    _ref = decodeURIQuery(location.search), zip = _ref.zip, altjs = _ref.altjs, althtml = _ref.althtml, altcss = _ref.altcss;
+    _ref1 = unzipDataURI(zip), js = _ref1.js, html = _ref1.html, css = _ref1.css;
+    document.getElementById("altJS").value = altjs || "JavaScript";
+    document.getElementById("altHTML").value = althtml || "HTML";
+    document.getElementById("altCSS").value = altcss || "CSS";
     document.getElementById("jsCode").value = js || "";
     document.getElementById("htmlCode").value = html || "";
     return document.getElementById("cssCode").value = css || "";
   })();
   document.getElementById("makeLink").addEventListener("click", function() {
-    var url;
-    url = location.href.split("?")[0] + "?zip=" + zipDataURI(getData(document));
+    var opt, url;
+    opt = {
+      zip: zipDataURI(getData(document)),
+      altjs: document.getElementById("altJS").value,
+      althtml: document.getElementById("altHTML").value,
+      altcss: document.getElementById("altCSS").value
+    };
+    url = location.href.split("?")[0] + encodeURIQuery(opt);
     document.getElementById("makedLink").value = url;
     history.pushState(null, null, url);
     return console.log(url.length);
   });
   return document.getElementById("run").addEventListener("click", function() {
-    var html;
-    html = makeHTML(getData(document));
+    var css, html, js, _css, _html, _js, _ref;
+    _ref = getData(document), js = _ref.js, html = _ref.html, css = _ref.css;
+    _js = compile(document.getElementById("altJS").value, js);
+    _html = compile(document.getElementById("altHTML").value, html);
+    _css = compile(document.getElementById("altCSS").value, css);
+    html = makeHTML({
+      js: _js,
+      html: _html,
+      css: _css
+    });
     return encodeDataURI(html, "text/html", function(a) {
       return document.getElementById("sandbox").setAttribute("src", a);
     });
   });
 });
+
+compile = function(type, code) {
+  switch (type) {
+    case "CoffeeScript":
+      return CoffeeScript.compile(code);
+    default:
+      return code;
+  }
+};
 
 getData = function(_document) {
   var css, html, js;
@@ -57,13 +83,15 @@ zipDataURI = function(_arg) {
 
 unzipDataURI = function(data) {
   var css, html, js, zip, _ref, _ref1, _ref2;
-  zip = new JSZip();
-  zip.load(data, {
-    base64: true
-  });
-  js = (_ref = zip.file("js")) != null ? _ref.asText() : void 0;
-  html = (_ref1 = zip.file("html")) != null ? _ref1.asText() : void 0;
-  css = (_ref2 = zip.file("css")) != null ? _ref2.asText() : void 0;
+  try {
+    zip = new JSZip();
+    zip.load(data, {
+      base64: true
+    });
+    js = (_ref = zip.file("js")) != null ? _ref.asText() : void 0;
+    html = (_ref1 = zip.file("html")) != null ? _ref1.asText() : void 0;
+    css = (_ref2 = zip.file("css")) != null ? _ref2.asText() : void 0;
+  } catch (_error) {}
   return {
     js: js,
     html: html,
