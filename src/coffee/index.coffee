@@ -1,39 +1,18 @@
 document.addEventListener "DOMContentLoaded", ->
   do ->
-    a = new Promise (resolve, reject)->
-      base64ToString getURLParameter(location.search, "js"), (a)-> resolve a
-    b = new Promise (resolve, reject)->
-      base64ToString getURLParameter(location.search, "html"), (a)-> resolve a
-    c = new Promise (resolve, reject)->
-      base64ToString getURLParameter(location.search, "css"), (a)-> resolve a
-    Promise.all([a, b, c]).then ([js, html, css])->
-      document.getElementById("jsCode").value = js
+    a = $.Deferred (dfd)-> base64ToString getURLParameter(location.search, "js"),   (a)-> dfd.resolve a
+    b = $.Deferred (dfd)-> base64ToString getURLParameter(location.search, "html"), (a)-> dfd.resolve a
+    c = $.Deferred (dfd)-> base64ToString getURLParameter(location.search, "css"),  (a)-> dfd.resolve a
+    $.when(a, b, c).then (js, html, css)->
+      document.getElementById("jsCode").value   = js
       document.getElementById("htmlCode").value = html
-      document.getElementById("cssCode").value = css
-      ###
-      opt = {
-        'theme': 'solarized dark',
-        'lineNumbers': true,
-        'matchBrackets': true,
-        'electricChars': true,
-        'persist': true,
-        'styleActiveLine': true,
-        'autoClearEmptyLines': true,
-        'extraKeys': { 'Tab': 'indentSelection' },
-      }
-      a = CodeMirror.fromTextArea(document.getElementById("jsCode"), mix(opt, {mode:"javascript"}))
-      b = CodeMirror.fromTextArea(document.getElementById("htmlCode"), mix(opt, {mode:"htmlmixed"}))
-      c = CodeMirror.fromTextArea(document.getElementById("cssCode"), mix(opt, {mode:"css"}))
-      ###
+      document.getElementById("cssCode").value  = css
 
   document.getElementById("makeLink").addEventListener "click", ->
-    a = new Promise (resolve, reject)->
-      stringToBase64 document.getElementById("jsCode").value, (a)-> resolve encodeURIComponent a
-    b = new Promise (resolve, reject)->
-      stringToBase64 document.getElementById("htmlCode").value, (a)-> resolve encodeURIComponent a
-    c = new Promise (resolve, reject)->
-      stringToBase64 document.getElementById("cssCode").value, (a)-> resolve encodeURIComponent a
-    Promise.all([a, b, c]).then ([js, html, css])->
+    a = $.Deferred (dfd)-> stringToBase64 document.getElementById("jsCode").value,   (a)-> dfd.resolve encodeURIComponent a
+    b = $.Deferred (dfd)-> stringToBase64 document.getElementById("htmlCode").value, (a)-> dfd.resolve encodeURIComponent a
+    c = $.Deferred (dfd)-> stringToBase64 document.getElementById("cssCode").value,  (a)-> dfd.resolve encodeURIComponent a
+    $.when(a, b, c).then (js, html, css)->
       link = location.href.split("?")[0]+ "?html="+html+"&css="+css+"&js="+js
       document.getElementById("makedLink").value = link
       history.pushState(null, null, link)
@@ -42,17 +21,17 @@ document.addEventListener "DOMContentLoaded", ->
     js   = document.getElementById("jsCode").value
     html = document.getElementById("htmlCode").value
     css  = document.getElementById("cssCode").value
-    toDataURL make(js, html, css), "text/html", (a)->
+    toDataURL makeHTML(js, html, css), "text/html", (a)->
       document.getElementById("sandbox").setAttribute "src", a
 
   document.getElementById("download").addEventListener "click", ->
     js   = document.getElementById("jsCode").value
     html = document.getElementById("htmlCode").value
     css  = document.getElementById("cssCode").value
-    toDataURL make(js, html, css), "text/plain", (a)->
+    toDataURL makeHTML(js, html, css), "text/plain", (a)->
       location.href = a
 
-make = (js, html, css)->
+makeHTML = (js, html, css)->
   """
   <!DOCTYPE html>
   <html>
@@ -67,12 +46,6 @@ make = (js, html, css)->
   </html>
   """
 
-mix = (a, b)->
-  c = {}
-  for key, val of a then c[key] = val
-  for key, val of b then c[key] = val
-  c
-
 getURLParameter = (query, name)->
   decodeURIComponent(
     (new RegExp(
@@ -82,7 +55,7 @@ getURLParameter = (query, name)->
 
 base64ToString = (base64, cb)->
   tmp = base64.split(',')
-  mimeString = tmp[0].split(':')[1].split(';')[0]
+  mimeString = (tmp[0].split(':')[1] or "").split(';')[0]
   byteString = atob(tmp[1] or "")
   ab = new ArrayBuffer(byteString.length)
   ia = new Uint8Array(ab)

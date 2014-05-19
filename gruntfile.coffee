@@ -38,7 +38,7 @@ module.exports = (grunt) ->
           {src: "./src/index.html", dest: "./public/index.html"}
           {expand: true, cwd: "./src/coffee/", src: '**', dest: './public/js/'}
           {expand: true, cwd: "./src/less/", src: '**', dest: './public/css/'}
-          #{expand: true, cwd: "./bower_components/jquery/dist/", src: '*.js', dest: './public/js/'}
+          {expand: true, cwd: "./bower_components/jquery/dist/", src: '*.js', dest: './public/js/'}
           #{expand: true, cwd: "./bower_components/codemirror/lib/", src: '*.js', dest: './public/js/'}
           #{expand: true, cwd: "./bower_components/codemirror/lib/", src: '*.css', dest: './public/css/'}
           #{src: "./bower_components/codemirror/theme/solarized.css", dest: './public/css/solarized.css'}
