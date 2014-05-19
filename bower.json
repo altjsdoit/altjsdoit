@@ -10,7 +10,8 @@
   "dependencies": {
     "jquery": "*",
     "codemirror": "*",
-    "jszip": "*"
+    "jszip": "*",
+    "coffee-script": "*"
   },
   "devDependencies": {
   }

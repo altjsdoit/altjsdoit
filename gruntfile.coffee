@@ -45,7 +45,7 @@ module.exports = (grunt) ->
           #{src: "./bower_components/codemirror/mode/javascript/javascript.js", dest: './public/js/javascript.js'}
           #{src: "./bower_components/codemirror/mode/htmlmixed/htmlmixed.js", dest: './public/js/htmlmixed.js'}
           #{src: "./bower_components/codemirror/mode/css/css.js", dest: './public/js/css.js'}
-          #{src: "./bower_components/jszip/jszip.min.js", dest: './public/js/jszip.min.js'}
+          {src: "./bower_components/jszip/jszip.min.js", dest: './public/js/jszip.min.js'}
         ]
     watch:
       coffee:

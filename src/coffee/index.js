@@ -1,37 +1,20 @@
-var decodeDataURI, decodeURIQuery, encodeDataURI, encodeURIQuery, getData, makeHTML;
+var decodeDataURI, decodeURIQuery, encodeDataURI, encodeURIQuery, getData, makeHTML, unzipDataURI, zipDataURI;
 
 document.addEventListener("DOMContentLoaded", function() {
   (function() {
-    var a, b, c, _ref;
-    _ref = decodeURIQuery(location.search), a = _ref.js, b = _ref.html, c = _ref.css;
-    return decodeDataURI(a, function(js) {
-      return decodeDataURI(b, function(html) {
-        return decodeDataURI(c, function(css) {
-          document.getElementById("jsCode").value = js || "";
-          document.getElementById("htmlCode").value = html || "";
-          return document.getElementById("cssCode").value = css || "";
-        });
-      });
-    });
+    var css, html, js, zip, _ref;
+    zip = decodeURIQuery(location.search).zip;
+    _ref = unzipDataURI(zip), js = _ref.js, html = _ref.html, css = _ref.css;
+    document.getElementById("jsCode").value = js || "";
+    document.getElementById("htmlCode").value = html || "";
+    return document.getElementById("cssCode").value = css || "";
   })();
   document.getElementById("makeLink").addEventListener("click", function() {
-    var css, html, js, _ref;
-    _ref = getData(document), js = _ref.js, html = _ref.html, css = _ref.css;
-    return encodeDataURI(js, "text/plain", function(a) {
-      return encodeDataURI(html, "text/plain", function(b) {
-        return encodeDataURI(css, "text/plain", function(c) {
-          var url;
-          url = location.href.split("?")[0] + encodeURIQuery({
-            js: a,
-            html: b,
-            css: c
-          });
-          document.getElementById("makedLink").value = url;
-          history.pushState(null, null, url);
-          return console.log(url.length);
-        });
-      });
-    });
+    var url;
+    url = location.href.split("?")[0] + "?zip=" + zipDataURI(getData(document));
+    document.getElementById("makedLink").value = url;
+    history.pushState(null, null, url);
+    return console.log(url.length);
   });
   return document.getElementById("run").addEventListener("click", function() {
     var html;
@@ -41,6 +24,66 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 });
+
+getData = function(_document) {
+  var css, html, js;
+  js = _document.getElementById("jsCode").value || "";
+  html = _document.getElementById("htmlCode").value || "";
+  css = _document.getElementById("cssCode").value || "";
+  return {
+    js: js,
+    html: html,
+    css: css
+  };
+};
+
+makeHTML = function(_arg) {
+  var css, html, js;
+  js = _arg.js, html = _arg.html, css = _arg.css;
+  return "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\" />\n  <style>" + css + "</style>\n</head>\n<body>\n  " + html + "\n  <script>" + (js + "</") + "script>\n</body>\n</html>";
+};
+
+zipDataURI = function(_arg) {
+  var css, html, js, zip;
+  js = _arg.js, html = _arg.html, css = _arg.css;
+  zip = new JSZip();
+  zip.file("js", js);
+  zip.file("html", html);
+  zip.file("css", css);
+  return zip.generate({
+    compression: "DEFLATE"
+  });
+};
+
+unzipDataURI = function(data) {
+  var css, html, js, zip, _ref, _ref1, _ref2;
+  zip = new JSZip();
+  zip.load(data, {
+    base64: true
+  });
+  js = (_ref = zip.file("js")) != null ? _ref.asText() : void 0;
+  html = (_ref1 = zip.file("html")) != null ? _ref1.asText() : void 0;
+  css = (_ref2 = zip.file("css")) != null ? _ref2.asText() : void 0;
+  return {
+    js: js,
+    html: html,
+    css: css
+  };
+};
+
+encodeDataURI = function(data, mime, cb) {
+  var reader;
+  reader = new FileReader();
+  reader.readAsDataURL(new Blob([data], {
+    type: mime
+  }));
+  reader.onloadend = function() {
+    return cb(reader.result);
+  };
+  return reader.onerror = function(err) {
+    throw new Error(err);
+  };
+};
 
 decodeDataURI = function(base64, cb) {
   var ab, byteString, i, ia, mimeString, reader, tmp, _i, _ref;
@@ -64,31 +107,6 @@ decodeDataURI = function(base64, cb) {
   };
 };
 
-encodeDataURI = function(data, mime, cb) {
-  var reader;
-  reader = new FileReader();
-  reader.readAsDataURL(new Blob([data], {
-    type: mime
-  }));
-  reader.onloadend = function() {
-    return cb(reader.result);
-  };
-  return reader.onerror = function(err) {
-    throw new Error(err);
-  };
-};
-
-decodeURIQuery = function(str) {
-  return str.replace("?", "").split("&").map(function(a) {
-    var b;
-    b = a.split("=");
-    return [b[0], b.slice(1).join("=")];
-  }).reduce((function(a, b) {
-    a[b[0]] = decodeURIComponent(b[1]);
-    return a;
-  }), {});
-};
-
 encodeURIQuery = function(o) {
   var key, val;
   return "?" + (((function() {
@@ -102,22 +120,15 @@ encodeURIQuery = function(o) {
   })()).join("&"));
 };
 
-getData = function(_document) {
-  var css, html, js;
-  js = _document.getElementById("jsCode").value || "";
-  html = _document.getElementById("htmlCode").value || "";
-  css = _document.getElementById("cssCode").value || "";
-  return {
-    js: js,
-    html: html,
-    css: css
-  };
-};
-
-makeHTML = function(_arg) {
-  var css, html, js;
-  js = _arg.js, html = _arg.html, css = _arg.css;
-  return "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\" />\n  <style>" + css + "</style>\n</head>\n<body>\n  " + html + "\n  <script>" + (js + "</") + "script>\n</body>\n</html>";
+decodeURIQuery = function(str) {
+  return str.replace("?", "").split("&").map(function(a) {
+    var b;
+    b = a.split("=");
+    return [b[0], b.slice(1).join("=")];
+  }).reduce((function(a, b) {
+    a[b[0]] = decodeURIComponent(b[1]);
+    return a;
+  }), {});
 };
 
 //# sourceMappingURL=index.js.map
