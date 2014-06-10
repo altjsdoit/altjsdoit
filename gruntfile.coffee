@@ -31,6 +31,7 @@ module.exports = (grunt) ->
           {src: "./src/package.json", dest: "./public/package.json"}
           {src: "./src/index.css",    dest: "./public/index.css"}
           {src: "./src/index.js",     dest: "./public/index.js"}
+          {src: "./src/manifest.appcache", dest: "./public/manifest.appcache"}
         ]
     watch:
       coffee:
