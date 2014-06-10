@@ -1,0 +1,8 @@
+{
+  "main": "index.html",
+  "name": "nw-demo",
+  "webkit": {
+    "plugin": true
+  }
+  "node-remote": "blob:"
+}
