@@ -1,20 +1,25 @@
 {
-  "name": "webapp-project-skeleton",
-  "version": "0.0.0",
+  "name": "altjsdo.it",
+  "version": "0.6.0",
   "private": true,
   "description": "",
-  "main": "app.js",
+  "main": "public/index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node_modules/nodewebkit/bin/nodewebkit",
   },
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "nodewebkit": "*"
+  },
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-coffee": "*",
     "grunt-contrib-less": "*",
     "grunt-contrib-watch": "*",
     "grunt-contrib-copy": "*",
-    "grunt-contrib-clean": "*"
+    "grunt-contrib-clean": "*",
+    "chai": "^1.9.1",
+    "grunt-simple-mocha": "^0.4.0"
   }
 }

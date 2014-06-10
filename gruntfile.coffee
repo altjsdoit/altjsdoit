@@ -4,61 +4,45 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks("grunt-contrib-watch")
   grunt.loadNpmTasks("grunt-contrib-clean")
+  grunt.loadNpmTasks('grunt-simple-mocha')
 
   grunt.initConfig
+    pkg: grunt.file.readJSON('./package.json')
+    simplemocha:
+      all:
+          src: ['./test/**/*.coffee']
+      options:
+          reporter: 'nyan'
+          ui: 'bdd'
     clean:
       build:
         src: "./public/*"
     coffee:
+      compile:
+        files:
+          './src/index.js': './src/index.coffee'
       options:
-        bare: true,
-        sourceMap: true
-      build:
-        expand: true,
-        flatten: true,
-        cwd: './src/coffee/',
-        src: ['*.coffee'],
-        dest: './src/coffee/',
-        ext: '.js'
-    less:
-      options:
-        sourceMap: true
-        outputSourceFiles: true
-      build:
-        expand: true,
-        flatten: true,
-        cwd: './src/less/',
-        src: ["*.less"],
-        dest: "./src/less/"
-        ext: '.css'
+        bare: yes
     copy:
       build:
         filter: 'isFile',
         files: [
-          {src: "./src/index.html", dest: "./public/index.html"}
-          {expand: true, cwd: "./src/coffee/", src: '**', dest: './public/js/'}
-          {expand: true, cwd: "./src/less/", src: '**', dest: './public/css/'}
-          #{expand: true, cwd: "./bower_components/jquery/dist/", src: '*.js', dest: './public/js/'}
-          #{expand: true, cwd: "./bower_components/codemirror/lib/", src: '*.js', dest: './public/js/'}
-          #{expand: true, cwd: "./bower_components/codemirror/lib/", src: '*.css', dest: './public/css/'}
-          #{src: "./bower_components/codemirror/theme/solarized.css", dest: './public/css/solarized.css'}
-          #{src: "./bower_components/codemirror/mode/javascript/javascript.js", dest: './public/js/javascript.js'}
-          #{src: "./bower_components/codemirror/mode/htmlmixed/htmlmixed.js", dest: './public/js/htmlmixed.js'}
-          #{src: "./bower_components/codemirror/mode/css/css.js", dest: './public/js/css.js'}
-          {src: "./bower_components/jszip/jszip.min.js", dest: './public/js/jszip.min.js'}
-          {src: "./bower_components/coffee-script/extras/coffee-script.js", dest: './public/js/coffee-script.js'}
+          {src: "./src/index.html",   dest: "./public/index.html"}
+          {src: "./src/package.json", dest: "./public/package.json"}
+          {src: "./src/index.css",    dest: "./public/index.css"}
+          {src: "./src/index.js",     dest: "./public/index.js"}
         ]
     watch:
       coffee:
-        files:["./src/coffee/*.coffee"],
+        files:["./src/**/*.coffee"],
         tasks:["make"]
-      less:
-        files:["./src/less/*.less"],
+      css:
+        files:["./src/**/*.css"],
         tasks:["make"]
       html:
-        files:["./src/*.html"]
+        files:["./src/**/*.html"]
         tasks:["make"]
 
-
-  grunt.registerTask("make", ["clean:build", "coffee:build", "less:build", "copy:build"])
+  grunt.registerTask("test", ["coffee:build", "simplemocha:all"])
+  grunt.registerTask("make", ["clean:build", "coffee:compile", "simplemocha:all", "copy:build"])
   grunt.registerTask("default", ["make"])

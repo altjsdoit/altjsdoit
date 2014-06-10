@@ -11,7 +11,8 @@
     "jquery": "*",
     "codemirror": "*",
     "jszip": "*",
-    "coffee-script": "*"
+    "coffee-script": "*",
+    "pure": "*"
   },
   "devDependencies": {
   }
