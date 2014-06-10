@@ -5,7 +5,7 @@
   "description": "",
   "main": "public/index.html",
   "scripts": {
-    "start": "node_modules/nodewebkit/bin/nodewebkit",
+    "start": "node_modules/nodewebkit/bin/nodewebkit"
   },
   "author": "",
   "license": "MIT",
