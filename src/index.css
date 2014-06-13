@@ -47,6 +47,10 @@ html, body, #layout, #main, #main>* {
                'Courier New',
                'monospace' !important;
 }
+
+#menu{
+  overflow-x: hidden;
+}
 #menu .pure-menu-selected {
     color: #fff !important;
 }
