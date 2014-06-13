@@ -333,62 +333,6 @@ getCompiler = function(lang) {
       return f("coffeescript", function(code, cb) {
         return cb(null, CoffeeScript.compile(code));
       });
-    case "TypeScript":
-      return f("javascript", function(c, d) {
-        var e,a,f,b,z,y,_i,_len;a=new TypeScript.TypeScriptCompiler('a.ts');b=TypeScript.ScriptSnapshot.fromString(c);a.addFile('a.ts',b);f=a.compile();for(b='';f.moveNext();)e=f.current().outputFiles[0],b+=e?e.text:'';a=a.getSemanticDiagnostics('a.ts');if(a.length){z=[];for(_i=0,_len=a.length;_i<_len;_i++){y=a[_i];z.push(y.text())}a=z.join('\\n');if(!b)throw Error(a);console.error(a)}d(null,b);
-        return void 0;
-      });
-    case "TypedCoffeeScript":
-      return f("coffeescript", function(code, cb) {
-        var jsAST, jsCode, parsed, preprocessed;
-        preprocessed = TypedCoffeeScript10.Preprocessor.process(code);
-        parsed = TypedCoffeeScript10.Parser.parse(preprocessed, {
-          raw: null,
-          inputSource: null,
-          optimise: null
-        });
-        TypedCoffeeScript10.TypeWalker.checkNodes(parsed);
-        TypedCoffeeScript10.reporter.clean();
-        TypedCoffeeScript10.TypeWalker.checkNodes(parsed);
-        if (TypedCoffeeScript10.reporter.has_errors()) {
-          console.error(TypedCoffeeScript10.reporter.report());
-          TypedCoffeeScript10.reporter.clean();
-        }
-        jsAST = TypedCoffeeScript10.Compiler.compile(parsed, {
-          bare: true
-        }).toBasicObject();
-        jsCode = escodegen.generate(jsAST);
-        return cb(null, jsCode);
-      });
-    case "Traceur":
-      return f("javascript", function(code, cb) {
-        var project, reporter;
-        reporter = new traceur.util.ErrorReporter();
-        reporter.reportMessageInternal = (function(location, kind, format, args) {
-          throw new Error(traceur.util.ErrorReporter.format(location, format, args));
-        });
-        project = new traceur.semantics.symbols.Project(location.href);
-        project.addFile(new traceur.syntax.SourceFile('a.js', code));
-        return cb(null, traceur.outputgeneration.ProjectWriter.write(traceur.codegeneration.Compiler.compile(reporter, project, false)));
-      });
-    case "LiveScript":
-      return f("coffeescript", function(code, cb) {
-        return cb(null, LiveScript.compile(code));
-      });
-    case "GorillaScript":
-      return f("coffeescript", function(code, cb) {
-        return cb(null, GorillaScript.compileSync(code).code);
-      });
-    case "Wisp":
-      return f("clojure", function(code, cb) {
-        var result;
-        result = wisp.compiler.compile(code);
-        return cb(result.error, result.code);
-      });
-    case "LispyScript":
-      return f("scheme", function(code, cb) {
-        return cb(null, lispyscript._compile(code));
-      });
     case "HTML":
       return f("xml", function(code, cb) {
         return cb(null, code);
@@ -456,7 +400,6 @@ build = function(_arg, callback) {
         if (enableFirebugLite) {
           scripts.push("https://getfirebug.com/firebug-lite.js#overrideConsole,showIconWhenHidden=true");
         }
-        console.log(altjs);
         if (altjs === "Traceur") {
           scripts.push("http://jsrun.it/assets/a/V/p/D/aVpDA");
         }
@@ -640,5 +583,3 @@ createBlobURL = function(data, mimetype) {
     type: mimetype
   }));
 };
-
-console.clear();

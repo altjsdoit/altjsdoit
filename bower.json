@@ -1,5 +1,5 @@
 {
-  "name": "webapp-project-skeleton",
+  "name": "altjsdo.it",
   "version": "0.0.0",
   "private": true,
   "ignore": [
@@ -8,11 +8,15 @@
     "bower_components"
   ],
   "dependencies": {
+    "pure": "*",
     "jquery": "*",
-    "codemirror": "*",
+    "underscore": "*",
+    "backbone": "*",
     "jszip": "*",
+    "codemirror": "*",
     "coffee-script": "*",
-    "pure": "*"
+    "jade": "*",
+    "less": "*"
   },
   "devDependencies": {
   }

@@ -1,0 +1,22 @@
+{
+  "version": "0.6.0",
+  "name": "altjsdo.it",
+  "launch_path": "/index.html",
+  "icons": {
+      "128": "/icon-128.png"
+  },
+  "description": "WebApp Editor",
+  "developer": {
+      "name": "Legokichi Duckscallion",
+      "url": "http://duxca.com/"
+  },
+  "locales": {
+    "en-US": {
+      "description": "WebApp Editor",
+      "developer": {
+        "url": "http://duxca.com/"
+      }
+    }
+  },
+  "default_locale": "en-US"
+}
