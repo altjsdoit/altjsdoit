@@ -6,7 +6,8 @@ $(function() {
 
 Config = Backbone.Model.extend({
   defaults: {
-    title: "",
+    timestamp: Date.now(),
+    title: "no name",
     altjs: "JavaScript",
     althtml: "HTML",
     altcss: "CSS"
@@ -26,6 +27,7 @@ Main = Backbone.View.extend({
   },
   saveURI: function() {
     var config, markup, script, style, url, _ref;
+    this.model.set("timestamp", Date.now());
     config = JSON.stringify(this.model.toJSON());
     _ref = this.getValues(), script = _ref.script, markup = _ref.markup, style = _ref.style;
     url = makeURL(location) + "#zip/" + encodeURIComponent(zipDataURI({
@@ -151,9 +153,10 @@ Main = Backbone.View.extend({
     };
   },
   render: function() {
-    var title;
-    title = this.model.toJSON().title;
-    return $("title").html(title + " - altjsdo.it");
+    var d, timestamp, title, _ref;
+    _ref = this.model.toJSON(), title = _ref.title, timestamp = _ref.timestamp;
+    d = new Date(timestamp);
+    return $("title").html(title + (" - " + d + " - altjsdo.it"));
   }
 });
 
@@ -184,8 +187,9 @@ Menu = Backbone.View.extend({
     return this.render();
   },
   render: function() {
-    var altcss, althtml, altjs, enableViewSource, _ref;
-    _ref = this.model.toJSON(), altjs = _ref.altjs, althtml = _ref.althtml, altcss = _ref.altcss, enableViewSource = _ref.enableViewSource;
+    var altcss, althtml, altjs, enableViewSource, title, _ref;
+    _ref = this.model.toJSON(), title = _ref.title, altjs = _ref.altjs, althtml = _ref.althtml, altcss = _ref.altcss, enableViewSource = _ref.enableViewSource;
+    $("#menu-head").html(title);
     $("#menu-altjs").html(altjs);
     $("#menu-althtml").html(althtml);
     $("#menu-altcss").html(altcss);

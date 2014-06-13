@@ -2,7 +2,8 @@ $ -> new Main
 
 Config = Backbone.Model.extend
   defaults:
-    title: ""
+    timestamp: Date.now()
+    title: "no name"
     altjs:   "JavaScript"
     althtml: "HTML"
     altcss:  "CSS"
@@ -17,6 +18,7 @@ Main = Backbone.View.extend
     $("#menu").toggleClass("active")
     $("#menuLink").toggleClass("active")
   saveURI: ->
+    @model.set("timestamp", Date.now())
     config = JSON.stringify(@model.toJSON())
     {script, markup, style} = @getValues()
     url = makeURL(location) + "#zip/" + encodeURIComponent(zipDataURI({config, script, markup, style}))
@@ -64,8 +66,9 @@ Main = Backbone.View.extend
     markup: @markupEd.getValue() or ""
     style:  @styleEd .getValue() or ""
   render: ->
-    {title} = @model.toJSON()
-    $("title").html(title + " - altjsdo.it")
+    {title, timestamp} = @model.toJSON()
+    d = new Date(timestamp)
+    $("title").html(title + " - #{d} - altjsdo.it")
 
 Menu = Backbone.View.extend
   el: "#menu"
@@ -92,7 +95,8 @@ Menu = Backbone.View.extend
     @model.bind("change", @render)
     @render()
   render: ->
-    {altjs, althtml, altcss, enableViewSource} = @model.toJSON()
+    {title, altjs, althtml, altcss, enableViewSource} = @model.toJSON()
+    $("#menu-head")   .html(title)
     $("#menu-altjs")  .html(altjs)
     $("#menu-althtml").html(althtml)
     $("#menu-altcss") .html(altcss)

@@ -5,12 +5,10 @@
   "description": "",
   "main": "public/index.html",
   "scripts": {
-    "start": "node_modules/nodewebkit/bin/nodewebkit"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "nodewebkit": "*"
   },
   "devDependencies": {
     "grunt": "*",
