@@ -25,6 +25,14 @@ Main = Backbone.View.extend
     $("#setting-project-url").val(url)
     $("#setting-project-size").html(url.length)
     history.pushState(null, null, url)
+    $.ajax
+      url: 'https://www.googleapis.com/urlshortener/v1/url'
+      type: 'POST'
+      contentType: 'application/json; charset=utf-8'
+      data: JSON.stringify({longUrl: url})
+      dataType: 'json'
+      success: (res)->
+        $("#setting-project-url").val(res.id)
   loadURI: ->
     if location.hash.slice(0, 5) is "#zip/"
       {config, script, markup, style} = unzipDataURI(decodeURIComponent(location.hash.slice(5)))
@@ -32,9 +40,9 @@ Main = Backbone.View.extend
       @model.set(config)
       @setValues({script, markup, style})
   run: ->
-    {altjs, althtml, altcss, enableFirebugLite, enableViewSource} = @model.toJSON()
+    {altjs, althtml, altcss, enableFirebugLite, enableViewSource, enableJQuery} = @model.toJSON()
     {script, markup, style} = @getValues()
-    build {altjs, althtml, altcss, script, markup, style, enableFirebugLite}, (srcdoc)->
+    build {altjs, althtml, altcss, script, markup, style, enableFirebugLite, enableJQuery}, (srcdoc)->
       console.log url = createBlobURL(srcdoc, (if enableViewSource then "text/plain" else "text/html"))
       $("#box-sandbox-iframe").attr({"src": url})
       #encodeDataURI srcdoc, "text/html", (base64)->
@@ -211,7 +219,7 @@ compile = (compilerFn, code, callback)->
       console.error(err.stack)
       callback(err, code)
 
-build = ({altjs, althtml, altcss, script, markup, style, enableFirebugLite}, callback)->
+build = ({altjs, althtml, altcss, script, markup, style, enableFirebugLite, enableJQuery}, callback)->
 # ( { altjs:string;  althtml:string; altcss:string;
 #     script:string; markup:string;  style:string; }
 #   callback:(code:string)=>void;
@@ -221,7 +229,8 @@ build = ({altjs, althtml, altcss, script, markup, style, enableFirebugLite}, cal
       compile getCompiler(altcss).compile,  style,  (cssErr="",   cssCode)->
         errdoc = altjs+"\n"+jsErr+"\n"+althtml+"\n"+htmlErr+"\n"+altcss+"\n"+cssErr
         scripts = []
-        if enableFirebugLite then scripts.push "https://getfirebug.com/firebug-lite.js#overrideConsole,showIconWhenHidden=true"
+        if enableFirebugLite then scripts.push "http://getfirebug.com/firebug-lite.js#overrideConsole,showIconWhenHidden=true"
+        if enableJQuery then scripts.push "http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"
         if altjs is "Traceur" then scripts.push "http://jsrun.it/assets/a/V/p/D/aVpDA"
         srcdoc = makeHTML
             error: if (jsErr+htmlErr+cssErr).length > 0 then errdoc else ""

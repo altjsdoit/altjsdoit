@@ -38,7 +38,19 @@ Main = Backbone.View.extend({
     }));
     $("#setting-project-url").val(url);
     $("#setting-project-size").html(url.length);
-    return history.pushState(null, null, url);
+    history.pushState(null, null, url);
+    return $.ajax({
+      url: 'https://www.googleapis.com/urlshortener/v1/url',
+      type: 'POST',
+      contentType: 'application/json; charset=utf-8',
+      data: JSON.stringify({
+        longUrl: url
+      }),
+      dataType: 'json',
+      success: function(res) {
+        return $("#setting-project-url").val(res.id);
+      }
+    });
   },
   loadURI: function() {
     var config, markup, script, style, _ref;
@@ -54,8 +66,8 @@ Main = Backbone.View.extend({
     }
   },
   run: function() {
-    var altcss, althtml, altjs, enableFirebugLite, enableViewSource, markup, script, style, _ref, _ref1;
-    _ref = this.model.toJSON(), altjs = _ref.altjs, althtml = _ref.althtml, altcss = _ref.altcss, enableFirebugLite = _ref.enableFirebugLite, enableViewSource = _ref.enableViewSource;
+    var altcss, althtml, altjs, enableFirebugLite, enableJQuery, enableViewSource, markup, script, style, _ref, _ref1;
+    _ref = this.model.toJSON(), altjs = _ref.altjs, althtml = _ref.althtml, altcss = _ref.altcss, enableFirebugLite = _ref.enableFirebugLite, enableViewSource = _ref.enableViewSource, enableJQuery = _ref.enableJQuery;
     _ref1 = this.getValues(), script = _ref1.script, markup = _ref1.markup, style = _ref1.style;
     return build({
       altjs: altjs,
@@ -64,7 +76,8 @@ Main = Backbone.View.extend({
       script: script,
       markup: markup,
       style: style,
-      enableFirebugLite: enableFirebugLite
+      enableFirebugLite: enableFirebugLite,
+      enableJQuery: enableJQuery
     }, function(srcdoc) {
       var url;
       console.log(url = createBlobURL(srcdoc, (enableViewSource ? "text/plain" : "text/html")));
@@ -384,8 +397,8 @@ compile = function(compilerFn, code, callback) {
 };
 
 build = function(_arg, callback) {
-  var altcss, althtml, altjs, enableFirebugLite, markup, script, style;
-  altjs = _arg.altjs, althtml = _arg.althtml, altcss = _arg.altcss, script = _arg.script, markup = _arg.markup, style = _arg.style, enableFirebugLite = _arg.enableFirebugLite;
+  var altcss, althtml, altjs, enableFirebugLite, enableJQuery, markup, script, style;
+  altjs = _arg.altjs, althtml = _arg.althtml, altcss = _arg.altcss, script = _arg.script, markup = _arg.markup, style = _arg.style, enableFirebugLite = _arg.enableFirebugLite, enableJQuery = _arg.enableJQuery;
   return compile(getCompiler(altjs).compile, script, function(jsErr, jsCode) {
     if (jsErr == null) {
       jsErr = "";
@@ -402,7 +415,10 @@ build = function(_arg, callback) {
         errdoc = altjs + "\n" + jsErr + "\n" + althtml + "\n" + htmlErr + "\n" + altcss + "\n" + cssErr;
         scripts = [];
         if (enableFirebugLite) {
-          scripts.push("https://getfirebug.com/firebug-lite.js#overrideConsole,showIconWhenHidden=true");
+          scripts.push("http://getfirebug.com/firebug-lite.js#overrideConsole,showIconWhenHidden=true");
+        }
+        if (enableJQuery) {
+          scripts.push("http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js");
         }
         if (altjs === "Traceur") {
           scripts.push("http://jsrun.it/assets/a/V/p/D/aVpDA");
