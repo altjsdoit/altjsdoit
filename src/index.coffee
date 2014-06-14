@@ -199,6 +199,7 @@ getCompiler = (lang)->
   switch lang
     when "JavaScript"   then f "javascript",   (code, cb)-> cb(null, code)
     when "CoffeeScript" then f "coffeescript", (code, cb)-> cb(null, CoffeeScript.compile(code))
+    when "Wisp"         then f "clojure",      (code, cb)-> result = wisp.compiler.compile(code); cb(result.error, result.code)
     when "HTML"         then f "xml",          (code, cb)-> cb(null, code)
     when "Jade"         then f "jade",         (code, cb)-> cb(null, jade.compile(code)({}))
     when "CSS"          then f "css",          (code, cb)-> cb(null, code)

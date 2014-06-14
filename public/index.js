@@ -350,6 +350,12 @@ getCompiler = function(lang) {
       return f("coffeescript", function(code, cb) {
         return cb(null, CoffeeScript.compile(code));
       });
+    case "Wisp":
+      return f("clojure", function(code, cb) {
+        var result;
+        result = wisp.compiler.compile(code);
+        return cb(result.error, result.code);
+      });
     case "HTML":
       return f("xml", function(code, cb) {
         return cb(null, code);
