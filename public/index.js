@@ -38,6 +38,7 @@ Main = Backbone.View.extend({
     }));
     $("#setting-project-url").val(url);
     $("#setting-project-size").html(url.length);
+    $("#setting-project-twitter").html("");
     history.pushState(null, null, url);
     return $.ajax({
       url: 'https://www.googleapis.com/urlshortener/v1/url',
@@ -47,9 +48,13 @@ Main = Backbone.View.extend({
         longUrl: url
       }),
       dataType: 'json',
-      success: function(res) {
-        return $("#setting-project-url").val(res.id);
-      }
+      success: (function(_this) {
+        return function(res) {
+          $("#setting-project-url").val(res.id);
+          $("#setting-project-twitter").html($("<a href=\"https://twitter.com/share\"\n   class=\"twitter-share-button\"\n   data-size=\"large\"\n   data-text=\"" + (_this.model.get('title')) + "\"\n   data-url=\"" + res.id + "\"\n   data-hashtags=\"altjsdo.it\"\n   data-count=\"none\">Tweet</a>"));
+          return twttr.widgets.load();
+        };
+      })(this)
     });
   },
   loadURI: function() {

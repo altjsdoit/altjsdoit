@@ -24,6 +24,7 @@ Main = Backbone.View.extend
     url = makeURL(location) + "#zip/" + encodeURIComponent(zipDataURI({config, script, markup, style}))
     $("#setting-project-url").val(url)
     $("#setting-project-size").html(url.length)
+    $("#setting-project-twitter").html("")
     history.pushState(null, null, url)
     $.ajax
       url: 'https://www.googleapis.com/urlshortener/v1/url'
@@ -31,8 +32,18 @@ Main = Backbone.View.extend
       contentType: 'application/json; charset=utf-8'
       data: JSON.stringify({longUrl: url})
       dataType: 'json'
-      success: (res)->
+      success: (res)=>
         $("#setting-project-url").val(res.id)
+        $("#setting-project-twitter").html($("""
+          <a href="https://twitter.com/share"
+             class="twitter-share-button"
+             data-size="large"
+             data-text="#{@model.get('title')}"
+             data-url="#{res.id}"
+             data-hashtags="altjsdo.it"
+             data-count="none">Tweet</a>
+        """))
+        twttr.widgets.load()
   loadURI: ->
     if location.hash.slice(0, 5) is "#zip/"
       {config, script, markup, style} = unzipDataURI(decodeURIComponent(location.hash.slice(5)))
