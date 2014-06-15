@@ -35,7 +35,7 @@ Main = Backbone.View.extend
       success: (res)=>
         $("#setting-project-url").val(res.id)
         $("#setting-project-twitter").html($("""
-          <a href="https://twitter.com/share" class="twitter-share-button" data-size="large" data-text="\"#{@model.get('title')}\"" data-url="#{res.id}" data-hashtags="altjsdo.it" data-count="none">Tweet</a>
+          <a href="https://twitter.com/share" class="twitter-share-button" data-size="large" data-text="'#{@model.get('title')}'" data-url="#{res.id}" data-hashtags="altjsdo.it" data-count="none">Tweet</a>
         """))
         twttr.widgets.load()
   loadURI: ->
