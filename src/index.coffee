@@ -151,7 +151,9 @@ Editor = Backbone.View.extend
       lineNumbers: true
       matchBrackets: true
       autoCloseBrackets: true
-      showCursorWhenSelecting: true,
+      showCursorWhenSelecting: true
+      keymap:
+        "Shift-Tab": "indentLess"
       extraKeys:
         "Tab": (cm)-> cm.replaceSelection("  ", "end")
         "Cmd-R": (cm)=>  @onrun()

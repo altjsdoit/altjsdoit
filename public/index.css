@@ -1,43 +1,42 @@
 html, body, #layout, #main, #main>* {
   height: 100%;
 }
-#setting-config-error {
-  color: red;
-}
 #main {
   position: fixed;
   left: 0px;
   width: 100%;
 }
-#main>* {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  background-color: white;
-}
-#main>.content {
-  margin-bottom: 0px !important;
-  width: 100%;
-}
-#main>[id^=box-] {
-  display: none;
-}
-#main>[id^=box-].active {
-  display: block;
-}
-#main>[id^=box-]>textarea, #box-sandbox-iframe {
-  margin: 0px;
-  padding: 0px;
-  border: none;
-  width: 100%;
-  height: 100%;
-  background-color: white;
-}
+  #main>* {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background-color: white;
+  }
+  #main>.content {
+    margin-bottom: 0px !important;
+    width: 100%;
+  }
+  #main>[id^=box-] {
+    display: none;
+  }
+  #main>[id^=box-].active {
+    display: block;
+  }
+  #main>[id^=box-]>textarea, #box-sandbox-iframe {
+    margin: 0px;
+    padding: 0px;
+    border: none;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+  }
 
-
+.CodeMirror-gutters {
+  padding: 0 10px 0 20px;
+}
 .CodeMirror, textarea {
   font-family: 'Source Code Pro',
                'Menlo',
@@ -51,9 +50,9 @@ html, body, #layout, #main, #main>* {
 #menu{
   overflow-x: hidden;
 }
-#menu .pure-menu-selected {
-    color: #fff !important;
-}
+  #menu .pure-menu-selected {
+      color: #fff !important;
+  }
 
 
 body {

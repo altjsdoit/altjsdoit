@@ -256,6 +256,9 @@ Editor = Backbone.View.extend({
       matchBrackets: true,
       autoCloseBrackets: true,
       showCursorWhenSelecting: true,
+      keymap: {
+        "Shift-Tab": "indentLess"
+      },
       extraKeys: {
         "Tab": function(cm) {
           return cm.replaceSelection("  ", "end");
