@@ -44,14 +44,14 @@ module.exports = (grunt) ->
     copy:
       build:
         files: [
-          #{expand: true, cwd: 'src/', src: ['index.appcache'], dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['index.appcache'], dest: 'public/'}
           {expand: true, cwd: 'src/', src: ['icon-128.png'],  dest: 'public/'}
           {expand: true, cwd: 'src/', src: ['manifest.webapp'], dest: 'public/'}
           {expand: true, src: ['thirdparty/**'], dest: 'public/'}
         ]
     watch:
       gruntfile:
-        files:["./gruntfile.coffee"]
+        files:["./gruntfile.coffee", "./index.appcache"]
         tasks:["make"]
       coffee:
         files:["./src/**/*.coffee"]

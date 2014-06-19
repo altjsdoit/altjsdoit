@@ -1,4 +1,3 @@
-URLStorage = require("./URLStorage.coffee")
 {build, getCompilerSetting} = require("./build.coffee")
 
 $ -> new Main
@@ -52,10 +51,7 @@ Main = Backbone.View.extend
     build {altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, enableJQuery}, (srcdoc)->
       console.log url = createBlobURL(srcdoc, (if enableViewSource then "text/plain" else "text/html"))
       $("#box-sandbox-iframe").attr({"src": url})
-      #encodeDataURI srcdoc, "text/html", (base64)->
-      #  console.log "http://jsrun.it/duxca/rJ2w/#base64/" + encodeURIComponent(base64)
   initialize: ->
-    console.log "a"
     @model    = new Config()
     @menu     = new Menu({@model})
     @setting  = new Setting({@model})
@@ -180,3 +176,25 @@ getElmVal = (elm)->
 #! createBlobURL :: String * String -> String # not referential transparency
 createBlobURL = (data, mimetype)->
   URL.createObjectURL(new Blob([data], {type: mimetype}))
+
+zipDataURI = (dic)-> # ! not referential transparency
+# ( { [filename:string]:string; } )=>stirng
+  zip = new JSZip()
+  for key, val of dic then zip.file(key, val)
+  zip.generate({compression: "DEFLATE"})
+
+unzipDataURI = (base64)->
+# ( base64:string )=>{ [filename:string]:string; }
+  zip = new JSZip()
+  {files} = zip.load(base64, {base64: true})
+  hash = {}
+  for key, val of files
+    hash[key] = zip.file(key).asText()
+  hash
+
+makeURL = (location)->
+# ( location:Location )=> string
+  location.protocol + '//' +
+  location.hostname +
+  (if location.port then ":"+location.port else "") +
+  location.pathname

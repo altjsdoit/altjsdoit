@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" manifest="index.appcache">
   <head>
     <meta charset="UTF-8">
     <title>altjsdo.it</title>
@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="./thirdparty/codemirror/addon/dialog/dialog.css">
     <link rel="stylesheet" href="./thirdparty/pure/pure-min.css">
     <link rel="stylesheet" href="./thirdparty/pure/main.css">
-    <link rel="stylesheet" href="./thirdparty/pure/main-grid.css">
     <link rel="stylesheet" href="./thirdparty/pure/baby-blue.css">
     <link rel="stylesheet" href="./thirdparty/googlefonts/SourceCodePro.css">
     <link rel="stylesheet" href="index.css">
@@ -23,7 +22,6 @@
       <div id="menu">
         <div class="pure-menu pure-menu-open"><a id="menu-head" class="pure-menu-heading">altjsdo.it</a>
           <ul>
-            <li><a id="menu-config" data-open="box-config" class="pure-menu-selected">Config</a></li>
             <li><a id="menu-altjs" data-open="box-altjs">Script</a></li>
             <li><a id="menu-althtml" data-open="box-althtml">Markup</a></li>
             <li><a id="menu-altcss" data-open="box-altcss">Style</a></li>
@@ -33,26 +31,6 @@
       </div>
       <div id="main">
         <div class="content">
-          <header class="header">
-            <h1>altjsdo.it</h1>
-            <h2>simple webapp editor</h2>
-          </header>
-          <section>
-            <h2 class="content-subhead">about</h2>
-            <p>
-              hoge
-              huga
-            </p>
-          </section>
-          <section>
-            <h2 class="content-subhead">usage</h2>
-            <p>
-              hoge
-              huga
-            </p>
-          </section>
-        </div>
-        <div id="box-config" class="content active">
           <form id="setting-config" class="pure-form pure-form-stacked">
             <fieldset>
               <legend>Project</legend>
@@ -69,27 +47,21 @@
               <label>altJS:
                 <select data-config="altjs">
                   <option value="JavaScript" selected="selected">JavaScript</option>
-                  <option value="CoffeeScript">CoffeeScript</option>
-                  <option value="TypeScript">TypeScript</option>
-                  <option value="TypedCoffeeScript">TypedCoffeeScript</option>
-                  <option value="Traceur">Traceur</option>
-                  <option value="GorillaScript">GorillaScript</option>
-                  <option value="LiveScript">LiveScript</option>
-                  <option value="Wisp">Wisp</option>
-                  <option value="LispyScript">LispyScript</option>
+                  <option value="CoffeeScript">CoffeeScript(1.7.1)</option>
+                  <option value="TypeScript">TypeScript(1.0.0)</option>
                 </select>
               </label>
               <label>altHTML:
                 <select data-config="althtml">
                   <option value="HTML" selected="selected">HTML</option>
-                  <option value="Jade">Jade</option>
+                  <option value="Jade">Jade(1.3.1)</option>
                 </select>
               </label>
               <label>altCSS:
                 <select data-config="altcss">
                   <option value="CSS" selected="selected">CSS</option>
-                  <option value="LESS">LESS</option>
-                  <option value="Stylus">Stylus</option>
+                  <option value="LESS">LESS(1.7.0)</option>
+                  <option value="Stylus">Stylus(0.46.3)</option>
                 </select>
               </label>
             </fieldset>
