@@ -177,13 +177,13 @@ build = function(_arg, _arg1, _arg2, callback) {
     styles = [];
     scripts = [];
     if (enableFirebugLite) {
-      scripts.push("http://getfirebug.com/firebug-lite.js#overrideConsole,showIconWhenHidden=true");
+      scripts.push("https://getfirebug.com/firebug-lite.js#overrideConsole,showIconWhenHidden=true");
     }
     if (enableJQuery) {
-      scripts.push("http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js");
+      scripts.push("https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js");
     }
     if (altjs === "Traceur") {
-      scripts.push("http://jsrun.it/assets/a/V/p/D/aVpDA");
+      scripts.push("https://jsrun.it/assets/a/V/p/D/aVpDA");
     }
     if ((js.err != null) || (html.err != null) || (css.err != null)) {
       return altjs + "\n" + js.err + "\n" + althtml + "\n" + html.err + "\n" + altcss + "\n" + css.err;
