@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2014-06-20-04
+# 2014-06-20-05
 
 CACHE:
 index.html
@@ -38,6 +38,7 @@ thirdparty/codemirror/addon/fold/foldcode.js
 thirdparty/codemirror/addon/fold/brace-fold.js
 thirdparty/codemirror/mode/javascript/javascript.js
 thirdparty/codemirror/mode/coffeescript/coffeescript.js
+thirdparty/codemirror/mode/scheme/scheme.js
 thirdparty/codemirror/mode/xml/xml.js
 thirdparty/codemirror/mode/jade/jade.js
 thirdparty/codemirror/mode/css/css.js
