@@ -1,6 +1,5 @@
 module.exports = (grunt) ->
   grunt.loadNpmTasks("grunt-contrib-coffee")
-  grunt.loadNpmTasks("grunt-contrib-less")
   grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks("grunt-contrib-watch")
   grunt.loadNpmTasks("grunt-contrib-clean")
@@ -25,15 +24,14 @@ module.exports = (grunt) ->
         bare: yes
     copy:
       build:
-        filter: 'isFile',
         files: [
-          {src: "./src/index.html",   dest: "./public/index.html"}
-          {src: "./src/package.json", dest: "./public/package.json"}
-          {src: "./src/index.css",    dest: "./public/index.css"}
-          {src: "./src/index.js",     dest: "./public/index.js"}
-          {src: "./src/icon-128.png", dest: "./public/icon-128.png"}
-          {src: "./src/manifest.webapp", dest: "./public/manifest.webapp"}
-          #{src: "./src/index.appcache",  dest: "./public/index.appcache"}
+          {expand: true, cwd: 'src/', src: ['**.js'],   dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['**.html'], dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['**.css'],  dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['**.appcache'], dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['**.png'],  dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['**.webapp'], dest: 'public/'}
+          {src: ['thirdparty/**'], dest: 'public/'}
         ]
     watch:
       coffee:
@@ -45,7 +43,5 @@ module.exports = (grunt) ->
       html:
         files:["./src/**/*.html"]
         tasks:["make"]
-
-  grunt.registerTask("test", ["coffee:build", "simplemocha:all"])
   grunt.registerTask("make", ["clean:build", "coffee:compile", "simplemocha:all", "copy:build"])
   grunt.registerTask("default", ["make"])

@@ -1,6 +1,6 @@
 {
   "name": "altjsdo.it",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "private": true,
   "description": "",
   "main": "public/index.html",
@@ -13,11 +13,10 @@
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-coffee": "*",
-    "grunt-contrib-less": "*",
     "grunt-contrib-watch": "*",
     "grunt-contrib-copy": "*",
     "grunt-contrib-clean": "*",
-    "chai": "^1.9.1",
-    "grunt-simple-mocha": "^0.4.0"
+    "chai": "*",
+    "grunt-simple-mocha": "*"
   }
 }

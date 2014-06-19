@@ -1,39 +1,53 @@
 CACHE MANIFEST
-# 2014-06-11-01
+# 2014-06-20-01
 
 CACHE:
 index.html
 index.css
 index.js
 
-jquery.min.js
-underscore-min.js
-backbone-min.js
-jszip.min.js
-codemirror.js
+thridparty/codemirror/codemirror.css
+thridparty/codemirror/theme/solarized.css
+thridparty/codemirror/addon/fold/foldgutter.css
+thridparty/codemirror/addon/dialog/dialog.css
 
-addon/search/searchcursor.js
-addon/search/search.js
-addon/dialog/dialog.js
-addon/edit/matchbrackets.js
-addon/edit/closebrackets.js
-addon/comment/comment.js
-addon/wrap/hardwrap.js
-addon/fold/foldcode.js
-addon/fold/brace-fold.js
+thridparty/pure/pure-min.css
+thridparty/googlefonts/SourceCodePro.css
+thridparty/googlefonts/SourceCodePro.woff
 
-mode/javascript/javascript.js
-mode/coffeescript/coffeescript.js
-mode/xml/xml.js
-mode/jade/jade.js
-mode/css/css.js
+thridparty/es6-shim/es6-shim.min.js
+thridparty/jquery/jquery.min.js
+thridparty/underscore.js/underscore-min.js
+thridparty/backbone.js/backbone-min.js
+thridparty/jszip/jszip.min.js
 
-coffee-script.js
-jade.js
-less-1.7.1.min.js
-stylus.min.js
+thridparty/codemirror/codemirror.min.js
+thridparty/codemirror/addon/search/searchcursor.js
+thridparty/codemirror/addon/search/search.js
+thridparty/codemirror/addon/dialog/dialog.js
+thridparty/codemirror/addon/edit/matchbrackets.js
+thridparty/codemirror/addon/edit/closebrackets.js
+thridparty/codemirror/addon/comment/comment.js
+thridparty/codemirror/addon/wrap/hardwrap.js
+thridparty/codemirror/addon/fold/foldcode.js
+thridparty/codemirror/addon/fold/brace-fold.js
+thridparty/codemirror/mode/javascript/javascript.js
+thridparty/codemirror/mode/coffeescript/coffeescript.js
+thridparty/codemirror/mode/xml/xml.js
+thridparty/codemirror/mode/jade/jade.js
+thridparty/codemirror/mode/css/css.js
+thridparty/codemirror/mode/clojure/clojure.js
+thridparty/codemirror/mode/scheme/scheme.js
+thridparty/codemirror/keymap/sublime.js
+
+thridparty/coffee-script/coffee-script.min.js
+thridparty/typescript/typescript.min.js
+thridparty/jade/jade.min.js
+thridparty/less.js/less-1.7.1.min.js
+thridparty/stylus/stylus.min.js
 
 
 NETWORK:
+
 
 FALLBACK:
