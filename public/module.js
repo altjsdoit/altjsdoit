@@ -177,7 +177,7 @@ build = function(_arg, _arg1, _arg2, callback) {
     styles = [];
     scripts = [];
     if (enableFirebugLite) {
-      scripts.push("https://getfirebug.com/firebug-lite.js#overrideConsole,showIconWhenHidden=true");
+      scripts.push("https://getfirebug.com/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true");
     }
     if (enableJQuery) {
       scripts.push("https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js");
