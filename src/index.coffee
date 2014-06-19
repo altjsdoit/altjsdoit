@@ -1,3 +1,4 @@
+
 $ -> new Main
 
 Config = Backbone.Model.extend
@@ -53,6 +54,7 @@ Main = Backbone.View.extend
       #encodeDataURI srcdoc, "text/html", (base64)->
       #  console.log "http://jsrun.it/duxca/rJ2w/#base64/" + encodeURIComponent(base64)
   initialize: ->
+    console.log "a"
     @model    = new Config()
     @menu     = new Menu({@model})
     @setting  = new Setting({@model})
@@ -184,37 +186,3 @@ Editor = Backbone.View.extend
       @cm = CodeMirror.fromTextArea(@el, @option)
       @cm.setSize("100%", "100%")
       @refreshed = false
-
-
-
-
-getElmVal = (elm)->
-# ( elm:HTMLElement )=>string | number | boolean
-  if elm instanceof HTMLInputElement and
-     $(elm).attr("type") is "checkbox"
-  then $(elm).is(':checked')
-  else $(elm).val()
-
-
-
-zipURL = ({config, script, markup, style})->
-# ( { config:string; script:string; markup:string; style:string; } )=>string
-    zip = zipDataURI({config, script, markup, style})
-    url = makeURL(location) + encodeURIQuery({zip}) + location.hash
-
-
-
-unzipQuery = (search)->
-# ( search:string )=>{ config:string; script:string; markup:string; style:string; }
-  {zip} = decodeURIQuery(search)
-  {config, script, markup, style} = unzipDataURI(zip or "")
-
-
-
-
-
-
-
-
-
-#console.clear()

@@ -1,0 +1,129 @@
+doctype html
+html(lang='ja')
+  head
+    meta(charset='UTF-8')
+    title altjsdo.it
+    meta(name='Description', content='altjsdo.it - edit JavaScript, HTML and CSS - ')
+    meta(name='Keywords', content='JavaScript,CoffeeScript,HTML5,CSS,altjs,less,stylus,jade')
+    meta(name='viewport', content='width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1')
+    link(rel='stylesheet', href='./thirdparty/codemirror/codemirror.css')
+    link(rel='stylesheet', href='./thirdparty/codemirror/theme/solarized.css')
+    link(rel='stylesheet', href='./thirdparty/codemirror/addon/fold/foldgutter.css')
+    link(rel='stylesheet', href='./thirdparty/codemirror/addon/dialog/dialog.css')
+    link(rel='stylesheet', href='./thirdparty/pure/pure-min.css')
+    link(rel='stylesheet', href='./thirdparty/pure/main.css')
+    link(rel='stylesheet', href='./thirdparty/googlefonts/SourceCodePro.css')
+    link(rel='stylesheet', href='index.css')
+  body
+    div#layout
+      a#menuLink.menu-link
+        span
+      div#menu
+        div.pure-menu.pure-menu-open
+          a#menu-head.pure-menu-heading altjsdo.it
+          ul
+            li
+              a#menu-altjs(data-open='box-config' class="pure-menu-selected") Config
+            li
+              a#menu-altjs(data-open='box-altjs') Script
+            li
+              a#menu-althtml(data-open='box-althtml') Markup
+            li
+              a#menu-altcss(data-open='box-altcss') Style
+            li
+              a#menu-sandbox(data-open='box-sandbox') Run
+      div#main
+        div
+          | license
+        div#box-config.content.active
+          form#setting-config.pure-form.pure-form-stacked
+            fieldset
+              legend Project
+              label
+                | Title:
+                input(data-config='title', type='text', value='', placeholder='no title')
+              p
+                | Save as Link:
+                input#setting-project-url(type='url', value='', placeholder='Press Save Button')
+                span#setting-project-size
+                input#setting-project-save.pure-button.pure-button-primary(type='button', value='Save')
+                span#setting-project-twitter
+              a.pure-button(target='_blank') New Project
+            fieldset
+              legend Compiler
+              label
+                | altJS:
+                select(data-config='altjs')
+                  option(value='JavaScript', selected='selected') JavaScript
+                  option(value='CoffeeScript') CoffeeScript
+                  option(value='TypeScript') TypeScript
+                  option(value='TypedCoffeeScript') TypedCoffeeScript
+                  option(value='Traceur') Traceur
+                  option(value='GorillaScript') GorillaScript
+                  option(value='LiveScript') LiveScript
+                  option(value='Wisp') Wisp
+                  option(value='LispyScript') LispyScript
+              label
+                | altHTML:
+                select(data-config='althtml')
+                  option(value='HTML', selected='selected') HTML
+                  option(value='Jade') Jade
+              label
+                | altCSS:
+                select(data-config='altcss')
+                  option(value='CSS', selected='selected') CSS
+                  option(value='LESS') LESS
+                  option(value='Stylus') Stylus
+            fieldset
+              legend Configuration
+              label
+                | enable CodeMirror:
+                input(data-config='enableCodeMirror', type='checkbox', checked='checked')
+              label
+                | enable FirebugLite:
+                input(data-config='enableFirebugLite', type='checkbox')
+              label
+                | enable jQuery:
+                input(data-config='enableJQuery', type='checkbox')
+              label
+                | view compiled code:
+                input(data-config='enableViewSource', type='checkbox')
+        #box-altjs
+          textarea#box-altjs-textarea(wrap='off', placeholder='script')
+        #box-althtml
+          textarea#box-althtml-textarea(wrap='off', placeholder='markup')
+        #box-altcss
+          textarea#box-altcss-textarea(wrap='off', placeholder='style')
+        #box-sandbox
+          iframe#box-sandbox-iframe
+    script(src='./thirdparty/es6-shim/es6-shim.min.js')
+    script(src='./thirdparty/jquery/jquery.min.js')
+    script(src='./thirdparty/pure/ui.js')
+    script(src='./ui.js')
+    script(src='./thirdparty/underscore.js/underscore-min.js')
+    script(src='./thirdparty/backbone.js/backbone-min.js')
+    script(src='./thirdparty/jszip/jszip.min.js')
+    script(src='./thirdparty/codemirror/codemirror.min.js')
+    script(src='./thirdparty/codemirror/addon/search/searchcursor.js')
+    script(src='./thirdparty/codemirror/addon/search/search.js')
+    script(src='./thirdparty/codemirror/addon/dialog/dialog.js')
+    script(src='./thirdparty/codemirror/addon/edit/matchbrackets.js')
+    script(src='./thirdparty/codemirror/addon/edit/closebrackets.js')
+    script(src='./thirdparty/codemirror/addon/comment/comment.js')
+    script(src='./thirdparty/codemirror/addon/wrap/hardwrap.js')
+    script(src='./thirdparty/codemirror/addon/fold/foldcode.js')
+    script(src='./thirdparty/codemirror/addon/fold/brace-fold.js')
+    script(src='./thirdparty/codemirror/mode/javascript/javascript.js')
+    script(src='./thirdparty/codemirror/mode/coffeescript/coffeescript.js')
+    script(src='./thirdparty/codemirror/mode/xml/xml.js')
+    script(src='./thirdparty/codemirror/mode/jade/jade.js')
+    script(src='./thirdparty/codemirror/mode/css/css.js')
+    script(src='./thirdparty/codemirror/keymap/sublime.js')
+    script(async='async', src='./thirdparty/coffee-script/coffee-script.min.js')
+    script(async='async', src='./thirdparty/typescript/typescript.min.js')
+    script(async='async', src='./thirdparty/jade/jade.min.js')
+    script(async='async', src='./thirdparty/less.js/less.min.js')
+    script(async='async', src='./thirdparty/stylus/stylus.min.js')
+    script(async='async', src='https://platform.twitter.com/widgets.js')
+    script(src='./URLStorage.js')
+    script(src='./index.js')

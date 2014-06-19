@@ -1,151 +1,137 @@
 <!DOCTYPE html>
-<html lang="ja" manifest="index.appcache">
-<head>
-<meta charset="UTF-8" />
-<title>altjsdo.it</title>
-<meta name="Description" content="altjsdo.it - edit JavaScript, HTML and CSS - " />
-<meta name="Keywords" content="JavaScript,CoffeeScript,HTML5,CSS,altjs,less,stylus,jade" />
-<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
-<link rel="stylesheet" href="./thridparty/codemirror/codemirror.css" />
-<link rel="stylesheet" href="./thridparty/codemirror/theme/solarized.css" />
-<link rel="stylesheet" href="./thridparty/codemirror/addon/fold/foldgutter.css" />
-<link rel="stylesheet" href="./thridparty/codemirror/addon/dialog/dialog.css" />
-<link rel="stylesheet" href="./thridparty/pure/pure-min.css" />
-<link rel='stylesheet' href='./thridparty/fonts/SourceCodePro.css'/>
-<link rel="stylesheet" href="index.css" />
-</head>
-<body>
-<div id="layout">
-  <!-- Menu toggle -->
-  <a id="menuLink" class="menu-link">
-    <!-- Hamburger icon -->
-    <span></span>
-  </a>
-  <div id="menu">
-    <div class="pure-menu pure-menu-open">
-      <a id="menu-head" class="pure-menu-heading">altjsdo.it</a>
-      <ul>
-        <li><a id="menu-altjs"   data-open="box-altjs">Script</a></li>
-        <li><a id="menu-althtml" data-open="box-althtml">Markup</a></li>
-        <li><a id="menu-altcss"  data-open="box-altcss">Style</a></li>
-        <li><a id="menu-sandbox" data-open="box-sandbox">Run</a></li>
-      </ul>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>altjsdo.it</title>
+    <meta name="Description" content="altjsdo.it - edit JavaScript, HTML and CSS - ">
+    <meta name="Keywords" content="JavaScript,CoffeeScript,HTML5,CSS,altjs,less,stylus,jade">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="./thirdparty/codemirror/codemirror.css">
+    <link rel="stylesheet" href="./thirdparty/codemirror/theme/solarized.css">
+    <link rel="stylesheet" href="./thirdparty/codemirror/addon/fold/foldgutter.css">
+    <link rel="stylesheet" href="./thirdparty/codemirror/addon/dialog/dialog.css">
+    <link rel="stylesheet" href="./thirdparty/pure/pure-min.css">
+    <link rel="stylesheet" href="./thirdparty/pure/main.css">
+    <link rel="stylesheet" href="./thirdparty/googlefonts/SourceCodePro.css">
+    <link rel="stylesheet" href="index.css">
+  </head>
+  <body>
+    <div id="layout"><a id="menuLink" class="menu-link"><span></span></a>
+      <div id="menu">
+        <div class="pure-menu pure-menu-open"><a id="menu-head" class="pure-menu-heading">altjsdo.it</a>
+          <ul>
+            <li><a id="menu-altjs" data-open="box-config" class="pure-menu-selected">Config</a></li>
+            <li><a id="menu-altjs" data-open="box-altjs">Script</a></li>
+            <li><a id="menu-althtml" data-open="box-althtml">Markup</a></li>
+            <li><a id="menu-altcss" data-open="box-altcss">Style</a></li>
+            <li><a id="menu-sandbox" data-open="box-sandbox">Run</a></li>
+          </ul>
+        </div>
+      </div>
+      <div id="main">
+        <div>license</div>
+        <div id="box-config" class="content active">
+          <form id="setting-config" class="pure-form pure-form-stacked">
+            <fieldset>
+              <legend>Project</legend>
+              <label>Title:
+                <input data-config="title" type="text" value="" placeholder="no title">
+              </label>
+              <p>Save as Link:
+                <input id="setting-project-url" type="url" value="" placeholder="Press Save Button"><span id="setting-project-size"></span>
+                <input id="setting-project-save" type="button" value="Save" class="pure-button pure-button-primary"><span id="setting-project-twitter"></span>
+              </p><a target="_blank" class="pure-button">New Project</a>
+            </fieldset>
+            <fieldset>
+              <legend>Compiler</legend>
+              <label>altJS:
+                <select data-config="altjs">
+                  <option value="JavaScript" selected="selected">JavaScript</option>
+                  <option value="CoffeeScript">CoffeeScript</option>
+                  <option value="TypeScript">TypeScript</option>
+                  <option value="TypedCoffeeScript">TypedCoffeeScript</option>
+                  <option value="Traceur">Traceur</option>
+                  <option value="GorillaScript">GorillaScript</option>
+                  <option value="LiveScript">LiveScript</option>
+                  <option value="Wisp">Wisp</option>
+                  <option value="LispyScript">LispyScript</option>
+                </select>
+              </label>
+              <label>altHTML:
+                <select data-config="althtml">
+                  <option value="HTML" selected="selected">HTML</option>
+                  <option value="Jade">Jade</option>
+                </select>
+              </label>
+              <label>altCSS:
+                <select data-config="altcss">
+                  <option value="CSS" selected="selected">CSS</option>
+                  <option value="LESS">LESS</option>
+                  <option value="Stylus">Stylus</option>
+                </select>
+              </label>
+            </fieldset>
+            <fieldset>
+              <legend>Configuration</legend>
+              <label>enable CodeMirror:
+                <input data-config="enableCodeMirror" type="checkbox" checked="checked">
+              </label>
+              <label>enable FirebugLite:
+                <input data-config="enableFirebugLite" type="checkbox">
+              </label>
+              <label>enable jQuery:
+                <input data-config="enableJQuery" type="checkbox">
+              </label>
+              <label>view compiled code:
+                <input data-config="enableViewSource" type="checkbox">
+              </label>
+            </fieldset>
+          </form>
+        </div>
+        <div id="box-altjs">
+          <textarea id="box-altjs-textarea" wrap="off" placeholder="script"></textarea>
+        </div>
+        <div id="box-althtml">
+          <textarea id="box-althtml-textarea" wrap="off" placeholder="markup"></textarea>
+        </div>
+        <div id="box-altcss">
+          <textarea id="box-altcss-textarea" wrap="off" placeholder="style"></textarea>
+        </div>
+        <div id="box-sandbox">
+          <iframe id="box-sandbox-iframe"></iframe>
+        </div>
+      </div>
     </div>
-  </div>
-  <div id="main">
-    <div class="content">
-      <form id="setting-config" class="pure-form pure-form-stacked">
-        <fieldset>
-          <legend>Project</legend>
-          <label>
-            Title:
-            <input data-config="title" type="text" value="" placeholder="no title" />
-          </label>
-          <p>
-            Save as Link:
-            <input id="setting-project-url" type="url" value="" onclick="this.select();"  placeholder="Press Save Button" />
-            <span id="setting-project-size"></span>
-            <input id="setting-project-save" type="button" value="Save" class="pure-button pure-button-primary" />
-            <span id="setting-project-twitter"></span>
-          </p>
-          <a target="_blank" class="pure-button"
-             onclick="this.href=location.protocol+'//'+location.hostname+(location.port?':'+location.port:'')+location.pathname;"
-            >New Project</a>
-        </fieldset>
-        <fieldset>
-          <legend>Compiler</legend>
-          <label>
-            altJS:
-            <select data-config="altjs">
-              <option value="JavaScript" selected>JavaScript</option>
-              <option value="CoffeeScript">CoffeeScript</option>
-              <option value="TypeScript">TypeScript</option>
-              <option value="TypedCoffeeScript">TypedCoffeeScript</option>
-              <option value="Traceur">Traceur</option>
-              <option value="GorillaScript">GorillaScript</option>
-              <option value="LiveScript">LiveScript</option>
-              <option value="Wisp">Wisp</option>
-              <option value="LispyScript">LispyScript</option>
-            </select>
-          </label>
-          <label>
-            altHTML:
-            <select data-config="althtml">
-              <option value="HTML" selected>HTML</option>
-              <option value="Jade">Jade</option>
-            </select>
-          </label>
-          <label>
-            altCSS:
-            <select data-config="altcss">
-              <option value="CSS" selected>CSS</option>
-              <option value="LESS">LESS</option>
-              <option value="Stylus">Stylus</option>
-            </select>
-          </label>
-        </fieldset>
-        <fieldset>
-          <legend>Configuration</legend>
-          <label>
-            enable CodeMirror:
-            <input data-config="enableCodeMirror" type="checkbox" checked />
-          </label>
-          <label>
-            enable FirebugLite:
-            <input data-config="enableFirebugLite" type="checkbox" />
-          </label>
-          <label>
-            enable jQuery:
-            <input data-config="enableJQuery" type="checkbox" />
-          </label>
-          <label>
-            view compiled code:
-            <input data-config="enableViewSource" type="checkbox" />
-          </label>
-        </fieldset>
-      </form>
-    </div>
-    <div id="box-altjs">
-      <textarea id="box-altjs-textarea" wrap="off" placeholder="script"></textarea>
-    </div>
-    <div id="box-althtml">
-      <textarea id="box-althtml-textarea" wrap="off" placeholder="markup"></textarea>
-    </div>
-    <div id="box-altcss">
-      <textarea id="box-altcss-textarea" wrap="off" placeholder="style"></textarea>
-    </div>
-    <div id="box-sandbox">
-      <iframe id="box-sandbox-iframe"></iframe>
-    </div>
-  </div>
-</div>
-<script src="./thridparty/es6-shim/es6-shim.min.js"></script>
-<script src="./thridparty/jquery/jquery.min.js"></script>
-<script src="./thridparty/underscore.js/underscore-min.js"></script>
-<script src="./thridparty/backbone.js/backbone-min.js"></script>
-<script src="./thridparty/jszip/jszip.min.js"></script>
-<script src="./thridparty/codemirror/codemirror.min.js"></script>
-<script src="./thridparty/codemirror/addon/search/searchcursor.js"></script>
-<script src="./thridparty/codemirror/addon/search/search.js"></script>
-<script src="./thridparty/codemirror/addon/dialog/dialog.js"></script>
-<script src="./thridparty/codemirror/addon/edit/matchbrackets.js"></script>
-<script src="./thridparty/codemirror/addon/edit/closebrackets.js"></script>
-<script src="./thridparty/codemirror/addon/comment/comment.js"></script>
-<script src="./thridparty/codemirror/addon/wrap/hardwrap.js"></script>
-<script src="./thridparty/codemirror/addon/fold/foldcode.js"></script>
-<script src="./thridparty/codemirror/addon/fold/brace-fold.js"></script>
-<script src="./thridparty/codemirror/mode/javascript/javascript.js"></script>
-<script src="./thridparty/codemirror/mode/coffeescript/coffeescript.js"></script>
-<script src="./thridparty/codemirror/mode/xml/xml.js"></script>
-<script src="./thridparty/codemirror/mode/jade/jade.js"></script>
-<script src="./thridparty/codemirror/mode/css/css.js"></script>
-<script src="./thridparty/codemirror/keymap/sublime.js"></script>
-<script async src="./thridparty/coffee-script/coffee-script.min.js"></script>
-<script async src="./thridparty/typescript/typescript.min.js"></script>
-<script async src="./thridparty/jade/jade.min.js"></script>
-<script async src="./thridparty/less.js/less.min.js"></script>
-<script async src="./thridparty/stylus/stylus.min.js"></script>
-<script async src="https://platform.twitter.com/widgets.js"></script>
-<script src="./index.js"></script>
-</body>
+    <script src="./thirdparty/es6-shim/es6-shim.min.js"></script>
+    <script src="./thirdparty/jquery/jquery.min.js"></script>
+    <script src="./thirdparty/pure/ui.js"></script>
+    <script src="./ui.js"></script>
+    <script src="./thirdparty/underscore.js/underscore-min.js"></script>
+    <script src="./thirdparty/backbone.js/backbone-min.js"></script>
+    <script src="./thirdparty/jszip/jszip.min.js"></script>
+    <script src="./thirdparty/codemirror/codemirror.min.js"></script>
+    <script src="./thirdparty/codemirror/addon/search/searchcursor.js"></script>
+    <script src="./thirdparty/codemirror/addon/search/search.js"></script>
+    <script src="./thirdparty/codemirror/addon/dialog/dialog.js"></script>
+    <script src="./thirdparty/codemirror/addon/edit/matchbrackets.js"></script>
+    <script src="./thirdparty/codemirror/addon/edit/closebrackets.js"></script>
+    <script src="./thirdparty/codemirror/addon/comment/comment.js"></script>
+    <script src="./thirdparty/codemirror/addon/wrap/hardwrap.js"></script>
+    <script src="./thirdparty/codemirror/addon/fold/foldcode.js"></script>
+    <script src="./thirdparty/codemirror/addon/fold/brace-fold.js"></script>
+    <script src="./thirdparty/codemirror/mode/javascript/javascript.js"></script>
+    <script src="./thirdparty/codemirror/mode/coffeescript/coffeescript.js"></script>
+    <script src="./thirdparty/codemirror/mode/xml/xml.js"></script>
+    <script src="./thirdparty/codemirror/mode/jade/jade.js"></script>
+    <script src="./thirdparty/codemirror/mode/css/css.js"></script>
+    <script src="./thirdparty/codemirror/keymap/sublime.js"></script>
+    <script async="async" src="./thirdparty/coffee-script/coffee-script.min.js"></script>
+    <script async="async" src="./thirdparty/typescript/typescript.min.js"></script>
+    <script async="async" src="./thirdparty/jade/jade.min.js"></script>
+    <script async="async" src="./thirdparty/less.js/less.min.js"></script>
+    <script async="async" src="./thirdparty/stylus/stylus.min.js"></script>
+    <script async="async" src="https://platform.twitter.com/widgets.js"></script>
+    <script src="./URLStorage.js"></script>
+    <script src="./index.js"></script>
+  </body>
 </html>

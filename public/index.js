@@ -1,4 +1,4 @@
-var Config, Editor, Main, Menu, Setting, getElmVal, unzipQuery, zipURL;
+var Config, Editor, Main, Menu, Setting;
 
 $(function() {
   return new Main;
@@ -92,6 +92,7 @@ Main = Backbone.View.extend({
     });
   },
   initialize: function() {
+    console.log("a");
     this.model = new Config();
     this.menu = new Menu({
       model: this.model
@@ -329,31 +330,3 @@ Editor = Backbone.View.extend({
     }
   }
 });
-
-getElmVal = function(elm) {
-  if (elm instanceof HTMLInputElement && $(elm).attr("type") === "checkbox") {
-    return $(elm).is(':checked');
-  } else {
-    return $(elm).val();
-  }
-};
-
-zipURL = function(_arg) {
-  var config, markup, script, style, url, zip;
-  config = _arg.config, script = _arg.script, markup = _arg.markup, style = _arg.style;
-  zip = zipDataURI({
-    config: config,
-    script: script,
-    markup: markup,
-    style: style
-  });
-  return url = makeURL(location) + encodeURIQuery({
-    zip: zip
-  }) + location.hash;
-};
-
-unzipQuery = function(search) {
-  var config, markup, script, style, zip, _ref;
-  zip = decodeURIQuery(search).zip;
-  return _ref = unzipDataURI(zip || ""), config = _ref.config, script = _ref.script, markup = _ref.markup, style = _ref.style, _ref;
-};
