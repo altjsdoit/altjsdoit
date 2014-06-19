@@ -4,12 +4,10 @@
   "private": true,
   "description": "",
   "main": "public/index.html",
-  "scripts": {
-  },
+  "scripts": {},
   "author": "",
   "license": "MIT",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-coffee": "*",
@@ -19,6 +17,9 @@
     "grunt-contrib-copy": "*",
     "grunt-contrib-clean": "*",
     "chai": "*",
-    "grunt-simple-mocha": "*"
+    "grunt-simple-mocha": "*",
+    "browserify": "*",
+    "grunt-browserify": "*",
+    "coffeeify": "*"
   }
 }

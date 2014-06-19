@@ -6,6 +6,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks("grunt-contrib-watch")
   grunt.loadNpmTasks("grunt-contrib-clean")
   grunt.loadNpmTasks('grunt-simple-mocha')
+  grunt.loadNpmTasks('grunt-browserify')
 
   grunt.initConfig
     pkg: grunt.file.readJSON('./package.json')
@@ -21,44 +22,53 @@ module.exports = (grunt) ->
     coffee:
       compile:
         files:
-          './src/index.js': './src/index.coffee'
-          './src/URLStorage.js': './src/URLStorage.coffee'
-          './src/ui.js': './src/ui.coffee'
+          './public/ui.js': './src/ui.coffee'
       options:
         bare: yes
     jade:
       compile:
         files:
-          "./src/index.html": "./src/index.jade"
+          "./public/index.html": "./src/index.jade"
       options:
         pretty: true
     less:
       compile:
         files:
-          "./src/index.css": "./src/index.less"
+          "./public/index.css": "./src/index.less"
+    browserify:
+      build:
+        files:
+          './public/module.js': ['./src/index.coffee']
+        options:
+          transform: ['coffeeify']
     copy:
       build:
         files: [
-          {expand: true, cwd: 'src/', src: ['**.js'],   dest: 'public/'}
-          {expand: true, cwd: 'src/', src: ['**.html'], dest: 'public/'}
-          {expand: true, cwd: 'src/', src: ['**.css'],  dest: 'public/'}
-          #{expand: true, cwd: 'src/', src: ['**.appcache'], dest: 'public/'}
-          {expand: true, cwd: 'src/', src: ['**.png'],  dest: 'public/'}
-          {expand: true, cwd: 'src/', src: ['**.webapp'], dest: 'public/'}
+          #{expand: true, cwd: 'src/', src: ['index.appcache'], dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['icon-128.png'],  dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['manifest.webapp'], dest: 'public/'}
           {expand: true, src: ['thirdparty/**'], dest: 'public/'}
         ]
     watch:
       gruntfile:
-        files:["./gruntfile.coffee"],
+        files:["./gruntfile.coffee"]
         tasks:["make"]
       coffee:
-        files:["./src/**/*.coffee"],
-        tasks:["make"]
-      css:
-        files:["./src/**/*.css"],
-        tasks:["make"]
+        files:["./src/**/*.coffee"]
+        tasks:["coffee:compile", "browserify:build"]
+      less:
+        files:["./src/**/*.less"]
+        tasks:["less:compile"]
       jade:
         files:["./src/**/*.jade"]
-        tasks:["make"]
-  grunt.registerTask("make", ["clean:build", "coffee:compile", "jade:compile", "less:compile", "simplemocha:all", "copy:build"])
+        tasks:["jade:compile"]
+  grunt.registerTask("make", [
+    "clean:build",
+    "coffee:compile",
+    "jade:compile",
+    "less:compile",
+    "browserify:build",
+    "simplemocha:all",
+    "copy:build"
+  ])
   grunt.registerTask("default", ["make"])

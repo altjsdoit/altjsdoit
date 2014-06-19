@@ -14,3 +14,7 @@ $ ->
       .find("#"+$(ev.target).attr("data-open"))
         .addClass("active")
       .end()
+  $("#menuLink").click ->
+    $("#layout").toggleClass("active")
+    $("#menu").toggleClass("active")
+    $("#menuLink").toggleClass("active")

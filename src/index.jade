@@ -6,12 +6,15 @@ html(lang='ja')
     meta(name='Description', content='altjsdo.it - edit JavaScript, HTML and CSS - ')
     meta(name='Keywords', content='JavaScript,CoffeeScript,HTML5,CSS,altjs,less,stylus,jade')
     meta(name='viewport', content='width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1')
+    link(rel="apple-touch-icon" href="./icon-128.png")
     link(rel='stylesheet', href='./thirdparty/codemirror/codemirror.css')
     link(rel='stylesheet', href='./thirdparty/codemirror/theme/solarized.css')
     link(rel='stylesheet', href='./thirdparty/codemirror/addon/fold/foldgutter.css')
     link(rel='stylesheet', href='./thirdparty/codemirror/addon/dialog/dialog.css')
     link(rel='stylesheet', href='./thirdparty/pure/pure-min.css')
     link(rel='stylesheet', href='./thirdparty/pure/main.css')
+    link(rel='stylesheet', href='./thirdparty/pure/main-grid.css')
+    link(rel='stylesheet', href='./thirdparty/pure/baby-blue.css')
     link(rel='stylesheet', href='./thirdparty/googlefonts/SourceCodePro.css')
     link(rel='stylesheet', href='index.css')
   body
@@ -23,7 +26,7 @@ html(lang='ja')
           a#menu-head.pure-menu-heading altjsdo.it
           ul
             li
-              a#menu-altjs(data-open='box-config' class="pure-menu-selected") Config
+              a#menu-config(data-open='box-config' class="pure-menu-selected") Config
             li
               a#menu-altjs(data-open='box-altjs') Script
             li
@@ -33,8 +36,20 @@ html(lang='ja')
             li
               a#menu-sandbox(data-open='box-sandbox') Run
       div#main
-        div
-          | license
+        div.content
+          header.header
+            h1. altjsdo.it
+            h2. simple webapp editor
+          section
+            h2.content-subhead about
+            p.
+              hoge
+              huga
+          section
+            h2.content-subhead usage
+            p.
+              hoge
+              huga
         div#box-config.content.active
           form#setting-config.pure-form.pure-form-stacked
             fieldset
@@ -98,7 +113,6 @@ html(lang='ja')
           iframe#box-sandbox-iframe
     script(src='./thirdparty/es6-shim/es6-shim.min.js')
     script(src='./thirdparty/jquery/jquery.min.js')
-    script(src='./thirdparty/pure/ui.js')
     script(src='./ui.js')
     script(src='./thirdparty/underscore.js/underscore-min.js')
     script(src='./thirdparty/backbone.js/backbone-min.js')
@@ -125,5 +139,4 @@ html(lang='ja')
     script(async='async', src='./thirdparty/less.js/less.min.js')
     script(async='async', src='./thirdparty/stylus/stylus.min.js')
     script(async='async', src='https://platform.twitter.com/widgets.js')
-    script(src='./URLStorage.js')
-    script(src='./index.js')
+    script(src='./module.js')

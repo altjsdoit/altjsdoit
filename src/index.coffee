@@ -1,3 +1,5 @@
+URLStorage = require("./URLStorage.coffee")
+{build, getCompilerSetting} = require("./build.coffee")
 
 $ -> new Main
 
@@ -12,7 +14,6 @@ Config = Backbone.Model.extend
 Main = Backbone.View.extend
   el: "#layout"
   events:
-    "click #menuLink": "sideMenu"
     "click #setting-project-save": "saveURI"
   sideMenu: ->
     $("#layout").toggleClass("active")
@@ -48,7 +49,7 @@ Main = Backbone.View.extend
   run: ->
     {altjs, althtml, altcss, enableFirebugLite, enableViewSource, enableJQuery} = @model.toJSON()
     {script, markup, style} = @getValues()
-    build {altjs, althtml, altcss, script, markup, style, enableFirebugLite, enableJQuery}, (srcdoc)->
+    build {altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, enableJQuery}, (srcdoc)->
       console.log url = createBlobURL(srcdoc, (if enableViewSource then "text/plain" else "text/html"))
       $("#box-sandbox-iframe").attr({"src": url})
       #encodeDataURI srcdoc, "text/html", (base64)->
@@ -87,24 +88,6 @@ Main = Backbone.View.extend
 
 Menu = Backbone.View.extend
   el: "#menu"
-  events:
-    "click .pure-menu-heading": "close"
-    "click li": "toggle"
-    "click #menu-altjs":   "open"
-    "click #menu-althtml": "open"
-    "click #menu-altcss":  "open"
-    "click #menu-sandbox": "open"
-  toggle: (ev)->
-    ev.stopPropagation()
-    @$el.find(".pure-menu-selected").removeClass("pure-menu-selected")
-    $(ev.target).addClass("pure-menu-selected")
-  open: (ev)->
-    $("#main")
-      .find(".active").removeClass("active").end()
-      .find("#"+$(ev.target).attr("data-open")).addClass("active")
-  close: ->
-    $("#main")
-      .find(".active").removeClass("active")
   initialize: ->
     _.bindAll(@, "render")
     @model.bind("change", @render)
@@ -179,10 +162,21 @@ Editor = Backbone.View.extend
     @refreshed = true
   render: ->
     if @cm? and  @cm.getOption("mode") isnt @model.get(@type)
-        @cm.setOption("mode", getCompiler(@model.get(@type)).mode)
+        @cm.setOption("mode", getCompilerSetting(@model.get(@type)).mode)
     if @model.get("enableCodeMirror") is false and @cm?
       @cm.toTextArea(); @cm = null
     if  @model.get("enableCodeMirror") is true and !@cm?
       @cm = CodeMirror.fromTextArea(@el, @option)
       @cm.setSize("100%", "100%")
       @refreshed = false
+
+getElmVal = (elm)->
+# ( elm:HTMLElement )=>string | number | boolean
+  if elm instanceof HTMLInputElement and
+     $(elm).attr("type") is "checkbox"
+  then $(elm).is(':checked')
+  else $(elm).val()
+
+#! createBlobURL :: String * String -> String # not referential transparency
+createBlobURL = (data, mimetype)->
+  URL.createObjectURL(new Blob([data], {type: mimetype}))

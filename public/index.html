@@ -6,12 +6,15 @@
     <meta name="Description" content="altjsdo.it - edit JavaScript, HTML and CSS - ">
     <meta name="Keywords" content="JavaScript,CoffeeScript,HTML5,CSS,altjs,less,stylus,jade">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+    <link rel="apple-touch-icon" href="./icon-128.png">
     <link rel="stylesheet" href="./thirdparty/codemirror/codemirror.css">
     <link rel="stylesheet" href="./thirdparty/codemirror/theme/solarized.css">
     <link rel="stylesheet" href="./thirdparty/codemirror/addon/fold/foldgutter.css">
     <link rel="stylesheet" href="./thirdparty/codemirror/addon/dialog/dialog.css">
     <link rel="stylesheet" href="./thirdparty/pure/pure-min.css">
     <link rel="stylesheet" href="./thirdparty/pure/main.css">
+    <link rel="stylesheet" href="./thirdparty/pure/main-grid.css">
+    <link rel="stylesheet" href="./thirdparty/pure/baby-blue.css">
     <link rel="stylesheet" href="./thirdparty/googlefonts/SourceCodePro.css">
     <link rel="stylesheet" href="index.css">
   </head>
@@ -20,7 +23,7 @@
       <div id="menu">
         <div class="pure-menu pure-menu-open"><a id="menu-head" class="pure-menu-heading">altjsdo.it</a>
           <ul>
-            <li><a id="menu-altjs" data-open="box-config" class="pure-menu-selected">Config</a></li>
+            <li><a id="menu-config" data-open="box-config" class="pure-menu-selected">Config</a></li>
             <li><a id="menu-altjs" data-open="box-altjs">Script</a></li>
             <li><a id="menu-althtml" data-open="box-althtml">Markup</a></li>
             <li><a id="menu-altcss" data-open="box-altcss">Style</a></li>
@@ -29,7 +32,26 @@
         </div>
       </div>
       <div id="main">
-        <div>license</div>
+        <div class="content">
+          <header class="header">
+            <h1>altjsdo.it</h1>
+            <h2>simple webapp editor</h2>
+          </header>
+          <section>
+            <h2 class="content-subhead">about</h2>
+            <p>
+              hoge
+              huga
+            </p>
+          </section>
+          <section>
+            <h2 class="content-subhead">usage</h2>
+            <p>
+              hoge
+              huga
+            </p>
+          </section>
+        </div>
         <div id="box-config" class="content active">
           <form id="setting-config" class="pure-form pure-form-stacked">
             <fieldset>
@@ -104,7 +126,6 @@
     </div>
     <script src="./thirdparty/es6-shim/es6-shim.min.js"></script>
     <script src="./thirdparty/jquery/jquery.min.js"></script>
-    <script src="./thirdparty/pure/ui.js"></script>
     <script src="./ui.js"></script>
     <script src="./thirdparty/underscore.js/underscore-min.js"></script>
     <script src="./thirdparty/backbone.js/backbone-min.js"></script>
@@ -131,7 +152,6 @@
     <script async="async" src="./thirdparty/less.js/less.min.js"></script>
     <script async="async" src="./thirdparty/stylus/stylus.min.js"></script>
     <script async="async" src="https://platform.twitter.com/widgets.js"></script>
-    <script src="./URLStorage.js"></script>
-    <script src="./index.js"></script>
+    <script src="./module.js"></script>
   </body>
 </html>

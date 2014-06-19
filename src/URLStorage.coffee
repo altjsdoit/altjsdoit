@@ -98,3 +98,5 @@ URLStorage = do ->
     save
     load
   }
+
+module.exports = URLStorage

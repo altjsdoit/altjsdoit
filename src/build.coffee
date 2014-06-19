@@ -84,10 +84,10 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
       new Promise (resolve, reject)->
         compile altjs, script, (err, code)-> resolve({err, code})
       new Promise (resolve, reject)->
-        compile althtml, script, (err, code)-> resolve({err, code})
+        compile althtml, markup, (err, code)-> resolve({err, code})
       new Promise (resolve, reject)->
-        compile altcss, script, (err, code)-> resolve({err, code})
-    ]).then ([js, html, css])->
+        compile altcss, style, (err, code)-> resolve({err, code})
+    ]).then(([js, html, css])->
       styles = []
       scripts = []
       if enableFirebugLite  then scripts.push "http://getfirebug.com/firebug-lite.js#overrideConsole,showIconWhenHidden=true"
@@ -101,6 +101,7 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
         css:  css.code
         styles: styles
         scripts: scripts
+    ).catch((err)-> console.error(err.stack))
 
 #! struct BuildHTMLConfig
 #!   js :: String
@@ -132,8 +133,8 @@ buildHTML = ({js, html, css, styles, scripts}={})->
     </html>
   """
 
+
 module.exports = {
-  getCompilerSetting
   build
-  buildHTML
+  getCompilerSetting
 }
