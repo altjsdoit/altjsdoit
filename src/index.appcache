@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2014-06-21-02
+# 2014-06-21-03
 
 CACHE:
 index.html
@@ -42,7 +42,6 @@ thirdparty/codemirror/mode/scheme/scheme.js
 thirdparty/codemirror/mode/xml/xml.js
 thirdparty/codemirror/mode/jade/jade.js
 thirdparty/codemirror/mode/css/css.js
-thirdparty/codemirror/keymap/sublime.js
 
 thirdparty/coffee-script/coffee-script.min.js
 thirdparty/typescript/typescript.min.js

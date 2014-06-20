@@ -287,7 +287,6 @@ Main = Backbone.View.extend({
     if (location.hash.slice(0, 5) === "#zip/") {
       _ref1 = unzipDataURI(decodeURIComponent(location.hash.slice(5))), config = _ref1.config, script = _ref1.script, markup = _ref1.markup, style = _ref1.style;
       config = JSON.parse(config || "{}");
-      console.log(config);
       this.model.set(config);
       return this.setValues({
         script: script,
@@ -460,6 +459,7 @@ Editor = Backbone.View.extend({
     _.bindAll(this, "render");
     this.model.bind("change", this.render);
     this.option = {
+      tabMode: "indent",
       theme: 'solarized dark',
       autoCloseTags: true,
       lineNumbers: true,
@@ -468,8 +468,9 @@ Editor = Backbone.View.extend({
       showCursorWhenSelecting: true,
       extraKeys: {
         "Tab": function(cm) {
-          return cm.replaceSelection("  ", "end");
+          return CodeMirror.commands[(cm.getSelection().length ? "indentMore" : "insertTab")](cm);
         },
+        "Shift-Tab": "indentLess",
         "Cmd-R": (function(_this) {
           return function(cm) {
             return _this.onrun();

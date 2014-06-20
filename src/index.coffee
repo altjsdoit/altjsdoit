@@ -43,7 +43,6 @@ Main = Backbone.View.extend
     if location.hash.slice(0, 5) is "#zip/"
       {config, script, markup, style} = unzipDataURI(decodeURIComponent(location.hash.slice(5)))
       config = JSON.parse(config or "{}")
-      console.log config
       @model.set(config)
       @setValues({script, markup, style})
   run: ->
@@ -130,6 +129,7 @@ Editor = Backbone.View.extend
     _.bindAll(this, "render")
     @model.bind("change", @render)
     @option =
+      tabMode: "indent"
       theme: 'solarized dark'
       autoCloseTags : true
       lineNumbers: true
@@ -137,7 +137,8 @@ Editor = Backbone.View.extend
       autoCloseBrackets: true
       showCursorWhenSelecting: true,
       extraKeys:
-        "Tab": (cm)-> cm.replaceSelection("  ", "end")
+        "Tab": (cm)-> CodeMirror.commands[(if cm.getSelection().length then "indentMore" else "insertTab")](cm)
+        "Shift-Tab": "indentLess"
         "Cmd-R": (cm)=>  @onrun()
         "Ctrl-R": (cm)=> @onrun()
         "Cmd-S": (cm)=>  @onsave()
