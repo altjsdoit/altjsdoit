@@ -47,6 +47,7 @@ Main = Backbone.View.extend
       @model.set(config)
       @setValues({script, markup, style})
   run: ->
+    @saveURI()
     {altjs, althtml, altcss, enableFirebugLite, enableViewSource, enableJQuery} = @model.toJSON()
     {script, markup, style} = @getValues()
     build {altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, enableJQuery}, (srcdoc)->

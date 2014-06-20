@@ -298,6 +298,7 @@ Main = Backbone.View.extend({
   },
   run: function() {
     var altcss, althtml, altjs, enableFirebugLite, enableJQuery, enableViewSource, markup, script, style, _ref1, _ref2;
+    this.saveURI();
     _ref1 = this.model.toJSON(), altjs = _ref1.altjs, althtml = _ref1.althtml, altcss = _ref1.altcss, enableFirebugLite = _ref1.enableFirebugLite, enableViewSource = _ref1.enableViewSource, enableJQuery = _ref1.enableJQuery;
     _ref2 = this.getValues(), script = _ref2.script, markup = _ref2.markup, style = _ref2.style;
     return build({
