@@ -90,9 +90,9 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
     ]).then(([js, html, css])->
       styles = []
       scripts = []
-      if enableFirebugLite  then scripts.push "https://getfirebug.com/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
-      if enableJQuery       then scripts.push "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"
-      if altjs is "Traceur" then scripts.push "https://jsrun.it/assets/a/V/p/D/aVpDA"
+      if enableFirebugLite  then scripts.push "https://altjs.duxca.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
+      if enableJQuery       then scripts.push "https://altjs.duxca.com/thirdparty/jquery/jquery.min.js"
+      #if altjs is "Traceur" then scripts.push "https://jsrun.it/assets/a/V/p/D/aVpDA"
       if js.err? or html.err? or css.err?
       then altjs+"\n"+js.err+"\n"+althtml+"\n"+html.err+"\n"+altcss+"\n"+css.err
       else callback buildHTML
