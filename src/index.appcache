@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2014-06-20-09
+# 2014-06-21-02
 
 CACHE:
 index.html
@@ -54,6 +54,8 @@ thirdparty/stylus/stylus.min.js
 thirdparty/twitter/widgets.js
 
 module.js
+
+thirdparty/firebug/firebug-lite.js
 
 NETWORK:
 
