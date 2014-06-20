@@ -50,11 +50,14 @@ thirdparty/lispyscript/lispyscript.js
 thirdparty/jade/jade.min.js
 thirdparty/less.js/less.min.js
 thirdparty/stylus/stylus.min.js
+
+thirdparty/twitter/widgets.js
+
 module.js
 
 NETWORK:
 
-https://platform.twitter.com/widgets.js
+
 
 
 FALLBACK:
