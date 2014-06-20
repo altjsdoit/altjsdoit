@@ -43,6 +43,7 @@ Main = Backbone.View.extend
     if location.hash.slice(0, 5) is "#zip/"
       {config, script, markup, style} = unzipDataURI(decodeURIComponent(location.hash.slice(5)))
       config = JSON.parse(config or "{}")
+      console.log config
       @model.set(config)
       @setValues({script, markup, style})
   run: ->
@@ -113,13 +114,14 @@ Setting = Backbone.View.extend
     @model.bind("change", @render)
     @render()
   render: ->
-    {title, altjs, althtml, altcss, enableCodeMirror, enableFirebugLite, enableViewSource} = @model.toJSON()
+    {title, altjs, althtml, altcss, enableCodeMirror, enableJQuery, enableFirebugLite, enableViewSource} = @model.toJSON()
     @$el.find("[data-config='title']"  ).val(title  ).end()
         .find("[data-config='altjs']"  ).val(altjs  ).end()
         .find("[data-config='althtml']").val(althtml).end()
         .find("[data-config='altcss']" ).val(altcss ).end()
         .find("[data-config='enableCodeMirror']").attr("checked", enableCodeMirror).end()
         .find("[data-config='enableFirebugLite']").attr("checked", enableFirebugLite).end()
+        .find("[data-config='enableJQuery']").attr("checked", enableJQuery).end()
         .find("[data-config='enableViewSource']").attr("checked", enableViewSource).end()
 
 Editor = Backbone.View.extend

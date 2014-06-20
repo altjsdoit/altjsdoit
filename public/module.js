@@ -290,6 +290,7 @@ Main = Backbone.View.extend({
     if (location.hash.slice(0, 5) === "#zip/") {
       _ref1 = unzipDataURI(decodeURIComponent(location.hash.slice(5))), config = _ref1.config, script = _ref1.script, markup = _ref1.markup, style = _ref1.style;
       config = JSON.parse(config || "{}");
+      console.log(config);
       this.model.set(config);
       return this.setValues({
         script: script,
@@ -449,9 +450,9 @@ Setting = Backbone.View.extend({
     return this.render();
   },
   render: function() {
-    var altcss, althtml, altjs, enableCodeMirror, enableFirebugLite, enableViewSource, title, _ref1;
-    _ref1 = this.model.toJSON(), title = _ref1.title, altjs = _ref1.altjs, althtml = _ref1.althtml, altcss = _ref1.altcss, enableCodeMirror = _ref1.enableCodeMirror, enableFirebugLite = _ref1.enableFirebugLite, enableViewSource = _ref1.enableViewSource;
-    return this.$el.find("[data-config='title']").val(title).end().find("[data-config='altjs']").val(altjs).end().find("[data-config='althtml']").val(althtml).end().find("[data-config='altcss']").val(altcss).end().find("[data-config='enableCodeMirror']").attr("checked", enableCodeMirror).end().find("[data-config='enableFirebugLite']").attr("checked", enableFirebugLite).end().find("[data-config='enableViewSource']").attr("checked", enableViewSource).end();
+    var altcss, althtml, altjs, enableCodeMirror, enableFirebugLite, enableJQuery, enableViewSource, title, _ref1;
+    _ref1 = this.model.toJSON(), title = _ref1.title, altjs = _ref1.altjs, althtml = _ref1.althtml, altcss = _ref1.altcss, enableCodeMirror = _ref1.enableCodeMirror, enableJQuery = _ref1.enableJQuery, enableFirebugLite = _ref1.enableFirebugLite, enableViewSource = _ref1.enableViewSource;
+    return this.$el.find("[data-config='title']").val(title).end().find("[data-config='altjs']").val(altjs).end().find("[data-config='althtml']").val(althtml).end().find("[data-config='altcss']").val(altcss).end().find("[data-config='enableCodeMirror']").attr("checked", enableCodeMirror).end().find("[data-config='enableFirebugLite']").attr("checked", enableFirebugLite).end().find("[data-config='enableJQuery']").attr("checked", enableJQuery).end().find("[data-config='enableViewSource']").attr("checked", enableViewSource).end();
   }
 });
 
