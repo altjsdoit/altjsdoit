@@ -137,7 +137,7 @@ Editor = Backbone.View.extend
       autoCloseBrackets: true
       showCursorWhenSelecting: true,
       extraKeys:
-        "Tab": (cm)-> CodeMirror.commands[(if cm.getSelection().length then "indentMore" else "insertTab")](cm)
+        "Tab": (cm)-> CodeMirror.commands[(if cm.getSelection().length then "indentMore" else "insertSoftTab")](cm)
         "Shift-Tab": "indentLess"
         "Cmd-R": (cm)=>  @onrun()
         "Ctrl-R": (cm)=> @onrun()

@@ -468,7 +468,7 @@ Editor = Backbone.View.extend({
       showCursorWhenSelecting: true,
       extraKeys: {
         "Tab": function(cm) {
-          return CodeMirror.commands[(cm.getSelection().length ? "indentMore" : "insertTab")](cm);
+          return CodeMirror.commands[(cm.getSelection().length ? "indentMore" : "insertSoftTab")](cm);
         },
         "Shift-Tab": "indentLess",
         "Cmd-R": (function(_this) {
