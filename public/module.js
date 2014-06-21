@@ -460,6 +460,7 @@ Editor = Backbone.View.extend({
     this.model.bind("change", this.render);
     this.option = {
       tabMode: "indent",
+      tabSize: 2,
       theme: 'solarized dark',
       autoCloseTags: true,
       lineNumbers: true,

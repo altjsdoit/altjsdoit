@@ -130,12 +130,13 @@ Editor = Backbone.View.extend
     @model.bind("change", @render)
     @option =
       tabMode: "indent"
+      tabSize: 2
       theme: 'solarized dark'
       autoCloseTags : true
       lineNumbers: true
       matchBrackets: true
       autoCloseBrackets: true
-      showCursorWhenSelecting: true,
+      showCursorWhenSelecting: true
       extraKeys:
         "Tab": (cm)-> CodeMirror.commands[(if cm.getSelection().length then "indentMore" else "insertSoftTab")](cm)
         "Shift-Tab": "indentLess"
