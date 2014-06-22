@@ -47,9 +47,9 @@ Main = Backbone.View.extend
       @setValues({script, markup, style})
   run: ->
     @saveURI()
-    {altjs, althtml, altcss, enableFirebugLite, enableViewSource, enableJQuery, enableUnderscore} = @model.toJSON()
+    {altjs, althtml, altcss, enableFirebugLite, enableViewSource, enableJQuery, enableUnderscore, enableES6shim} = @model.toJSON()
     {script, markup, style} = @getValues()
-    build {altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, enableJQuery, enableUnderscore}, (srcdoc)->
+    build {altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim}, (srcdoc)->
       console.log url = createBlobURL(srcdoc, (if enableViewSource then "text/plain" else "text/html"))
       $("#box-sandbox-iframe").attr({"src": url})
   initialize: ->
