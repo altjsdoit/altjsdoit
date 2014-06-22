@@ -15,3 +15,7 @@ Change Log
 #### Version 0.7.1
 
 support lispyscript
+
+License
+---------------
+MIT

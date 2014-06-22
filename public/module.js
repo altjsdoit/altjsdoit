@@ -146,10 +146,10 @@ compile = function(altFoo, code, callback) {
 };
 
 build = function(_arg, _arg1, _arg2, callback) {
-  var altcss, althtml, altjs, enableFirebugLite, enableJQuery, markup, script, style;
+  var altcss, althtml, altjs, enableFirebugLite, enableJQuery, enableUnderscore, markup, script, style;
   altjs = _arg.altjs, althtml = _arg.althtml, altcss = _arg.altcss;
   script = _arg1.script, markup = _arg1.markup, style = _arg1.style;
-  enableFirebugLite = _arg2.enableFirebugLite, enableJQuery = _arg2.enableJQuery;
+  enableFirebugLite = _arg2.enableFirebugLite, enableJQuery = _arg2.enableJQuery, enableUnderscore = _arg2.enableUnderscore;
   return Promise.all([
     new Promise(function(resolve, reject) {
       return compile(altjs, script, function(err, code) {
@@ -183,6 +183,9 @@ build = function(_arg, _arg1, _arg2, callback) {
     }
     if (enableJQuery) {
       scripts.push("https://altjs.duxca.com/thirdparty/jquery/jquery.min.js");
+    }
+    if (enableUnderscore) {
+      scripts.push("https://altjs.duxca.com/thirdparty/underscore.js/underscore-min.js");
     }
     if ((js.err != null) || (html.err != null) || (css.err != null)) {
       return callback(buildHTML({
@@ -301,9 +304,9 @@ Main = Backbone.View.extend({
     }
   },
   run: function() {
-    var altcss, althtml, altjs, enableFirebugLite, enableJQuery, enableViewSource, markup, script, style, _ref1, _ref2;
+    var altcss, althtml, altjs, enableFirebugLite, enableJQuery, enableUnderscore, enableViewSource, markup, script, style, _ref1, _ref2;
     this.saveURI();
-    _ref1 = this.model.toJSON(), altjs = _ref1.altjs, althtml = _ref1.althtml, altcss = _ref1.altcss, enableFirebugLite = _ref1.enableFirebugLite, enableViewSource = _ref1.enableViewSource, enableJQuery = _ref1.enableJQuery;
+    _ref1 = this.model.toJSON(), altjs = _ref1.altjs, althtml = _ref1.althtml, altcss = _ref1.altcss, enableFirebugLite = _ref1.enableFirebugLite, enableViewSource = _ref1.enableViewSource, enableJQuery = _ref1.enableJQuery, enableUnderscore = _ref1.enableUnderscore;
     _ref2 = this.getValues(), script = _ref2.script, markup = _ref2.markup, style = _ref2.style;
     return build({
       altjs: altjs,
@@ -315,7 +318,8 @@ Main = Backbone.View.extend({
       style: style
     }, {
       enableFirebugLite: enableFirebugLite,
-      enableJQuery: enableJQuery
+      enableJQuery: enableJQuery,
+      enableUnderscore: enableUnderscore
     }, function(srcdoc) {
       var url;
       console.log(url = createBlobURL(srcdoc, (enableViewSource ? "text/plain" : "text/html")));

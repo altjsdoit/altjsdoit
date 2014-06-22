@@ -79,7 +79,7 @@ compile = (altFoo, code, callback)->
 #!   enableFirebugLite :: Boolean
 #!   enableJQuery :: Boolean
 #! build :: AltFoo * Codes * Config * (String -> Void) -> Void
-build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, enableJQuery}, callback)->
+build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, enableJQuery, enableUnderscore}, callback)->
   Promise.all([
       new Promise (resolve, reject)->
         compile altjs, script, (err, code)-> resolve({err, code})
@@ -92,6 +92,7 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
       scripts = []
       if enableFirebugLite  then scripts.push "https://altjs.duxca.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
       if enableJQuery       then scripts.push "https://altjs.duxca.com/thirdparty/jquery/jquery.min.js"
+      if enableUnderscore   then scripts.push "https://altjs.duxca.com/thirdparty/underscore.js/underscore-min.js"
       #if altjs is "Traceur" then scripts.push "https://jsrun.it/assets/a/V/p/D/aVpDA"
       if js.err? or html.err? or css.err?
         callback buildHTML
