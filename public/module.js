@@ -185,7 +185,10 @@ build = function(_arg, _arg1, _arg2, callback) {
       scripts.push("https://altjs.duxca.com/thirdparty/jquery/jquery.min.js");
     }
     if ((js.err != null) || (html.err != null) || (css.err != null)) {
-      return altjs + "\n" + js.err + "\n" + althtml + "\n" + html.err + "\n" + altcss + "\n" + css.err;
+      return callback(buildHTML({
+        css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';",
+        html: "<pre>" + altjs + "\n" + js.err + "\n" + althtml + "\n" + html.err + "\n" + altcss + "\n" + css.err + "</pre>"
+      }));
     } else {
       return callback(buildHTML({
         js: js.code,

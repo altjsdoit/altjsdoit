@@ -94,7 +94,9 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
       if enableJQuery       then scripts.push "https://altjs.duxca.com/thirdparty/jquery/jquery.min.js"
       #if altjs is "Traceur" then scripts.push "https://jsrun.it/assets/a/V/p/D/aVpDA"
       if js.err? or html.err? or css.err?
-      then altjs+"\n"+js.err+"\n"+althtml+"\n"+html.err+"\n"+altcss+"\n"+css.err
+        callback buildHTML
+          css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';"
+          html: "<pre>"+altjs+"\n"+js.err+"\n"+althtml+"\n"+html.err+"\n"+altcss+"\n"+css.err+"</pre>"
       else callback buildHTML
         js:   js.code
         html: html.code
