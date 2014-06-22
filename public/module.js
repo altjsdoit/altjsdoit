@@ -278,7 +278,7 @@ Main = Backbone.View.extend({
       success: (function(_this) {
         return function(res) {
           $("#setting-project-url").val(res.id);
-          $("#setting-project-twitter").html($("<a href=\"https://twitter.com/share\" class=\"twitter-share-button\" data-size=\"large\" data-text=\"'" + (_this.model.get('title')) + "'\" data-url=\"" + res.id + "\" data-hashtags=\"altjsdoit\" data-count=\"none\">Tweet</a>"));
+          $("#setting-project-twitter").html($("<a href=\"https://twitter.com/share\" class=\"twitter-share-button\" data-size=\"large\" data-text=\"'" + (_this.model.get('title')) + "'\" data-url=\"" + res.id + "\" data-hashtags=\"altjsdoit\" data-count=\"count\" data-lang=\"en\">Tweet</a>"));
           return twttr.widgets.load();
         };
       })(this)
