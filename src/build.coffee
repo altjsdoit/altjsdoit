@@ -90,7 +90,8 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
     ]).then(([js, html, css])->
       styles = []
       scripts = []
-      if enableFirebugLite  then scripts.push "https://altjs.duxca.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
+      if enableFirebugLite then scripts.push "https://altjs.duxca.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
+      #if enableFirebugLite then js.code = "try{"+js.code+"}catch(err){console.error(err);}"
       if enableJQuery       then scripts.push "https://altjs.duxca.com/thirdparty/jquery/jquery.min.js"
       if enableUnderscore   then scripts.push "https://altjs.duxca.com/thirdparty/underscore.js/underscore-min.js"
       if enableES6shim      then scripts.push "https://altjs.duxca.com/thirdparty/es6-shim/es6-shim.min.js"
