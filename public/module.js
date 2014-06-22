@@ -184,7 +184,7 @@ build = function(_arg, _arg1, _arg2, callback) {
       scripts.push("https://altjs.duxca.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true");
     }
     if (enableFirebugLite) {
-      js.code = "try{" + js.code + "}catch(err){console.error(err);}";
+      js.code = "try{" + js.code + "}catch(err){console.error(err);console.error(err.stack);}";
     }
     if (enableJQuery) {
       scripts.push("https://altjs.duxca.com/thirdparty/jquery/jquery.min.js");
