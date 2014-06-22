@@ -52,7 +52,7 @@ getCompilerSetting = (lang)->
     when "Wisp"         then f "clojure",      (code, cb)-> result = wisp.compiler.compile(code); cb(result.error, result.code)
     when "LispyScript"  then f "scheme",       (code, cb)-> cb(null, lispyscript._compile(code))
     when "HTML"         then f "xml",          (code, cb)-> cb(null, code)
-    when "Jade"         then f "jade",         (code, cb)-> cb(null, jade.compile(code)({}))
+    when "Jade"         then f "jade",         (code, cb)-> cb(null, jade.compile(code,{pretty:true})({}))
     when "CSS"          then f "css",          (code, cb)-> cb(null, code)
     when "LESS"         then f "css",          (code, cb)-> (new less.Parser({})).parse code, (err, tree)-> (if err then cb(err) else cb(err, tree.toCSS({})))
     when "Stylus"       then f "css",          (code, cb)-> stylus.render(code, {}, cb)

@@ -73,14 +73,17 @@ html(lang='ja', manifest="index.appcache")
                 | enable CodeMirror:
                 input(data-config='enableCodeMirror', type='checkbox', checked='checked')
               label
-                | enable FirebugLite:
-                input(data-config='enableFirebugLite', type='checkbox')
-              label
-                | enable jQuery:
-                input(data-config='enableJQuery', type='checkbox')
-              label
                 | view compiled code:
                 input(data-config='enableViewSource', type='checkbox')
+            fieldset
+              legend Library
+              label
+                | FirebugLite(1.4.0):
+                input(data-config='enableFirebugLite', type='checkbox')
+              label
+                | jQuery(2.1.1):
+                input(data-config='enableJQuery', type='checkbox')
+
         #box-altjs
           textarea#box-altjs-textarea(wrap='off', placeholder='script')
         #box-althtml

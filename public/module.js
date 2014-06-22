@@ -101,7 +101,9 @@ getCompilerSetting = function(lang) {
       });
     case "Jade":
       return f("jade", function(code, cb) {
-        return cb(null, jade.compile(code)({}));
+        return cb(null, jade.compile(code, {
+          pretty: true
+        })({}));
       });
     case "CSS":
       return f("css", function(code, cb) {
