@@ -182,6 +182,8 @@ build = function(_arg, _arg1, _arg2, callback) {
     scripts = [];
     if (enableFirebugLite) {
       scripts.push("https://altjs.duxca.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true");
+    }
+    if (enableFirebugLite) {
       js.code = "try{" + js.code + "}catch(err){console.error(err);}";
     }
     if (enableJQuery) {
