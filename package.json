@@ -1,6 +1,6 @@
 {
   "name": "altjsdoit",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": true,
   "description": "",
   "main": "public/index.html",
@@ -16,10 +16,9 @@
     "grunt-contrib-watch": "*",
     "grunt-contrib-copy": "*",
     "grunt-contrib-clean": "*",
-    "chai": "*",
-    "grunt-simple-mocha": "*",
     "browserify": "*",
     "grunt-browserify": "*",
-    "coffeeify": "*"
+    "coffeeify": "*",
+    "qunitjs": "^1.14.0"
   }
 }

@@ -21,7 +21,7 @@ index.css
 
 thirdparty/es6-shim/es6-shim.min.js
 thirdparty/jquery/jquery.min.js
-ui.js
+
 thirdparty/underscore.js/underscore-min.js
 thirdparty/backbone.js/backbone-min.js
 thirdparty/jszip/jszip.min.js
@@ -52,13 +52,11 @@ thirdparty/stylus/stylus.min.js
 
 thirdparty/twitter/widgets.js
 
-module.js
+index.js
 
 thirdparty/firebug/firebug-lite.js
 
 NETWORK:
-
-
 
 
 FALLBACK:
