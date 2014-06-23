@@ -12,6 +12,11 @@ grunt
 
 Change Log
 ---------------
+
+#### Version 0.8.1
+
+* some behavior changed more better
+
 #### Version 0.8.0
 
 * change domain from altjs.duxca.com to altjsdoit.github.com
