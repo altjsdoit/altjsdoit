@@ -22,7 +22,7 @@ Main = Backbone.View.extend
     @model.set("timestamp", Date.now())
     config = JSON.stringify(@model.toJSON())
     {script, markup, style} = @getValues()
-    url = makeURL(location) + "#zip/" + encodeURIComponent(zipDataURI({config, script, markup, style}))
+    url = "https://altjsdoit.github.io/#zip=" + encodeURIComponent(zipDataURI({config, script, markup, style}))
     $("#setting-project-url").val(url)
     $("#setting-project-size").html(url.length)
     $("#setting-project-twitter").html("")
@@ -36,11 +36,11 @@ Main = Backbone.View.extend
       success: (res)=>
         $("#setting-project-url").val(res.id)
         $("#setting-project-twitter").html($("""
-          <a href="https://twitter.com/share" class="twitter-share-button" data-size="large" data-text="'#{@model.get('title')}'" data-url="#{res.id}" data-hashtags="altjsdoit" data-count="count" data-lang="en">Tweet</a>
+          <a href="https://twitter.com/share" class="twitter-share-button" data-size="large" data-text="'#{@model.get('title')}'" data-url="#{res.id}" data-hashtags="altjsdoit" data-count="none" data-lang="en">Tweet</a>
         """))
         twttr.widgets.load()
   loadURI: ->
-    if location.hash.slice(0, 5) is "#zip/"
+    if location.hash.slice(0, 5) is "#zip="
       {config, script, markup, style} = unzipDataURI(decodeURIComponent(location.hash.slice(5)))
       config = JSON.parse(config or "{}")
       @model.set(config)

@@ -1,22 +1,14 @@
 {
-  "version": "0.7.1",
-  "name": "altjsdo.it",
-  "launch_path": "/index.html",
+  "version": "0.8.0",
+  "name": "altjsdoit",
+  "launch_path": "/",
   "icons": {
       "128": "/icon-128.png"
   },
-  "description": "WebApp Editor",
+  "description": "Simple WebApp Editor",
   "developer": {
       "name": "Legokichi Duckscallion",
-      "url": "http://duxca.com/"
+      "url": "https://github.com/altjsdoit"
   },
-  "locales": {
-    "en-US": {
-      "description": "WebApp Editor",
-      "developer": {
-        "url": "http://duxca.com/"
-      }
-    }
-  },
-  "default_locale": "en-US"
+  "default_locale": "en"
 }

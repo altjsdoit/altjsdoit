@@ -1,6 +1,6 @@
 {
-  "name": "altjsdo.it",
-  "version": "0.7.1",
+  "name": "altjsdoit",
+  "version": "0.8.0",
   "private": true,
   "description": "",
   "main": "public/index.html",
