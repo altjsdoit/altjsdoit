@@ -90,7 +90,7 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
     ]).then(([js, html, css])->
       styles = []
       scripts = []
-      if enableFirebugLite then scripts.push "https://altjsdoit.github.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
+      if enableFirebugLite then scripts.push "https://altjsdoit.github.io/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
       if enableFirebugLite then js.code = "try{"+js.code+"}catch(err){console.error(err);console.error(err.stack);}"
       if enableJQuery       then scripts.push "https://altjsdoit.github.com/thirdparty/jquery/jquery.min.js"
       if enableUnderscore   then scripts.push "https://altjsdoit.github.com/thirdparty/underscore.js/underscore-min.js"
