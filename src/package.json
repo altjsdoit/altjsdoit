@@ -1,8 +1,0 @@
-{
-  "main": "index.html",
-  "name": "altjsdo.it",
-  "webkit": {
-    "plugin": true
-  },
-  "node-remote": "blob:"
-}

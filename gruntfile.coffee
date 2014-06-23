@@ -18,7 +18,7 @@ module.exports = (grunt) ->
           ui: 'bdd'
     clean:
       build:
-        src: "./public/*"
+        src: ["./public/*", "!./public/.git"]
     coffee:
       compile:
         files:

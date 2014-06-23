@@ -1,6 +1,6 @@
 {
-  "version": "0.8.0",
   "name": "altjsdoit",
+  "version": "0.8.0",
   "launch_path": "/",
   "icons": {
       "128": "/icon-128.png"
