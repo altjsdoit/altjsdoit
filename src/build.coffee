@@ -90,11 +90,11 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
     ]).then(([js, html, css])->
       styles = []
       scripts = []
-      if enableFirebugLite then scripts.push "https://altjs.duxca.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
+      if enableFirebugLite then scripts.push "https://altjsdoit.github.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
       if enableFirebugLite then js.code = "try{"+js.code+"}catch(err){console.error(err);console.error(err.stack);}"
-      if enableJQuery       then scripts.push "https://altjs.duxca.com/thirdparty/jquery/jquery.min.js"
-      if enableUnderscore   then scripts.push "https://altjs.duxca.com/thirdparty/underscore.js/underscore-min.js"
-      if enableES6shim      then scripts.push "https://altjs.duxca.com/thirdparty/es6-shim/es6-shim.min.js"
+      if enableJQuery       then scripts.push "https://altjsdoit.github.com/thirdparty/jquery/jquery.min.js"
+      if enableUnderscore   then scripts.push "https://altjsdoit.github.com/thirdparty/underscore.js/underscore-min.js"
+      if enableES6shim      then scripts.push "https://altjsdoit.github.com/thirdparty/es6-shim/es6-shim.min.js"
       #if altjs is "Traceur" then scripts.push "https://jsrun.it/assets/a/V/p/D/aVpDA"
       if js.err? or html.err? or css.err?
         callback buildHTML
@@ -103,7 +103,7 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
       else callback buildHTML
         js:   js.code
         html: html.code
-        css:  css.code
+        css:  (if enableFirebugLite then "body{margin-bottom:212px;}" else "")+css.code
         styles: styles
         scripts: scripts
     ).catch((err)-> console.error(err.stack))

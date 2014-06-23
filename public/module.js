@@ -181,19 +181,19 @@ build = function(_arg, _arg1, _arg2, callback) {
     styles = [];
     scripts = [];
     if (enableFirebugLite) {
-      scripts.push("https://altjs.duxca.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true");
+      scripts.push("https://altjsdoit.github.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true");
     }
     if (enableFirebugLite) {
       js.code = "try{" + js.code + "}catch(err){console.error(err);console.error(err.stack);}";
     }
     if (enableJQuery) {
-      scripts.push("https://altjs.duxca.com/thirdparty/jquery/jquery.min.js");
+      scripts.push("https://altjsdoit.github.com/thirdparty/jquery/jquery.min.js");
     }
     if (enableUnderscore) {
-      scripts.push("https://altjs.duxca.com/thirdparty/underscore.js/underscore-min.js");
+      scripts.push("https://altjsdoit.github.com/thirdparty/underscore.js/underscore-min.js");
     }
     if (enableES6shim) {
-      scripts.push("https://altjs.duxca.com/thirdparty/es6-shim/es6-shim.min.js");
+      scripts.push("https://altjsdoit.github.com/thirdparty/es6-shim/es6-shim.min.js");
     }
     if ((js.err != null) || (html.err != null) || (css.err != null)) {
       return callback(buildHTML({
@@ -204,7 +204,7 @@ build = function(_arg, _arg1, _arg2, callback) {
       return callback(buildHTML({
         js: js.code,
         html: html.code,
-        css: css.code,
+        css: (enableFirebugLite ? "body{margin-bottom:212px;}" : "") + css.code,
         styles: styles,
         scripts: scripts
       }));
@@ -271,7 +271,7 @@ Main = Backbone.View.extend({
     this.model.set("timestamp", Date.now());
     config = JSON.stringify(this.model.toJSON());
     _ref1 = this.getValues(), script = _ref1.script, markup = _ref1.markup, style = _ref1.style;
-    url = "https://altjsdoit.github.io/#zip=" + encodeURIComponent(zipDataURI({
+    url = makeURL(location) + "#zip=" + encodeURIComponent(zipDataURI({
       config: config,
       script: script,
       markup: markup,

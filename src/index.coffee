@@ -22,7 +22,7 @@ Main = Backbone.View.extend
     @model.set("timestamp", Date.now())
     config = JSON.stringify(@model.toJSON())
     {script, markup, style} = @getValues()
-    url = "https://altjsdoit.github.io/#zip=" + encodeURIComponent(zipDataURI({config, script, markup, style}))
+    url = makeURL(location) + "#zip=" + encodeURIComponent(zipDataURI({config, script, markup, style}))
     $("#setting-project-url").val(url)
     $("#setting-project-size").html(url.length)
     $("#setting-project-twitter").html("")
