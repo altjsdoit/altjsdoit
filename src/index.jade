@@ -90,11 +90,11 @@ html(lang='ja', manifest="index.appcache")
                 | es6-shim(0.11.0):
                 input(data-config='enableES6shim', type='checkbox')
         #box-altjs
-          textarea#box-altjs-textarea(wrap='off', placeholder='script')
+          textarea#box-altjs-textarea(wrap='off', placeholder='script')!="\n\n\n"
         #box-althtml
-          textarea#box-althtml-textarea(wrap='off', placeholder='markup')
+          textarea#box-althtml-textarea(wrap='off', placeholder='markup')!="\n\n\n"
         #box-altcss
-          textarea#box-altcss-textarea(wrap='off', placeholder='style')
+          textarea#box-altcss-textarea(wrap='off', placeholder='style')!="\n\n\n"
         #box-sandbox
           iframe#box-sandbox-iframe
     script(src='./thirdparty/es6-shim/es6-shim.min.js')

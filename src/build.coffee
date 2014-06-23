@@ -92,9 +92,9 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, 
       scripts = []
       if enableFirebugLite then scripts.push "https://altjsdoit.github.io/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
       if enableFirebugLite then js.code = "try{"+js.code+"}catch(err){console.error(err);console.error(err.stack);}"
-      if enableJQuery       then scripts.push "https://altjsdoit.github.com/thirdparty/jquery/jquery.min.js"
-      if enableUnderscore   then scripts.push "https://altjsdoit.github.com/thirdparty/underscore.js/underscore-min.js"
-      if enableES6shim      then scripts.push "https://altjsdoit.github.com/thirdparty/es6-shim/es6-shim.min.js"
+      if enableJQuery       then scripts.push "https://altjsdoit.github.io/thirdparty/jquery/jquery.min.js"
+      if enableUnderscore   then scripts.push "https://altjsdoit.github.io/thirdparty/underscore.js/underscore-min.js"
+      if enableES6shim      then scripts.push "https://altjsdoit.github.io/thirdparty/es6-shim/es6-shim.min.js"
       #if altjs is "Traceur" then scripts.push "https://jsrun.it/assets/a/V/p/D/aVpDA"
       if js.err? or html.err? or css.err?
         callback buildHTML
