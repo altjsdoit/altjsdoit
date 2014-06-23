@@ -181,7 +181,7 @@ build = function(_arg, _arg1, _arg2, callback) {
     styles = [];
     scripts = [];
     if (enableFirebugLite) {
-      scripts.push("https://altjsdoit.github.com/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true");
+      scripts.push("https://altjsdoit.github.io/thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true");
     }
     if (enableFirebugLite) {
       js.code = "try{" + js.code + "}catch(err){console.error(err);console.error(err.stack);}";
