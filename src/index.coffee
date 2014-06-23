@@ -22,7 +22,7 @@ Main = Backbone.View.extend
     @model.set("timestamp", Date.now())
     config = JSON.stringify(@model.toJSON())
     {script, markup, style} = @getValues()
-    url = makeURL(location) + "#zip=" + encodeURIComponent(zipDataURI({config, script, markup, style}))
+    url = makeURL(location) + "#" + encodeURIQuery {zip:zipDataURI({config, script, markup, style})}
     $("#setting-project-url").val(url)
     $("#setting-project-size").html(url.length)
     $("#setting-project-twitter").html("")
@@ -40,7 +40,8 @@ Main = Backbone.View.extend
         """))
         twttr.widgets.load()
   loadURI: ->
-    if location.hash.slice(0, 5) is "#zip="
+    {zip} = decodeURIQuery(location.hash)
+    if zip?
       {config, script, markup, style} = unzipDataURI(decodeURIComponent(location.hash.slice(5)))
       config = JSON.parse(config or "{}")
       @model.set(config)
@@ -203,3 +204,20 @@ makeURL = (location)->
   location.hostname +
   (if location.port then ":"+location.port else "") +
   location.pathname
+
+encodeURIQuery = (dic)->
+# ( { [val:string]:string; } )=>string
+  ((key+"="+encodeURIComponent(val) for key, val of dic).join("&"))
+
+decodeURIQuery = (locationHash)->
+# ( search:string )=>{ [val:string]:string; }
+  locationHash
+    .slice(1)
+    .split("&")
+    .map((a)->
+      b = a.split("=")
+      [b[0], b.slice(1).join("=")]
+    ).reduce(((a, b)->
+      a[b[0]] = decodeURIComponent(b[1])
+      a
+    ), {})

@@ -238,7 +238,7 @@ module.exports = {
 
 
 },{}],2:[function(require,module,exports){
-var Config, Editor, Main, Menu, Setting, build, createBlobURL, getCompilerSetting, getElmVal, makeURL, unzipDataURI, zipDataURI, _ref;
+var Config, Editor, Main, Menu, Setting, build, createBlobURL, decodeURIQuery, encodeURIQuery, getCompilerSetting, getElmVal, makeURL, unzipDataURI, zipDataURI, _ref;
 
 _ref = require("./build.coffee"), build = _ref.build, getCompilerSetting = _ref.getCompilerSetting;
 
@@ -271,12 +271,14 @@ Main = Backbone.View.extend({
     this.model.set("timestamp", Date.now());
     config = JSON.stringify(this.model.toJSON());
     _ref1 = this.getValues(), script = _ref1.script, markup = _ref1.markup, style = _ref1.style;
-    url = makeURL(location) + "#zip=" + encodeURIComponent(zipDataURI({
-      config: config,
-      script: script,
-      markup: markup,
-      style: style
-    }));
+    url = makeURL(location) + "#" + encodeURIQuery({
+      zip: zipDataURI({
+        config: config,
+        script: script,
+        markup: markup,
+        style: style
+      })
+    });
     $("#setting-project-url").val(url);
     $("#setting-project-size").html(url.length);
     $("#setting-project-twitter").html("");
@@ -299,8 +301,9 @@ Main = Backbone.View.extend({
     });
   },
   loadURI: function() {
-    var config, markup, script, style, _ref1;
-    if (location.hash.slice(0, 5) === "#zip=") {
+    var config, markup, script, style, zip, _ref1;
+    zip = decodeURIQuery(location.hash).zip;
+    if (zip != null) {
       _ref1 = unzipDataURI(decodeURIComponent(location.hash.slice(5))), config = _ref1.config, script = _ref1.script, markup = _ref1.markup, style = _ref1.style;
       config = JSON.parse(config || "{}");
       this.model.set(config);
@@ -602,6 +605,30 @@ unzipDataURI = function(base64) {
 
 makeURL = function(location) {
   return location.protocol + '//' + location.hostname + (location.port ? ":" + location.port : "") + location.pathname;
+};
+
+encodeURIQuery = function(dic) {
+  var key, val;
+  return ((function() {
+    var _results;
+    _results = [];
+    for (key in dic) {
+      val = dic[key];
+      _results.push(key + "=" + encodeURIComponent(val));
+    }
+    return _results;
+  })()).join("&");
+};
+
+decodeURIQuery = function(locationHash) {
+  return locationHash.slice(1).split("&").map(function(a) {
+    var b;
+    b = a.split("=");
+    return [b[0], b.slice(1).join("=")];
+  }).reduce((function(a, b) {
+    a[b[0]] = decodeURIComponent(b[1]);
+    return a;
+  }), {});
 };
 
 
