@@ -16,16 +16,15 @@
 createBlobURL = (data, mimetype)->
   URL.createObjectURL(new Blob([data], {type: mimetype}))
 
-#! urlToBlobURL :: String * String * (String -> Void) -> String # not referential transparency
-URLToBlobURL = (url, mimetype, callback)->
+#! URLToText :: String * (String -> Void) -> String # not referential transparency
+URLToText = (url, callback)->
   $.ajax
     url:url
     error: (err)->
       if err.status is 200 and err.readyState is 4 # offline appcache behavior
-      then callback(createBlobURL(err.responseText, mimetype))
+      then callback(err.responseText)
       else console.error(err, err.stack)
-    success: (res)->
-      callback(createBlobURL(res, mimetype))
+    success: (res)-> callback(res)
 
 #! zipDataURI :: Dictionary<String> -> Stirng # not referential transparency
 zipDataURI = (dic)->
@@ -183,52 +182,56 @@ build = ({altjs, althtml, altcss},
         css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';"
         html: "<pre>"+altjs+"\n"+js.err+"\n"+althtml+"\n"+html.err+"\n"+altcss+"\n"+css.err+"</pre>"
     else
-      scripts = []
-      if enableFirebugLite then scripts.push "thirdparty/firebug/firebug-lite.js"
-      if enableJQuery      then scripts.push "thirdparty/jquery/jquery.min.js"
-      if enableUnderscore  then scripts.push "thirdparty/underscore.js/underscore-min.js"
-      if enableES6shim     then scripts.push "thirdparty/es6-shim/es6-shim.min.js"
-      if enableMathjs      then scripts.push "thirdparty/mathjs/math.min.js"
-      if enableProcessing  then scripts.push "thirdparty/processing.js/processing.min.js"
-      pBlobURL = (url)-> new Promise (resolve)-> URLToBlobURL url, "text/javascript", (_url)-> resolve(_url)
-      pscripts = scripts.map (url)-> pBlobURL(url)
-      Promise.all(pscripts).then((blobScripts)->
-        styles = []
-        pBlobURL = (url)-> new Promise (resolve)-> URLToBlobURL url, "text/css", (_url)-> resolve(_url)
-        pstyles = scripts.map (url)-> pBlobURL(url)
-        Promise.all(pstyles).then((blobStyles)->
-          head = ""
+      styles = []
+      pBlobURL = (url)-> new Promise (resolve)-> URLToText url, (text)-> resolve(createBlobURL(text, "text/css"))
+      pstyles = styles.map (url)-> pBlobURL(url)
+      Promise.all(pstyles).then((blobStyles)->
+        scripts = []
+        if enableJQuery      then scripts.push "thirdparty/jquery/jquery.min.js"
+        if enableUnderscore  then scripts.push "thirdparty/underscore.js/underscore-min.js"
+        if enableES6shim     then scripts.push "thirdparty/es6-shim/es6-shim.min.js"
+        if enableMathjs      then scripts.push "thirdparty/mathjs/math.min.js"
+        if enableProcessing  then scripts.push "thirdparty/processing.js/processing.min.js"
+        pBlobURL = (url)-> new Promise (resolve)-> URLToText url, (text)-> resolve(createBlobURL(text, "text/javascript"))
+        pscripts = scripts.map (url)-> pBlobURL(url)
+        Promise.all(pscripts).then((blobScripts)->
+          specials = []
           if enableFirebugLite
-            js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
-            firebugURL = blobScripts.shift()
-            head += """<script src='#{firebugURL}#firebug-lite.js' id='FirebugLite' FirebugLite="4">
-            {
-              overrideConsole: true,
-              showIconWhenHidden: true,
-              startOpened: true,
-              enableTrace: true
-            }
-            <#{"/"}script>\n"""
-          blobStyles.forEach (url)-> head += "<link rel='stylesheet' href='#{url}' />\n"
-          blobScripts.forEach (url)-> head += "<script src='#{url}'><#{"/"}script>\n"
-          callback """
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <meta charset="UTF-8" />
-            #{head or ""}
-            <style>
-            #{css.code or ""}
-            </style>
-            </head>
-            <body>
-            #{html.code or ""}
-            <script>
-            #{js.code or ""}
-            </script>
-            </body>
-            </html>
-          """
+            specials.push  new Promise (resolve)->
+              URLToText "thirdparty/firebug/firebug-lite.js", (text)->
+                text = text.replace("path=rePath.exec(location.href)[1];", "path=rePath.exec('http://hoge.com/firebug-lite.js')[1];")
+                firebugURL = createBlobURL(text, "text/javascript")
+                js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
+                resolve """<script src='#{firebugURL}#firebug-lite.js' id='FirebugLite' FirebugLite="4">
+                {
+                  overrideConsole: true,
+                  showIconWhenHidden: true,
+                  startOpened: true,
+                  enableTrace: true
+                }
+                <#{"/"}script>"""
+          Promise.all(specials).then((heads)->
+            blobStyles.forEach (url)-> heads.push "<link rel='stylesheet' href='#{url}' />"
+            blobScripts.forEach (url)-> heads.push "<script src='#{url}'><#{"/"}script>"
+            callback """
+              <!DOCTYPE html>
+              <html>
+              <head>
+              <meta charset="UTF-8" />
+              #{heads.join("\n") or ""}
+              <style>
+              #{css.code or ""}
+              </style>
+              </head>
+              <body>
+              #{html.code or ""}
+              <script>
+              #{js.code or ""}
+              </script>
+              </body>
+              </html>
+            """
+          ).catch((err)-> console.error(err, err.stack))
         ).catch((err)-> console.error(err, err.stack))
       ).catch((err)-> console.error(err, err.stack))
     ).catch((err)-> console.error(err, err.stack))

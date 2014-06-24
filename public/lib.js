@@ -1,4 +1,4 @@
-var URLToBlobURL, build, compile, createBlobURL, decodeURIQuery, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
+var URLToText, build, compile, createBlobURL, decodeURIQuery, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
 
 createBlobURL = function(data, mimetype) {
   return URL.createObjectURL(new Blob([data], {
@@ -6,18 +6,18 @@ createBlobURL = function(data, mimetype) {
   }));
 };
 
-URLToBlobURL = function(url, mimetype, callback) {
+URLToText = function(url, callback) {
   return $.ajax({
     url: url,
     error: function(err) {
       if (err.status === 200 && err.readyState === 4) {
-        return callback(createBlobURL(err.responseText, mimetype));
+        return callback(err.responseText);
       } else {
         return console.error(err, err.stack);
       }
     },
     success: function(res) {
-      return callback(createBlobURL(res, mimetype));
+      return callback(res);
     }
   });
 };
@@ -283,7 +283,7 @@ build = function(_arg, _arg1, _arg2, callback) {
       });
     })
   ]).then(function(_arg3) {
-    var css, html, js, pBlobURL, pscripts, scripts;
+    var css, html, js, pBlobURL, pstyles, styles;
     js = _arg3[0], html = _arg3[1], css = _arg3[2];
     if ((js.err != null) || (html.err != null) || (css.err != null)) {
       return callback(buildHTML({
@@ -291,63 +291,70 @@ build = function(_arg, _arg1, _arg2, callback) {
         html: "<pre>" + altjs + "\n" + js.err + "\n" + althtml + "\n" + html.err + "\n" + altcss + "\n" + css.err + "</pre>"
       }));
     } else {
-      scripts = [];
-      if (enableFirebugLite) {
-        scripts.push("thirdparty/firebug/firebug-lite.js");
-      }
-      if (enableJQuery) {
-        scripts.push("thirdparty/jquery/jquery.min.js");
-      }
-      if (enableUnderscore) {
-        scripts.push("thirdparty/underscore.js/underscore-min.js");
-      }
-      if (enableES6shim) {
-        scripts.push("thirdparty/es6-shim/es6-shim.min.js");
-      }
-      if (enableMathjs) {
-        scripts.push("thirdparty/mathjs/math.min.js");
-      }
-      if (enableProcessing) {
-        scripts.push("thirdparty/processing.js/processing.min.js");
-      }
+      styles = [];
       pBlobURL = function(url) {
         return new Promise(function(resolve) {
-          return URLToBlobURL(url, "text/javascript", function(_url) {
-            return resolve(_url);
+          return URLToText(url, function(text) {
+            return resolve(createBlobURL(text, "text/css"));
           });
         });
       };
-      pscripts = scripts.map(function(url) {
+      pstyles = styles.map(function(url) {
         return pBlobURL(url);
       });
-      return Promise.all(pscripts).then(function(blobScripts) {
-        var pstyles, styles;
-        styles = [];
+      return Promise.all(pstyles).then(function(blobStyles) {
+        var pscripts, scripts;
+        scripts = [];
+        if (enableJQuery) {
+          scripts.push("thirdparty/jquery/jquery.min.js");
+        }
+        if (enableUnderscore) {
+          scripts.push("thirdparty/underscore.js/underscore-min.js");
+        }
+        if (enableES6shim) {
+          scripts.push("thirdparty/es6-shim/es6-shim.min.js");
+        }
+        if (enableMathjs) {
+          scripts.push("thirdparty/mathjs/math.min.js");
+        }
+        if (enableProcessing) {
+          scripts.push("thirdparty/processing.js/processing.min.js");
+        }
         pBlobURL = function(url) {
           return new Promise(function(resolve) {
-            return URLToBlobURL(url, "text/css", function(_url) {
-              return resolve(_url);
+            return URLToText(url, function(text) {
+              return resolve(createBlobURL(text, "text/javascript"));
             });
           });
         };
-        pstyles = scripts.map(function(url) {
+        pscripts = scripts.map(function(url) {
           return pBlobURL(url);
         });
-        return Promise.all(pstyles).then(function(blobStyles) {
-          var firebugURL, head;
-          head = "";
+        return Promise.all(pscripts).then(function(blobScripts) {
+          var specials;
+          specials = [];
           if (enableFirebugLite) {
-            js.code = "try{" + js.code + "}catch(err){console.error(err, err.stack);}";
-            firebugURL = blobScripts.shift();
-            head += "<script src='" + firebugURL + "#firebug-lite.js' id='FirebugLite' FirebugLite=\"4\">\n{\n  overrideConsole: true,\n  showIconWhenHidden: true,\n  startOpened: true,\n  enableTrace: true\n}\n<" + "/" + "script>\n";
+            specials.push(new Promise(function(resolve) {
+              return URLToText("thirdparty/firebug/firebug-lite.js", function(text) {
+                var firebugURL;
+                text = text.replace("path=rePath.exec(location.href)[1];", "path=rePath.exec('http://hoge.com/firebug-lite.js')[1];");
+                firebugURL = createBlobURL(text, "text/javascript");
+                js.code = "try{" + js.code + "}catch(err){console.error(err, err.stack);}";
+                return resolve("<script src='" + firebugURL + "#firebug-lite.js' id='FirebugLite' FirebugLite=\"4\">\n{\n  overrideConsole: true,\n  showIconWhenHidden: true,\n  startOpened: true,\n  enableTrace: true\n}\n<" + "/" + "script>");
+              });
+            }));
           }
-          blobStyles.forEach(function(url) {
-            return head += "<link rel='stylesheet' href='" + url + "' />\n";
+          return Promise.all(specials).then(function(heads) {
+            blobStyles.forEach(function(url) {
+              return heads.push("<link rel='stylesheet' href='" + url + "' />");
+            });
+            blobScripts.forEach(function(url) {
+              return heads.push("<script src='" + url + "'><" + "/" + "script>");
+            });
+            return callback("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n" + (heads.join("\n") || "") + "\n<style>\n" + (css.code || "") + "\n</style>\n</head>\n<body>\n" + (html.code || "") + "\n<script>\n" + (js.code || "") + "\n</script>\n</body>\n</html>");
+          })["catch"](function(err) {
+            return console.error(err, err.stack);
           });
-          blobScripts.forEach(function(url) {
-            return head += "<script src='" + url + "'><" + "/" + "script>\n";
-          });
-          return callback("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n" + (head || "") + "\n<style>\n" + (css.code || "") + "\n</style>\n</head>\n<body>\n" + (html.code || "") + "\n<script>\n" + (js.code || "") + "\n</script>\n</body>\n</html>");
         })["catch"](function(err) {
           return console.error(err, err.stack);
         });
