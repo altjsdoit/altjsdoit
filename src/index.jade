@@ -85,9 +85,11 @@ html(lang='ja', manifest="index.appcache")
                 | es6-shim(0.11.0):
                 input(data-config='enableES6shim', type='checkbox')
               label
+                | Processing.js(1.4.8):
+                input(data-config='enableProcessing', type='checkbox')
+              label
                 | mathjs(0.23.0):
                 input(data-config='enableMathjs', type='checkbox')
-              li
         #box-altjs
           textarea#box-altjs-textarea(wrap='off', placeholder='script')!="\n\n\n"
         #box-althtml

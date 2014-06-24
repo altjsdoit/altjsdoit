@@ -16,6 +16,8 @@ Change Log
 #### Version 0.8.2
 
 * support math.js
+* support processing.js
+* a lot of bug fix
 
 #### Version 0.8.1
 

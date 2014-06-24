@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2014-06-22-12
+# 2014-06-24-01
 
 CACHE:
 index.html
@@ -14,13 +14,13 @@ thirdparty/codemirror/addon/dialog/dialog.css
 thirdparty/pure/pure-min.css
 thirdparty/pure/main.css
 thirdparty/pure/baby-blue.css
-thirdparty/googlefonts/SourceCodePro.css
-thirdparty/googlefonts/SourceCodePro.woff
 
 index.css
 
 thirdparty/es6-shim/es6-shim.min.js
 thirdparty/jquery/jquery.min.js
+
+ui.js
 
 thirdparty/underscore.js/underscore-min.js
 thirdparty/backbone.js/backbone-min.js
@@ -52,11 +52,19 @@ thirdparty/stylus/stylus.min.js
 
 thirdparty/twitter/widgets.js
 
+lib.js
 index.js
 
 thirdparty/firebug/firebug-lite.js
+thirdparty/processing.js/processing.min.js
+thirdparty/mathjs/math.min.js
+
+
+test.html
+
+thirdparty/qunit/qunit.js
+thirdparty/qunit/qunit.css
 
 NETWORK:
-
 
 FALLBACK:

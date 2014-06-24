@@ -46,12 +46,13 @@ Main = Backbone.View.extend
       @setValues({script, markup, style})
   run: ->
     @saveURI()
-    {altjs, althtml, altcss, enableViewSource, enableFirebugLite,
-     enableJQuery, enableUnderscore, enableES6shim, enableMathjs} = @model.toJSON()
+    {altjs, althtml, altcss,
+     enableViewSource, enableFirebugLite, enableJQuery, enableUnderscore,
+     enableES6shim, enableMathjs, enableProcessing} = @model.toJSON()
     {script, markup, style} = @getValues()
     build {altjs, althtml, altcss},
           {script, markup, style},
-          {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim, enableMathjs},
+          {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim, enableMathjs, enableProcessing},
           (srcdoc)->
             console.log url = createBlobURL(srcdoc, (if enableViewSource then "text/plain" else "text/html"))
             $("#box-sandbox-iframe").attr({"src": url})
@@ -119,7 +120,8 @@ Setting = Backbone.View.extend
   render: ->
     {title, altjs, althtml, altcss,
      enableCodeMirror, enableViewSource, enableJQuery,
-     enableUnderscore, enableES6shim, enableFirebugLite, enableMathjs} = @model.toJSON()
+     enableUnderscore, enableES6shim, enableFirebugLite,
+     enableProcessing, enableMathjs} = @model.toJSON()
     @$el.find("[data-config='title']"  ).val(title  ).end()
         .find("[data-config='altjs']"  ).val(altjs  ).end()
         .find("[data-config='althtml']").val(althtml).end()
@@ -130,7 +132,10 @@ Setting = Backbone.View.extend
         .find("[data-config='enableJQuery']").attr("checked", enableJQuery).end()
         .find("[data-config='enableUnderscore']").attr("checked", enableUnderscore).end()
         .find("[data-config='enableES6shim']").attr("checked", enableES6shim).end()
+        .find("[data-config='enableProcessing']").attr("checked", enableProcessing).end()
         .find("[data-config='enableMathjs']").attr("checked", enableMathjs).end()
+
+
 
 Editor = Backbone.View.extend
   initialize: ({@type})->
