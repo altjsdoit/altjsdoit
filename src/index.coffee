@@ -38,7 +38,7 @@ Main = Backbone.View.extend
         """))
         twttr.widgets.load()
   loadURI: ->
-    {zip} = decodeURIQuery(location.hash)
+    {zip} = decodeURIQuery(location.hash.slice(1))
     if zip?
       {config, script, markup, style} = unzipDataURI(decodeURIComponent(location.hash.slice(5)))
       config = JSON.parse(config or "{}")
@@ -54,6 +54,7 @@ Main = Backbone.View.extend
           {script, markup, style},
           {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim, enableMathjs, enableProcessing},
           (srcdoc)->
+            #$("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
             console.log url = createBlobURL(srcdoc, (if enableViewSource then "text/plain" else "text/html"))
             $("#box-sandbox-iframe").attr({"src": url})
   initialize: ->

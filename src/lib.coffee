@@ -16,6 +16,17 @@
 createBlobURL = (data, mimetype)->
   URL.createObjectURL(new Blob([data], {type: mimetype}))
 
+#! urlToBlobURL :: String * String * (String -> Void) -> String # not referential transparency
+URLToBlobURL = (url, mimetype, callback)->
+  $.ajax
+    url:url
+    error: (err)->
+      if err.status is 200 and err.readyState is 4 # offline appcache behavior
+      then callback(createBlobURL(err.responseText, mimetype))
+      else console.error(err, err.stack)
+    success: (res)->
+      callback(createBlobURL(res, mimetype))
+
 #! zipDataURI :: Dictionary<String> -> Stirng # not referential transparency
 zipDataURI = (dic)->
   zip = new JSZip()
@@ -43,9 +54,8 @@ encodeURIQuery = (dic)->
   ((key+"="+encodeURIComponent(val) for key, val of dic).join("&"))
 
 #! decodeURIQuery :: String -> Dictionary<String>
-decodeURIQuery = (hash)->
-  hash
-    .slice(1) # remove first hash sharp
+decodeURIQuery = (query)->
+  query
     .split("&")
     .map((a)->
       b = a.split("=")
@@ -66,7 +76,7 @@ shortenURL = (url, callback)->
     success: (res)->
       console.info res
       callback(res.id)
-    error: (err)-> console.error(err)
+    error: (err)-> console.error(err, err.stack)
 
 #! expandURL :: String * (String -> Void) -> Void
 expandURL = (url, callback)->
@@ -75,7 +85,7 @@ expandURL = (url, callback)->
     success: (res)->
       console.info res
       callback(res.longUrl)
-    error: (err)-> console.error(err.stack)
+    error: (err)-> console.error(err, err.stack)
 
 #! struct CompilerSetting
 #!   mode :: String
@@ -140,7 +150,7 @@ compile = (altFoo, code, callback)->
   setTimeout ->
     try compilerFn code, (err, _code)-> callback(err, _code)
     catch err
-      console.error(err.stack)
+      console.error(err, err.stack)
       callback(err, code)
 
 #! struct AltFoo
@@ -158,66 +168,72 @@ compile = (altFoo, code, callback)->
 #! build :: AltFoo * Codes * Config * (String -> Void) -> Void
 build = ({altjs, althtml, altcss},
          {script, markup, style},
-         {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim, enableProcessing, enableMathjs}, callback)->
+         {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim, enableProcessing, enableMathjs},
+         callback)->
   Promise.all([
-      new Promise (resolve, reject)->
-        compile altjs, script, (err, code)-> resolve({err, code})
-      new Promise (resolve, reject)->
-        compile althtml, markup, (err, code)-> resolve({err, code})
-      new Promise (resolve, reject)->
-        compile altcss, style, (err, code)-> resolve({err, code})
-    ]).then(([js, html, css])->
-      styles = []
+    new Promise (resolve)->
+      compile altjs, script, (err, code)-> resolve({err, code})
+    new Promise (resolve)->
+      compile althtml, markup, (err, code)-> resolve({err, code})
+    new Promise (resolve)->
+      compile altcss, style, (err, code)-> resolve({err, code})
+  ]).then(([js, html, css])->
+    if js.err? or html.err? or css.err?
+      callback buildHTML
+        css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';"
+        html: "<pre>"+altjs+"\n"+js.err+"\n"+althtml+"\n"+html.err+"\n"+altcss+"\n"+css.err+"</pre>"
+    else
       scripts = []
-      if enableFirebugLite then scripts.push makeURL(location)+"thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true"
-      if enableFirebugLite then js.code = "try{"+js.code+"}catch(err){console.error(err);console.error(err.stack);}"
-      if enableJQuery      then scripts.push makeURL(location)+"thirdparty/jquery/jquery.min.js"
-      if enableUnderscore  then scripts.push makeURL(location)+"thirdparty/underscore.js/underscore-min.js"
-      if enableES6shim     then scripts.push makeURL(location)+"thirdparty/es6-shim/es6-shim.min.js"
-      if enableMathjs      then scripts.push makeURL(location)+"thirdparty/mathjs/math.min.js"
-      if enableProcessing  then scripts.push makeURL(location)+"thirdparty/processing.js/processing.min.js"
-      #if altjs is "Traceur" then scripts.push "https://jsrun.it/assets/a/V/p/D/aVpDA"
-      if js.err? or html.err? or css.err?
-        callback buildHTML
-          css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';"
-          html: "<pre>"+altjs+"\n"+js.err+"\n"+althtml+"\n"+html.err+"\n"+altcss+"\n"+css.err+"</pre>"
-      else callback buildHTML
-        js:   js.code
-        html: html.code
-        css:  (if enableFirebugLite then "body{margin-bottom:212px;}" else "")+css.code
-        styles: styles
-        scripts: scripts
-    ).catch((err)-> console.error(err.stack))
+      if enableFirebugLite then scripts.push "thirdparty/firebug/firebug-lite.js"
+      if enableJQuery      then scripts.push "thirdparty/jquery/jquery.min.js"
+      if enableUnderscore  then scripts.push "thirdparty/underscore.js/underscore-min.js"
+      if enableES6shim     then scripts.push "thirdparty/es6-shim/es6-shim.min.js"
+      if enableMathjs      then scripts.push "thirdparty/mathjs/math.min.js"
+      if enableProcessing  then scripts.push "thirdparty/processing.js/processing.min.js"
+      pBlobURL = (url)-> new Promise (resolve)-> URLToBlobURL url, "text/javascript", (_url)-> resolve(_url)
+      pscripts = scripts.map (url)-> pBlobURL(url)
+      Promise.all(pscripts).then((blobScripts)->
+        styles = []
+        pBlobURL = (url)-> new Promise (resolve)-> URLToBlobURL url, "text/css", (_url)-> resolve(_url)
+        pstyles = scripts.map (url)-> pBlobURL(url)
+        Promise.all(pstyles).then((blobStyles)->
+          head = ""
+          if enableFirebugLite
+            js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
+            firebugURL = blobScripts.shift()
+            head += """<script src='#{firebugURL}#firebug-lite.js' id='FirebugLite' FirebugLite="4">
+            {
+              overrideConsole: true,
+              showIconWhenHidden: true,
+              startOpened: true,
+              enableTrace: true
+            }
+            <#{"/"}script>\n"""
+          blobStyles.forEach (url)-> head += "<link rel='stylesheet' href='#{url}' />\n"
+          blobScripts.forEach (url)-> head += "<script src='#{url}'><#{"/"}script>\n"
+          callback """
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset="UTF-8" />
+            #{head or ""}
+            <style>
+            #{css.code or ""}
+            </style>
+            </head>
+            <body>
+            #{html.code or ""}
+            <script>
+            #{js.code or ""}
+            </script>
+            </body>
+            </html>
+          """
+        ).catch((err)-> console.error(err, err.stack))
+      ).catch((err)-> console.error(err, err.stack))
+    ).catch((err)-> console.error(err, err.stack))
 
-#! struct BuildHTMLConfig
-#!   js :: String
-#!   html :: String
-#!   css :: String
-#!   styles :: String[]
-#!   scripts :: String[]
-#! buildHTML :: BuildHTMLConfig -> String
-buildHTML = ({js, html, css, styles, scripts}={})->
-  head = []
-  styles?.forEach (href)-> head.push "<link rel='stylesheet' href='#{href}' />"
-  scripts?.forEach (src)-> head.push "<script src='#{src}'></"+"script>"
-  """
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <meta charset="UTF-8" />
-    #{head.join("\n")}
-    <style>
-    #{css or ""}
-    </style>
-    </head>
-    <body>
-    #{html or ""}
-    <script>
-    #{js or ""}
-    </script>
-    </body>
-    </html>
-  """
+
 
 #! getElmVal :: HTMLElement -> String | Number | Boolean
 getElmVal = (elm)->

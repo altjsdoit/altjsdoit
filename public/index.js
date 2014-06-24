@@ -60,7 +60,7 @@ Main = Backbone.View.extend({
   },
   loadURI: function() {
     var config, markup, script, style, zip, _ref;
-    zip = decodeURIQuery(location.hash).zip;
+    zip = decodeURIQuery(location.hash.slice(1)).zip;
     if (zip != null) {
       _ref = unzipDataURI(decodeURIComponent(location.hash.slice(5))), config = _ref.config, script = _ref.script, markup = _ref.markup, style = _ref.style;
       config = JSON.parse(config || "{}");

@@ -1,9 +1,25 @@
-var build, buildHTML, compile, createBlobURL, decodeURIQuery, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
+var URLToBlobURL, build, compile, createBlobURL, decodeURIQuery, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
 
 createBlobURL = function(data, mimetype) {
   return URL.createObjectURL(new Blob([data], {
     type: mimetype
   }));
+};
+
+URLToBlobURL = function(url, mimetype, callback) {
+  return $.ajax({
+    url: url,
+    error: function(err) {
+      if (err.status === 200 && err.readyState === 4) {
+        return callback(createBlobURL(err.responseText, mimetype));
+      } else {
+        return console.error(err, err.stack);
+      }
+    },
+    success: function(res) {
+      return callback(createBlobURL(res, mimetype));
+    }
+  });
 };
 
 zipDataURI = function(dic) {
@@ -49,8 +65,8 @@ encodeURIQuery = function(dic) {
   })()).join("&");
 };
 
-decodeURIQuery = function(hash) {
-  return hash.slice(1).split("&").map(function(a) {
+decodeURIQuery = function(query) {
+  return query.split("&").map(function(a) {
     var b;
     b = a.split("=");
     return [b[0], b.slice(1).join("=")];
@@ -74,7 +90,7 @@ shortenURL = function(url, callback) {
       return callback(res.id);
     },
     error: function(err) {
-      return console.error(err);
+      return console.error(err, err.stack);
     }
   });
 };
@@ -87,7 +103,7 @@ expandURL = function(url, callback) {
       return callback(res.longUrl);
     },
     error: function(err) {
-      return console.error(err.stack);
+      return console.error(err, err.stack);
     }
   });
 };
@@ -232,7 +248,7 @@ compile = function(altFoo, code, callback) {
       });
     } catch (_error) {
       err = _error;
-      console.error(err.stack);
+      console.error(err, err.stack);
       return callback(err, code);
     }
   });
@@ -244,21 +260,21 @@ build = function(_arg, _arg1, _arg2, callback) {
   script = _arg1.script, markup = _arg1.markup, style = _arg1.style;
   enableFirebugLite = _arg2.enableFirebugLite, enableJQuery = _arg2.enableJQuery, enableUnderscore = _arg2.enableUnderscore, enableES6shim = _arg2.enableES6shim, enableProcessing = _arg2.enableProcessing, enableMathjs = _arg2.enableMathjs;
   return Promise.all([
-    new Promise(function(resolve, reject) {
+    new Promise(function(resolve) {
       return compile(altjs, script, function(err, code) {
         return resolve({
           err: err,
           code: code
         });
       });
-    }), new Promise(function(resolve, reject) {
+    }), new Promise(function(resolve) {
       return compile(althtml, markup, function(err, code) {
         return resolve({
           err: err,
           code: code
         });
       });
-    }), new Promise(function(resolve, reject) {
+    }), new Promise(function(resolve) {
       return compile(altcss, style, function(err, code) {
         return resolve({
           err: err,
@@ -267,65 +283,81 @@ build = function(_arg, _arg1, _arg2, callback) {
       });
     })
   ]).then(function(_arg3) {
-    var css, html, js, scripts, styles;
+    var css, html, js, pBlobURL, pscripts, scripts;
     js = _arg3[0], html = _arg3[1], css = _arg3[2];
-    styles = [];
-    scripts = [];
-    if (enableFirebugLite) {
-      scripts.push(makeURL(location) + "thirdparty/firebug/firebug-lite.js#overrideConsole=true,showIconWhenHidden=true,startOpened=true,enableTrace=true");
-    }
-    if (enableFirebugLite) {
-      js.code = "try{" + js.code + "}catch(err){console.error(err);console.error(err.stack);}";
-    }
-    if (enableJQuery) {
-      scripts.push(makeURL(location) + "thirdparty/jquery/jquery.min.js");
-    }
-    if (enableUnderscore) {
-      scripts.push(makeURL(location) + "thirdparty/underscore.js/underscore-min.js");
-    }
-    if (enableES6shim) {
-      scripts.push(makeURL(location) + "thirdparty/es6-shim/es6-shim.min.js");
-    }
-    if (enableMathjs) {
-      scripts.push(makeURL(location) + "thirdparty/mathjs/math.min.js");
-    }
-    if (enableProcessing) {
-      scripts.push(makeURL(location) + "thirdparty/processing.js/processing.min.js");
-    }
     if ((js.err != null) || (html.err != null) || (css.err != null)) {
       return callback(buildHTML({
         css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';",
         html: "<pre>" + altjs + "\n" + js.err + "\n" + althtml + "\n" + html.err + "\n" + altcss + "\n" + css.err + "</pre>"
       }));
     } else {
-      return callback(buildHTML({
-        js: js.code,
-        html: html.code,
-        css: (enableFirebugLite ? "body{margin-bottom:212px;}" : "") + css.code,
-        styles: styles,
-        scripts: scripts
-      }));
+      scripts = [];
+      if (enableFirebugLite) {
+        scripts.push("thirdparty/firebug/firebug-lite.js");
+      }
+      if (enableJQuery) {
+        scripts.push("thirdparty/jquery/jquery.min.js");
+      }
+      if (enableUnderscore) {
+        scripts.push("thirdparty/underscore.js/underscore-min.js");
+      }
+      if (enableES6shim) {
+        scripts.push("thirdparty/es6-shim/es6-shim.min.js");
+      }
+      if (enableMathjs) {
+        scripts.push("thirdparty/mathjs/math.min.js");
+      }
+      if (enableProcessing) {
+        scripts.push("thirdparty/processing.js/processing.min.js");
+      }
+      pBlobURL = function(url) {
+        return new Promise(function(resolve) {
+          return URLToBlobURL(url, "text/javascript", function(_url) {
+            return resolve(_url);
+          });
+        });
+      };
+      pscripts = scripts.map(function(url) {
+        return pBlobURL(url);
+      });
+      return Promise.all(pscripts).then(function(blobScripts) {
+        var pstyles, styles;
+        styles = [];
+        pBlobURL = function(url) {
+          return new Promise(function(resolve) {
+            return URLToBlobURL(url, "text/css", function(_url) {
+              return resolve(_url);
+            });
+          });
+        };
+        pstyles = scripts.map(function(url) {
+          return pBlobURL(url);
+        });
+        return Promise.all(pstyles).then(function(blobStyles) {
+          var firebugURL, head;
+          head = "";
+          if (enableFirebugLite) {
+            js.code = "try{" + js.code + "}catch(err){console.error(err, err.stack);}";
+            firebugURL = blobScripts.shift();
+            head += "<script src='" + firebugURL + "#firebug-lite.js' id='FirebugLite' FirebugLite=\"4\">\n{\n  overrideConsole: true,\n  showIconWhenHidden: true,\n  startOpened: true,\n  enableTrace: true\n}\n<" + "/" + "script>\n";
+          }
+          blobStyles.forEach(function(url) {
+            return head += "<link rel='stylesheet' href='" + url + "' />\n";
+          });
+          blobScripts.forEach(function(url) {
+            return head += "<script src='" + url + "'><" + "/" + "script>\n";
+          });
+          return callback("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n" + (head || "") + "\n<style>\n" + (css.code || "") + "\n</style>\n</head>\n<body>\n" + (html.code || "") + "\n<script>\n" + (js.code || "") + "\n</script>\n</body>\n</html>");
+        })["catch"](function(err) {
+          return console.error(err, err.stack);
+        });
+      })["catch"](function(err) {
+        return console.error(err, err.stack);
+      });
     }
   })["catch"](function(err) {
-    return console.error(err.stack);
+    return console.error(err, err.stack);
   });
-};
-
-buildHTML = function(_arg) {
-  var css, head, html, js, scripts, styles, _ref;
-  _ref = _arg != null ? _arg : {}, js = _ref.js, html = _ref.html, css = _ref.css, styles = _ref.styles, scripts = _ref.scripts;
-  head = [];
-  if (styles != null) {
-    styles.forEach(function(href) {
-      return head.push("<link rel='stylesheet' href='" + href + "' />");
-    });
-  }
-  if (scripts != null) {
-    scripts.forEach(function(src) {
-      return head.push(("<script src='" + src + "'></") + "script>");
-    });
-  }
-  return "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n" + (head.join("\n")) + "\n<style>\n" + (css || "") + "\n</style>\n</head>\n<body>\n" + (html || "") + "\n<script>\n" + (js || "") + "\n</script>\n</body>\n</html>";
 };
 
 getElmVal = function(elm) {

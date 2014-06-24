@@ -13,6 +13,10 @@ grunt
 Change Log
 ---------------
 
+#### Version 0.8.3
+
+* support completely offline runnable
+
 #### Version 0.8.2
 
 * support math.js
