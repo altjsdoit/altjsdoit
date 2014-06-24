@@ -88,5 +88,5 @@ html, body, #layout, #main, #main>* {
 .CodeMirror,
 textarea,
 code {
-  font-family: 'Source Code Pro', 'Menlo', 'Monaco', 'Andale Mono', 'lucida console', 'Courier New', 'monospace' !important;
+  font-family: 'Menlo', 'Monaco', 'Andale Mono', 'lucida console', 'Courier New', 'monospace' !important;
 }

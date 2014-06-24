@@ -14,7 +14,6 @@ html(lang='ja', manifest="index.appcache")
     link(rel='stylesheet', href='./thirdparty/pure/pure-min.css')
     link(rel='stylesheet', href='./thirdparty/pure/main.css')
     link(rel='stylesheet', href='./thirdparty/pure/baby-blue.css')
-    link(rel='stylesheet', href='./thirdparty/googlefonts/SourceCodePro.css')
     link(rel='stylesheet', href='index.css')
   body
     div#layout
@@ -86,9 +85,9 @@ html(lang='ja', manifest="index.appcache")
                 | es6-shim(0.11.0):
                 input(data-config='enableES6shim', type='checkbox')
               label
-                a(href="https://github.com/josdejong/mathjs") mathjs
-                | (0.23.0):
+                | mathjs(0.23.0):
                 input(data-config='enableMathjs', type='checkbox')
+              li
         #box-altjs
           textarea#box-altjs-textarea(wrap='off', placeholder='script')!="\n\n\n"
         #box-althtml
