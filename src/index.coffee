@@ -1,5 +1,3 @@
-{build, getCompilerSetting} = require("./build.coffee")
-
 $ -> new Main
 
 Config = Backbone.Model.extend
@@ -48,11 +46,15 @@ Main = Backbone.View.extend
       @setValues({script, markup, style})
   run: ->
     @saveURI()
-    {altjs, althtml, altcss, enableFirebugLite, enableViewSource, enableJQuery, enableUnderscore, enableES6shim} = @model.toJSON()
+    {altjs, althtml, altcss, enableViewSource, enableFirebugLite,
+     enableJQuery, enableUnderscore, enableES6shim, enableMathjs} = @model.toJSON()
     {script, markup, style} = @getValues()
-    build {altjs, althtml, altcss}, {script, markup, style}, {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim}, (srcdoc)->
-      console.log url = createBlobURL(srcdoc, (if enableViewSource then "text/plain" else "text/html"))
-      $("#box-sandbox-iframe").attr({"src": url})
+    build {altjs, althtml, altcss},
+          {script, markup, style},
+          {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim, enableMathjs},
+          (srcdoc)->
+            console.log url = createBlobURL(srcdoc, (if enableViewSource then "text/plain" else "text/html"))
+            $("#box-sandbox-iframe").attr({"src": url})
   initialize: ->
     @model    = new Config()
     @menu     = new Menu({@model})
@@ -115,15 +117,20 @@ Setting = Backbone.View.extend
     @model.bind("change", @render)
     @render()
   render: ->
-    {title, altjs, althtml, altcss, enableCodeMirror, enableJQuery, enableFirebugLite, enableViewSource} = @model.toJSON()
+    {title, altjs, althtml, altcss,
+     enableCodeMirror, enableViewSource, enableJQuery,
+     enableUnderscore, enableES6shim, enableFirebugLite, enableMathjs} = @model.toJSON()
     @$el.find("[data-config='title']"  ).val(title  ).end()
         .find("[data-config='altjs']"  ).val(altjs  ).end()
         .find("[data-config='althtml']").val(althtml).end()
         .find("[data-config='altcss']" ).val(altcss ).end()
         .find("[data-config='enableCodeMirror']").attr("checked", enableCodeMirror).end()
+        .find("[data-config='enableViewSource']").attr("checked", enableViewSource).end()
         .find("[data-config='enableFirebugLite']").attr("checked", enableFirebugLite).end()
         .find("[data-config='enableJQuery']").attr("checked", enableJQuery).end()
-        .find("[data-config='enableViewSource']").attr("checked", enableViewSource).end()
+        .find("[data-config='enableUnderscore']").attr("checked", enableUnderscore).end()
+        .find("[data-config='enableES6shim']").attr("checked", enableES6shim).end()
+        .find("[data-config='enableMathjs']").attr("checked", enableMathjs).end()
 
 Editor = Backbone.View.extend
   initialize: ({@type})->
@@ -171,53 +178,3 @@ Editor = Backbone.View.extend
       @cm = CodeMirror.fromTextArea(@el, @option)
       @cm.setSize("100%", "100%")
       @refreshed = false
-
-getElmVal = (elm)->
-# ( elm:HTMLElement )=>string | number | boolean
-  if elm instanceof HTMLInputElement and
-     $(elm).attr("type") is "checkbox"
-  then $(elm).is(':checked')
-  else $(elm).val()
-
-#! createBlobURL :: String * String -> String # not referential transparency
-createBlobURL = (data, mimetype)->
-  URL.createObjectURL(new Blob([data], {type: mimetype}))
-
-zipDataURI = (dic)-> # ! not referential transparency
-# ( { [filename:string]:string; } )=>stirng
-  zip = new JSZip()
-  for key, val of dic then zip.file(key, val)
-  zip.generate({compression: "DEFLATE"})
-
-unzipDataURI = (base64)->
-# ( base64:string )=>{ [filename:string]:string; }
-  zip = new JSZip()
-  {files} = zip.load(base64, {base64: true})
-  hash = {}
-  for key, val of files
-    hash[key] = zip.file(key).asText()
-  hash
-
-makeURL = (location)->
-# ( location:Location )=> string
-  location.protocol + '//' +
-  location.hostname +
-  (if location.port then ":"+location.port else "") +
-  location.pathname
-
-encodeURIQuery = (dic)->
-# ( { [val:string]:string; } )=>string
-  ((key+"="+encodeURIComponent(val) for key, val of dic).join("&"))
-
-decodeURIQuery = (locationHash)->
-# ( search:string )=>{ [val:string]:string; }
-  locationHash
-    .slice(1)
-    .split("&")
-    .map((a)->
-      b = a.split("=")
-      [b[0], b.slice(1).join("=")]
-    ).reduce(((a, b)->
-      a[b[0]] = decodeURIComponent(b[1])
-      a
-    ), {})

@@ -24,14 +24,10 @@ html(lang='ja', manifest="index.appcache")
         div.pure-menu.pure-menu-open
           a#menu-head.pure-menu-heading altjsdo.it
           ul
-            li
-              a#menu-altjs(data-open='box-altjs') Script
-            li
-              a#menu-althtml(data-open='box-althtml') Markup
-            li
-              a#menu-altcss(data-open='box-altcss') Style
-            li
-              a#menu-sandbox(data-open='box-sandbox') Run
+            li: a#menu-altjs(data-open='box-altjs') Script
+            li: a#menu-althtml(data-open='box-althtml') Markup
+            li: a#menu-altcss(data-open='box-altcss') Style
+            li: a#menu-sandbox(data-open='box-sandbox') Run
       div#main
         div.content
           form#setting-config.pure-form.pure-form-stacked
@@ -41,12 +37,12 @@ html(lang='ja', manifest="index.appcache")
                 | Title:
                 input(data-config='title', type='text', value='', placeholder='no title')
               p
-                | Save as Link:
+                | Save as URL:
                 input#setting-project-url(type='url', value='', placeholder='Press Save Button', onclick="this.select();")
                 span#setting-project-size
                 input#setting-project-save.pure-button.pure-button-primary(type='button', value='Save')
                 span#setting-project-twitter
-              a.pure-button(target='_blank') New Project
+              a.pure-button(target='_blank' href="#") New Project
             fieldset
               legend Compiler
               label
@@ -78,7 +74,7 @@ html(lang='ja', manifest="index.appcache")
             fieldset
               legend Library
               label
-                | FirebugLite(1.4.0):
+                | Firebug-Lite(1.4.0):
                 input(data-config='enableFirebugLite', type='checkbox')
               label
                 | jQuery(2.1.1):
@@ -89,6 +85,10 @@ html(lang='ja', manifest="index.appcache")
               label
                 | es6-shim(0.11.0):
                 input(data-config='enableES6shim', type='checkbox')
+              label
+                a(href="https://github.com/josdejong/mathjs") mathjs
+                | (0.23.0):
+                input(data-config='enableMathjs', type='checkbox')
         #box-altjs
           textarea#box-altjs-textarea(wrap='off', placeholder='script')!="\n\n\n"
         #box-althtml
@@ -126,6 +126,6 @@ html(lang='ja', manifest="index.appcache")
     script(async='async', src='./thirdparty/jade/jade.min.js')
     script(async='async', src='./thirdparty/less.js/less.min.js')
     script(async='async', src='./thirdparty/stylus/stylus.min.js')
-    script(async='async', src='./thirdparty/lispyscript/lispyscript.js')
     script(async='async', src='./thirdparty/twitter/widgets.js')
-    script(src='./module.js')
+    script(src='./lib.js')
+    script(src='./index.js')

@@ -37,10 +37,10 @@
               <label>Title:
                 <input data-config="title" type="text" value="" placeholder="no title">
               </label>
-              <p>Save as Link:
+              <p>Save as URL:
                 <input id="setting-project-url" type="url" value="" placeholder="Press Save Button" onclick="this.select();"><span id="setting-project-size"></span>
                 <input id="setting-project-save" type="button" value="Save" class="pure-button pure-button-primary"><span id="setting-project-twitter"></span>
-              </p><a target="_blank" class="pure-button">New Project</a>
+              </p><a target="_blank" href="#" class="pure-button">New Project</a>
             </fieldset>
             <fieldset>
               <legend>Compiler</legend>
@@ -77,7 +77,7 @@
             </fieldset>
             <fieldset>
               <legend>Library</legend>
-              <label>FirebugLite(1.4.0):
+              <label>Firebug-Lite(1.4.0):
                 <input data-config="enableFirebugLite" type="checkbox">
               </label>
               <label>jQuery(2.1.1):
@@ -88,6 +88,9 @@
               </label>
               <label>es6-shim(0.11.0):
                 <input data-config="enableES6shim" type="checkbox">
+              </label>
+              <label><a href="https://github.com/josdejong/mathjs">mathjs</a>(0.23.0):
+                <input data-config="enableMathjs" type="checkbox">
               </label>
             </fieldset>
           </form>
@@ -144,8 +147,8 @@
     <script async="async" src="./thirdparty/jade/jade.min.js"></script>
     <script async="async" src="./thirdparty/less.js/less.min.js"></script>
     <script async="async" src="./thirdparty/stylus/stylus.min.js"></script>
-    <script async="async" src="./thirdparty/lispyscript/lispyscript.js"></script>
     <script async="async" src="./thirdparty/twitter/widgets.js"></script>
-    <script src="./module.js"></script>
+    <script src="./lib.js"></script>
+    <script src="./index.js"></script>
   </body>
 </html>

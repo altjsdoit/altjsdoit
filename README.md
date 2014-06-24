@@ -1,4 +1,4 @@
-altjsdoit
+![](http://altjsdoit.github.io/icon-128.png) altjsdoit
 ===========
 
 Build
@@ -12,6 +12,10 @@ grunt
 
 Change Log
 ---------------
+
+#### Version 0.8.2
+
+* support math.js
 
 #### Version 0.8.1
 
