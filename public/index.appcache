@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2014-06-25-09
+# 2014-06-25-11
 
 CACHE:
 index.html
@@ -55,7 +55,8 @@ thirdparty/twitter/widgets.js
 lib.js
 index.js
 
-thirdparty/firebug/firebug-lite.js
+thirdparty/firebug/build/firebug-lite.js
+thirdparty/firebug/skin/xp/sprite.png
 thirdparty/processing.js/processing.min.js
 thirdparty/mathjs/math.min.js
 

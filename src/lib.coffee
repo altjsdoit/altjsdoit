@@ -16,6 +16,16 @@
 createBlobURL = (data, mimetype)->
   URL.createObjectURL(new Blob([data], {type: mimetype}))
 
+URLToArrayBuffer = (url, callback)->
+  xhr = new XMLHttpRequest()
+  xhr.open('GET', url, true)
+  xhr.responseType = 'arraybuffer'
+  xhr.onload = ->
+    if this.status is 200 and this.readyState is 4
+      callback(this.response)
+  xhr.send()
+
+
 #! URLToText :: String * (String -> Void) -> String # not referential transparency
 URLToText = (url, callback)->
   $.ajax
@@ -198,18 +208,22 @@ build = ({altjs, althtml, altcss},
           specials = []
           if enableFirebugLite
             specials.push  new Promise (resolve)->
-              URLToText "thirdparty/firebug/firebug-lite.js", (text)->
-                text = text.replace("path=rePath.exec(location.href)[1];", "path=rePath.exec('http://hoge.com/firebug-lite.js')[1];")
-                firebugURL = createBlobURL(text, "text/javascript")
-                js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
-                resolve """<script src='#{firebugURL}#firebug-lite.js' id='FirebugLite' FirebugLite="4">
-                {
-                  overrideConsole: true,
-                  showIconWhenHidden: true,
-                  startOpened: true,
-                  enableTrace: true
-                }
-                <#{"/"}script>"""
+              URLToArrayBuffer "thirdparty/firebug/skin/xp/sprite.png", (data)->
+                spriteURL = createBlobURL(data, "image/png")
+                URLToText "thirdparty/firebug/build/firebug-lite.js", (text)->
+                  text = text.replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png", spriteURL)
+                  text = text.replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;", "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
+                  firebugURL = createBlobURL(text, "text/javascript")
+                  js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
+                  resolve """<script id='FirebugLite' FirebugLite='4' src='#{firebugURL}'>
+                    {
+                      overrideConsole:true,
+                      showIconWhenHidden:true,
+                      startOpened:true,
+                      enableTrace:true,
+                      useLocalSkin:true
+                    }
+                  <#{"/"}script>"""
           Promise.all(specials).then((heads)->
             blobStyles.forEach (url)-> heads.push "<link rel='stylesheet' href='#{url}' />"
             blobScripts.forEach (url)-> heads.push "<script src='#{url}'><#{"/"}script>"

@@ -1,9 +1,22 @@
-var URLToText, build, compile, createBlobURL, decodeURIQuery, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
+var URLToArrayBuffer, URLToText, build, compile, createBlobURL, decodeURIQuery, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
 
 createBlobURL = function(data, mimetype) {
   return URL.createObjectURL(new Blob([data], {
     type: mimetype
   }));
+};
+
+URLToArrayBuffer = function(url, callback) {
+  var xhr;
+  xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.responseType = 'arraybuffer';
+  xhr.onload = function() {
+    if (this.status === 200 && this.readyState === 4) {
+      return callback(this.response);
+    }
+  };
+  return xhr.send();
 };
 
 URLToText = function(url, callback) {
@@ -335,12 +348,17 @@ build = function(_arg, _arg1, _arg2, callback) {
           specials = [];
           if (enableFirebugLite) {
             specials.push(new Promise(function(resolve) {
-              return URLToText("thirdparty/firebug/firebug-lite.js", function(text) {
-                var firebugURL;
-                text = text.replace("path=rePath.exec(location.href)[1];", "path=rePath.exec('http://hoge.com/firebug-lite.js')[1];");
-                firebugURL = createBlobURL(text, "text/javascript");
-                js.code = "try{" + js.code + "}catch(err){console.error(err, err.stack);}";
-                return resolve("<script src='" + firebugURL + "#firebug-lite.js' id='FirebugLite' FirebugLite=\"4\">\n{\n  overrideConsole: true,\n  showIconWhenHidden: true,\n  startOpened: true,\n  enableTrace: true\n}\n<" + "/" + "script>");
+              return URLToArrayBuffer("thirdparty/firebug/skin/xp/sprite.png", function(data) {
+                var spriteURL;
+                spriteURL = createBlobURL(data, "image/png");
+                return URLToText("thirdparty/firebug/build/firebug-lite.js", function(text) {
+                  var firebugURL;
+                  text = text.replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png", spriteURL);
+                  text = text.replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;", "var m=['build/', 'build']; path='" + (makeURL(location)) + "thirdparty/firebug/build/'");
+                  firebugURL = createBlobURL(text, "text/javascript");
+                  js.code = "try{" + js.code + "}catch(err){console.error(err, err.stack);}";
+                  return resolve("<script id='FirebugLite' FirebugLite='4' src='" + firebugURL + "'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true,\n    useLocalSkin:true\n  }\n<" + "/" + "script>");
+                });
               });
             }));
           }
