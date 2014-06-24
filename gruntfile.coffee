@@ -5,21 +5,12 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks("grunt-contrib-watch")
   grunt.loadNpmTasks("grunt-contrib-clean")
-  #grunt.loadNpmTasks('grunt-browserify')
 
   grunt.initConfig
     pkg: grunt.file.readJSON('./package.json')
     clean:
       build:
         src: ["./public/*", "!./public/.git"]
-    ###
-    browserify:
-      build:
-        files:
-          './public/index.js': ['./src/*.coffee']
-        options:
-          transform: ['coffeeify']
-    ###
     coffee:
       compile:
         files:

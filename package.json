@@ -15,9 +15,6 @@
     "grunt-contrib-less": "*",
     "grunt-contrib-watch": "*",
     "grunt-contrib-copy": "*",
-    "grunt-contrib-clean": "*",
-    "browserify": "*",
-    "grunt-browserify": "*",
-    "coffeeify": "*"
+    "grunt-contrib-clean": "*"
   }
 }

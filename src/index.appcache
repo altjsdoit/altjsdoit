@@ -59,8 +59,8 @@ thirdparty/firebug/firebug-lite.js
 thirdparty/processing.js/processing.min.js
 thirdparty/mathjs/math.min.js
 
-
 test.html
+test.js
 
 thirdparty/qunit/qunit.js
 thirdparty/qunit/qunit.css
