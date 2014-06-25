@@ -393,10 +393,7 @@ build = function(dic, opt, callback) {
     js = _arg[0], html = _arg[1], css = _arg[2];
     console.log([js, html, css]);
     if ((js.err != null) || (html.err != null) || (css.err != null)) {
-      return callback(buildHTML({
-        css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';",
-        html: "<pre>" + altjs + "\n" + js.err + "\n" + althtml + "\n" + html.err + "\n" + altcss + "\n" + css.err + "</pre>"
-      }));
+      return callback("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n<style>\n*{font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';}\n</style>\n</head>\n<body>\n<pre>\n" + altjs + "\n" + js.err + "\n\n" + althtml + "\n" + html.err + "\n\n" + altcss + "\n" + css.err + "\n</pre>\n</body>\n</html>");
     } else {
       styles = [];
       pBlobURL = function(url) {

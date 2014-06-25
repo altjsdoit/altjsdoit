@@ -222,9 +222,29 @@ build = (dic, opt, callback)->
   compileAll dic, ([js, html, css])->
     console.log [js, html, css]
     if js.err? or html.err? or css.err?
-      callback buildHTML
-        css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';"
-        html: "<pre>"+altjs+"\n"+js.err+"\n"+althtml+"\n"+html.err+"\n"+altcss+"\n"+css.err+"</pre>"
+      callback """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="UTF-8" />
+        <style>
+        *{font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';}
+        </style>
+        </head>
+        <body>
+        <pre>
+        #{altjs}
+        #{js.err}
+
+        #{althtml}
+        #{html.err}
+        
+        #{altcss}
+        #{css.err}
+        </pre>
+        </body>
+        </html>
+      """
     else
       styles = []
       pBlobURL = (url)-> new Promise (resolve)-> URLToText url, (text)-> resolve(createBlobURL(text, "text/css"))
