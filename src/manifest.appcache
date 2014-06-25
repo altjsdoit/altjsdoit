@@ -1,5 +1,7 @@
 CACHE MANIFEST
-# 2014-06-25-16
+# version: @@version
+# build: @@timestamp
+
 
 CACHE:
 index.html
@@ -58,12 +60,9 @@ index.js
 thirdparty/processing.js/processing.min.js
 thirdparty/mathjs/math.min.js
 
-test.html
-test.js
-
 thirdparty/qunit/qunit.js
 thirdparty/qunit/qunit.css
 
 NETWORK:
-
+*
 FALLBACK:

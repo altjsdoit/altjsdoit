@@ -1,56 +1,100 @@
 module.exports = (grunt) ->
+  grunt.loadNpmTasks("grunt-contrib-clean")
+  grunt.loadNpmTasks('grunt-replace')
+  grunt.loadNpmTasks('grunt-preprocess')
   grunt.loadNpmTasks('grunt-contrib-coffee')
   grunt.loadNpmTasks('grunt-contrib-jade')
   grunt.loadNpmTasks('grunt-contrib-less')
   grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks("grunt-contrib-watch")
-  grunt.loadNpmTasks("grunt-contrib-clean")
-
   grunt.initConfig
     pkg: grunt.file.readJSON('./package.json')
     clean:
-      build:
+      before:
         src: ["./public/*", "!./public/.git"]
-    coffee:
       compile:
-        files:
-          "./public/ui.js":  "./src/ui.coffee"
-          "./public/lib.js":  "./src/lib.coffee"
-          "./public/index.js": "./src/index.coffee"
-          "./public/test.js": "./src/test.coffee"
-      options:
-        bare: true
-    jade:
-      compile:
-        files:
-          "./public/index.html": "./src/index.jade"
-          "./public/test.html":  "./src/test.jade"
-      options:
-        pretty: true
-    less:
-      compile:
-        files:
-          "./public/index.css": "./src/index.less"
+        src: [
+          "./public/*.coffee"
+          "./public/*.jade"
+          "./public/*.less"
+        ]
     copy:
       build:
         files: [
           {expand: true, cwd: 'src/', src: ['icon-128.png'],    dest: 'public/'}
-          {expand: true, cwd: 'src/', src: ['index.appcache'],  dest: 'public/'}
-          {expand: true, cwd: 'src/', src: ['manifest.webapp'], dest: 'public/'}
           {expand: true,              src: ['thirdparty/**'],   dest: 'public/'}
         ]
+    replace:
+      compile:
+        options:
+          patterns: [
+            {match: 'timestamp', replacement: '<%= grunt.template.today() %>'}
+            {match: "version",   replacement: '<%= pkg.version %>'}
+          ]
+        files: [
+          {expand: true, cwd: 'src/', src: ['*.appcache'], dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['*.webapp'],   dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['*.coffee'],   dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['*.jade'],     dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['*.less'],     dest: 'public/'}
+        ]
+    preprocess:
+      options:
+        inline : true
+        context:
+          DEBUG: true
+      compile:
+        src: [
+          "./public/*.appcache"
+          "./public/*.webapp"
+          "./public/*.coffee"
+          "./public/*.jade"
+          "./public/*.less"
+        ]
+    coffee:
+      compile:
+        expand: true
+        cwd: 'public/'
+        src: ['*.coffee']
+        dest: 'public/'
+        ext: '.js'
+      options:
+        sourceMap: false
+        bare: true
+    jade:
+      compile:
+        expand: true
+        cwd: 'public/'
+        src: ['*.jade']
+        dest: 'public/'
+        ext: '.html'
+      options:
+        pretty: true
+        data:
+          debug: true
+    less:
+      compile:
+        expand: true
+        cwd: 'public/'
+        src: ['*.less']
+        dest: 'public/'
+        ext: '.css'
+      options:
+        compress: false
+        sourceMap: false
     watch:
       gruntfile:
-        files:["./gruntfile.coffee", "./src/index.appcache", "./src/manifest.webapp"]
+        files:["./gruntfile.coffee", "./src/manifest.webapp"]
         tasks:["make"]
       coffee:
         files:["./src/**/*.coffee"]
-        tasks:["coffee:compile"]
+        tasks:["compile"]
       less:
         files:["./src/**/*.less"]
-        tasks:["less:compile"]
+        tasks:["compile"]
       jade:
         files:["./src/**/*.jade"]
-        tasks:["jade:compile"]
-  grunt.registerTask("make", ["clean:build", "coffee:compile", "jade:compile", "less:compile", "copy:build"])
+        tasks:["compile"]
+  grunt.registerTask("compile", ["replace:compile", "preprocess:compile", "coffee:compile", "jade:compile", "less:compile", "clean:compile"])
+  grunt.registerTask("make", ["clean:before", "copy:build", "compile"])
   grunt.registerTask("default", ["make"])

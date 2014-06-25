@@ -10,21 +10,9 @@
 #!   hash :: String
 #!   search :: String
 
-#! type URL = String
-
 #! createBlobURL :: (String | ArrayBuffer | Blob) * String -> String # not referential transparency
 createBlobURL = (data, mimetype)->
   URL.createObjectURL(new Blob([data], {type: mimetype}))
-
-URLToArrayBuffer = (url, callback)->
-  xhr = new XMLHttpRequest()
-  xhr.open('GET', url, true)
-  xhr.responseType = 'arraybuffer'
-  xhr.onload = ->
-    if this.status is 200 and this.readyState is 4
-      callback(this.response)
-  xhr.send()
-
 
 #! URLToText :: String * (String -> Void) -> String # not referential transparency
 URLToText = (url, callback)->
@@ -36,22 +24,17 @@ URLToText = (url, callback)->
       else console.error(err, err.stack)
     success: (res)-> callback(res)
 
-#! zipDataURI :: Dictionary<String> -> Stirng # not referential transparency
-zipDataURI = (dic)->
-  zip = new JSZip()
-  zip.file(key, val) for key, val of dic
-  zip.generate({compression: "DEFLATE"})
+#! URLToArrayBuffer :: String * (ArrayBuffer -> Void) -> Void # not referential transparency
+URLToArrayBuffer = (url, callback)->
+  xhr = new XMLHttpRequest()
+  xhr.open('GET', url, true)
+  xhr.responseType = 'arraybuffer'
+  xhr.onload = ->
+    if this.status is 200 and this.readyState is 4
+      callback(this.response)
+  xhr.send()
 
-#! unzipDataURI :: String -> Dictionary<String>
-unzipDataURI = (base64)->
-  zip = new JSZip()
-  {files} = zip.load(base64, {base64: true})
-  hash = {}
-  for key, val of files
-    hash[key] = zip.file(key).asText()
-  hash
-
-#! makeURL :: Location -> URL
+#! makeURL :: Location -> String
 makeURL = (location)->
   location.protocol + '//' +
   location.hostname +
@@ -96,6 +79,27 @@ expandURL = (url, callback)->
       callback(res.longUrl)
     error: (err)-> console.error(err, err.stack)
 
+#! zipDataURI :: Dictionary<String> -> Stirng # not referential transparency
+zipDataURI = (dic)->
+  zip = new JSZip()
+  zip.file(key, val) for key, val of dic
+  zip.generate({compression: "DEFLATE"})
+
+#! unzipDataURI :: String -> Dictionary<String>
+unzipDataURI = (base64)->
+  zip = new JSZip()
+  {files} = zip.load(base64, {base64: true})
+  hash = {}
+  for key, val of files
+    hash[key] = zip.file(key).asText()
+  hash
+
+#! getElmVal :: HTMLElement -> String | Number | Boolean
+getElmVal = (elm)->
+  if elm instanceof HTMLInputElement and $(elm).attr("type") is "checkbox"
+  then $(elm).is(':checked')
+  else $(elm).val()
+
 #! struct CompilerSetting
 #!   mode :: String
 #!   compile :: String * (String? * String -> Void) -> Void
@@ -104,9 +108,9 @@ expandURL = (url, callback)->
 getCompilerSetting = (lang)->
   f = (a, b)-> { mode:a, compile:b }
   switch lang
-    when "JavaScript"   then f "javascript",   (code, cb)-> cb(null, code)
-    when "CoffeeScript" then f "coffeescript", (code, cb)-> cb(null, CoffeeScript.compile(code, {bare:true}))
-    when "TypeScript"   then f "javascript",   (code, cb)->
+    when "JavaScript"   then f "javascript",   (code, cb)-> setTimeout -> cb(null, code)
+    when "CoffeeScript" then f "coffeescript", (code, cb)-> setTimeout -> cb(null, CoffeeScript.compile(code, {bare:true}))
+    when "TypeScript"   then f "javascript",   (code, cb)-> setTimeout ->
       filename = "jsdo.it.ts"
       source = code
       _compiler = new TypeScript.TypeScriptCompiler(filename)
@@ -123,7 +127,7 @@ getCompilerSetting = (lang)->
         if !output then throw new Error(err)
         console.error err
       cb(null, output)
-    when "TypedCoffeeScript" then f "coffeescript", (code, cb)->
+    when "TypedCoffeeScript" then f "coffeescript", (code, cb)-> setTimeout ->
         preprocessed = TypedCoffeeScript.Preprocessor.process(code)
         parsed = TypedCoffeeScript.Parser.parse(preprocessed, {raw: null, inputSource: null, optimise: null})
         TypedCoffeeScript.TypeWalker.checkNodes(parsed)
@@ -135,44 +139,36 @@ getCompilerSetting = (lang)->
         jsAST = TypedCoffeeScript.Compiler.compile(parsed, {bare: true}).toBasicObject()
         jsCode = escodegen.generate(jsAST)
         cb(null, jsCode)
-    when "Traceur"      then f "javascript",   (code, cb)->
+    when "Traceur"      then f "javascript",   (code, cb)-> setTimeout ->
       reporter = new traceur.util.ErrorReporter()
       reporter.reportMessageInternal = (location, kind, format, args)->
         throw new Error(traceur.util.ErrorReporter.format(location, format, args))
       project = new traceur.semantics.symbols.Project(location.href)
       project.addFile(new traceur.syntax.SourceFile('a.js', code))
       cb(null, traceur.outputgeneration.ProjectWriter.write(traceur.codegeneration.Compiler.compile(reporter, project, false)))
-    when "LiveScript"   then f "coffeescript", (code, cb)-> cb(null, LiveScript.compile(code))
-    when "GorillaScript" then f "coffeescript", (code, cb)-> cb(null, GorillaScript.compileSync(code).code)
-    when "Wisp"         then f "clojure",      (code, cb)-> result = wisp.compiler.compile(code); cb(result.error, result.code)
-    when "LispyScript"  then f "scheme",       (code, cb)-> cb(null, lispyscript._compile(code))
-    when "HTML"         then f "xml",          (code, cb)-> cb(null, code)
-    when "Jade"         then f "jade",         (code, cb)-> cb(null, jade.compile(code,{pretty:true})({}))
-    when "CSS"          then f "css",          (code, cb)-> cb(null, code)
-    when "LESS"         then f "css",          (code, cb)-> (new less.Parser({})).parse code, (err, tree)-> (if err then cb(err) else cb(err, tree.toCSS({})))
-    when "Stylus"       then f "css",          (code, cb)-> stylus.render(code, {}, cb)
+    when "LiveScript"   then f "coffeescript", (code, cb)->  setTimeout -> cb(null, LiveScript.compile(code))
+    when "GorillaScript" then f "coffeescript", (code, cb)-> setTimeout -> cb(null, GorillaScript.compileSync(code).code)
+    when "Wisp"         then f "clojure",      (code, cb)-> setTimeout -> result = wisp.compiler.compile(code); cb(result.error, result.code)
+    when "LispyScript"  then f "scheme",       (code, cb)-> setTimeout -> cb(null, lispyscript._compile(code))
+    when "HTML"         then f "xml",          (code, cb)-> setTimeout -> cb(null, code)
+    when "Jade"         then f "jade",         (code, cb)-> setTimeout -> cb(null, jade.compile(code,{pretty:true})({}))
+    when "CSS"          then f "css",          (code, cb)-> setTimeout -> cb(null, code)
+    when "LESS"         then f "css",          (code, cb)-> setTimeout -> (new less.Parser({})).parse code, (err, tree)-> (if err then cb(err) else cb(err, tree.toCSS({})))
+    when "Stylus"       then f "css",          (code, cb)-> setTimeout -> stylus.render(code, {}, cb)
     else throw new TypeError "unknown compiler"
 
-#! compile :: Compiler * String * (String? * String -> Void) -> Void
-compile = (altFoo, code, callback)->
-  compilerFn = getCompilerSetting(altFoo).compile
-  setTimeout ->
-    try compilerFn code, (err, _code)-> callback(err, _code)
-    catch err
-      console.error(err, err.stack)
-      callback(err, code)
-
-#! struct AltFoo
-#!   altjs :: String
-#!   althtml :: String
-#!   altcss :: String
-#! struct Codes
-#!   script :: String
-#!   markup :: String
-#!   style :: String
-#! struct Config
-#!   enableFirebugLite :: Boolean
-#!   enableJQuery :: Boolean
+#! compileAll :: {lang :: String, code :: String}[] * (String[] -> Void) -> Void
+compileAll = (codes)->
+  compile = (lang, code)->
+    new Promise (resolve, reject)->
+      compilerFn = getCompilerSetting(lang).compile
+      try compilerFn code, (err, _code)-> resolve([err, _code])
+      catch err then reject([err, code])
+  promises = codes.map ({lang, code})-> compile(lang, code)
+  Promise
+    .all(promises)
+    .then((results)-> callback(results))
+    .catch((err)-> console.error(err, err.stack))
 
 #! build :: AltFoo * Codes * Config * (String -> Void) -> Void
 build = ({altjs, althtml, altcss},
@@ -248,11 +244,3 @@ build = ({altjs, althtml, altcss},
         ).catch((err)-> console.error(err, err.stack))
       ).catch((err)-> console.error(err, err.stack))
     ).catch((err)-> console.error(err, err.stack))
-
-
-
-#! getElmVal :: HTMLElement -> String | Number | Boolean
-getElmVal = (elm)->
-  if elm instanceof HTMLInputElement and $(elm).attr("type") is "checkbox"
-  then $(elm).is(':checked')
-  else $(elm).val()

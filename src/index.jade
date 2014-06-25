@@ -1,5 +1,5 @@
 doctype html
-html(lang='ja', manifest="index.appcache")
+html(lang='ja', manifest="manifest.appcache")
   head
     meta(charset='UTF-8')
     title altjsdo.it
@@ -98,6 +98,7 @@ html(lang='ja', manifest="index.appcache")
           textarea#box-altcss-textarea(wrap='off', placeholder='style')!="\n\n\n"
         #box-sandbox
           iframe#box-sandbox-iframe
+    script(src='./cache.js')
     script(src='./thirdparty/es6-shim/es6-shim.min.js')
     script(src='./thirdparty/jquery/jquery.min.js')
     script(src='./ui.js')

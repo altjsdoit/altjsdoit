@@ -1,22 +1,9 @@
-var URLToArrayBuffer, URLToText, build, compile, createBlobURL, decodeURIQuery, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
+var URLToArrayBuffer, URLToText, build, compileAll, createBlobURL, decodeURIQuery, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
 
 createBlobURL = function(data, mimetype) {
   return URL.createObjectURL(new Blob([data], {
     type: mimetype
   }));
-};
-
-URLToArrayBuffer = function(url, callback) {
-  var xhr;
-  xhr = new XMLHttpRequest();
-  xhr.open('GET', url, true);
-  xhr.responseType = 'arraybuffer';
-  xhr.onload = function() {
-    if (this.status === 200 && this.readyState === 4) {
-      return callback(this.response);
-    }
-  };
-  return xhr.send();
 };
 
 URLToText = function(url, callback) {
@@ -35,30 +22,17 @@ URLToText = function(url, callback) {
   });
 };
 
-zipDataURI = function(dic) {
-  var key, val, zip;
-  zip = new JSZip();
-  for (key in dic) {
-    val = dic[key];
-    zip.file(key, val);
-  }
-  return zip.generate({
-    compression: "DEFLATE"
-  });
-};
-
-unzipDataURI = function(base64) {
-  var files, hash, key, val, zip;
-  zip = new JSZip();
-  files = zip.load(base64, {
-    base64: true
-  }).files;
-  hash = {};
-  for (key in files) {
-    val = files[key];
-    hash[key] = zip.file(key).asText();
-  }
-  return hash;
+URLToArrayBuffer = function(url, callback) {
+  var xhr;
+  xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.responseType = 'arraybuffer';
+  xhr.onload = function() {
+    if (this.status === 200 && this.readyState === 4) {
+      return callback(this.response);
+    }
+  };
+  return xhr.send();
 };
 
 makeURL = function(location) {
@@ -121,6 +95,40 @@ expandURL = function(url, callback) {
   });
 };
 
+zipDataURI = function(dic) {
+  var key, val, zip;
+  zip = new JSZip();
+  for (key in dic) {
+    val = dic[key];
+    zip.file(key, val);
+  }
+  return zip.generate({
+    compression: "DEFLATE"
+  });
+};
+
+unzipDataURI = function(base64) {
+  var files, hash, key, val, zip;
+  zip = new JSZip();
+  files = zip.load(base64, {
+    base64: true
+  }).files;
+  hash = {};
+  for (key in files) {
+    val = files[key];
+    hash[key] = zip.file(key).asText();
+  }
+  return hash;
+};
+
+getElmVal = function(elm) {
+  if (elm instanceof HTMLInputElement && $(elm).attr("type") === "checkbox") {
+    return $(elm).is(':checked');
+  } else {
+    return $(elm).val();
+  }
+};
+
 getCompilerSetting = function(lang) {
   var f;
   f = function(a, b) {
@@ -132,138 +140,177 @@ getCompilerSetting = function(lang) {
   switch (lang) {
     case "JavaScript":
       return f("javascript", function(code, cb) {
-        return cb(null, code);
+        return setTimeout(function() {
+          return cb(null, code);
+        });
       });
     case "CoffeeScript":
       return f("coffeescript", function(code, cb) {
-        return cb(null, CoffeeScript.compile(code, {
-          bare: true
-        }));
+        return setTimeout(function() {
+          return cb(null, CoffeeScript.compile(code, {
+            bare: true
+          }));
+        });
       });
     case "TypeScript":
       return f("javascript", function(code, cb) {
-        var current, diagnostics, err, filename, iter, output, snapshot, source, _compiler;
-        filename = "jsdo.it.ts";
-        source = code;
-        _compiler = new TypeScript.TypeScriptCompiler(filename);
-        snapshot = TypeScript.ScriptSnapshot.fromString(source);
-        _compiler.addFile(filename, snapshot);
-        iter = _compiler.compile();
-        output = '';
-        while (iter.moveNext()) {
-          current = iter.current().outputFiles[0];
-          output += !!current ? current.text : '';
-        }
-        diagnostics = _compiler.getSemanticDiagnostics(filename);
-        if (diagnostics.length) {
-          err = diagnostics.map(function(d) {
-            return d.text();
-          }).join("\n");
-          if (!output) {
-            throw new Error(err);
+        return setTimeout(function() {
+          var current, diagnostics, err, filename, iter, output, snapshot, source, _compiler;
+          filename = "jsdo.it.ts";
+          source = code;
+          _compiler = new TypeScript.TypeScriptCompiler(filename);
+          snapshot = TypeScript.ScriptSnapshot.fromString(source);
+          _compiler.addFile(filename, snapshot);
+          iter = _compiler.compile();
+          output = '';
+          while (iter.moveNext()) {
+            current = iter.current().outputFiles[0];
+            output += !!current ? current.text : '';
           }
-          console.error(err);
-        }
-        return cb(null, output);
+          diagnostics = _compiler.getSemanticDiagnostics(filename);
+          if (diagnostics.length) {
+            err = diagnostics.map(function(d) {
+              return d.text();
+            }).join("\n");
+            if (!output) {
+              throw new Error(err);
+            }
+            console.error(err);
+          }
+          return cb(null, output);
+        });
       });
     case "TypedCoffeeScript":
       return f("coffeescript", function(code, cb) {
-        var jsAST, jsCode, parsed, preprocessed;
-        preprocessed = TypedCoffeeScript.Preprocessor.process(code);
-        parsed = TypedCoffeeScript.Parser.parse(preprocessed, {
-          raw: null,
-          inputSource: null,
-          optimise: null
-        });
-        TypedCoffeeScript.TypeWalker.checkNodes(parsed);
-        TypedCoffeeScript.reporter.clean();
-        TypedCoffeeScript.TypeWalker.checkNodes(parsed);
-        if (TypedCoffeeScript.reporter.has_errors()) {
-          console.error(TypedCoffeeScript.reporter.report());
+        return setTimeout(function() {
+          var jsAST, jsCode, parsed, preprocessed;
+          preprocessed = TypedCoffeeScript.Preprocessor.process(code);
+          parsed = TypedCoffeeScript.Parser.parse(preprocessed, {
+            raw: null,
+            inputSource: null,
+            optimise: null
+          });
+          TypedCoffeeScript.TypeWalker.checkNodes(parsed);
           TypedCoffeeScript.reporter.clean();
-        }
-        jsAST = TypedCoffeeScript.Compiler.compile(parsed, {
-          bare: true
-        }).toBasicObject();
-        jsCode = escodegen.generate(jsAST);
-        return cb(null, jsCode);
+          TypedCoffeeScript.TypeWalker.checkNodes(parsed);
+          if (TypedCoffeeScript.reporter.has_errors()) {
+            console.error(TypedCoffeeScript.reporter.report());
+            TypedCoffeeScript.reporter.clean();
+          }
+          jsAST = TypedCoffeeScript.Compiler.compile(parsed, {
+            bare: true
+          }).toBasicObject();
+          jsCode = escodegen.generate(jsAST);
+          return cb(null, jsCode);
+        });
       });
     case "Traceur":
       return f("javascript", function(code, cb) {
-        var project, reporter;
-        reporter = new traceur.util.ErrorReporter();
-        reporter.reportMessageInternal = function(location, kind, format, args) {
-          throw new Error(traceur.util.ErrorReporter.format(location, format, args));
-        };
-        project = new traceur.semantics.symbols.Project(location.href);
-        project.addFile(new traceur.syntax.SourceFile('a.js', code));
-        return cb(null, traceur.outputgeneration.ProjectWriter.write(traceur.codegeneration.Compiler.compile(reporter, project, false)));
+        return setTimeout(function() {
+          var project, reporter;
+          reporter = new traceur.util.ErrorReporter();
+          reporter.reportMessageInternal = function(location, kind, format, args) {
+            throw new Error(traceur.util.ErrorReporter.format(location, format, args));
+          };
+          project = new traceur.semantics.symbols.Project(location.href);
+          project.addFile(new traceur.syntax.SourceFile('a.js', code));
+          return cb(null, traceur.outputgeneration.ProjectWriter.write(traceur.codegeneration.Compiler.compile(reporter, project, false)));
+        });
       });
     case "LiveScript":
       return f("coffeescript", function(code, cb) {
-        return cb(null, LiveScript.compile(code));
+        return setTimeout(function() {
+          return cb(null, LiveScript.compile(code));
+        });
       });
     case "GorillaScript":
       return f("coffeescript", function(code, cb) {
-        return cb(null, GorillaScript.compileSync(code).code);
+        return setTimeout(function() {
+          return cb(null, GorillaScript.compileSync(code).code);
+        });
       });
     case "Wisp":
       return f("clojure", function(code, cb) {
-        var result;
-        result = wisp.compiler.compile(code);
-        return cb(result.error, result.code);
+        return setTimeout(function() {
+          var result;
+          result = wisp.compiler.compile(code);
+          return cb(result.error, result.code);
+        });
       });
     case "LispyScript":
       return f("scheme", function(code, cb) {
-        return cb(null, lispyscript._compile(code));
+        return setTimeout(function() {
+          return cb(null, lispyscript._compile(code));
+        });
       });
     case "HTML":
       return f("xml", function(code, cb) {
-        return cb(null, code);
+        return setTimeout(function() {
+          return cb(null, code);
+        });
       });
     case "Jade":
       return f("jade", function(code, cb) {
-        return cb(null, jade.compile(code, {
-          pretty: true
-        })({}));
+        return setTimeout(function() {
+          return cb(null, jade.compile(code, {
+            pretty: true
+          })({}));
+        });
       });
     case "CSS":
       return f("css", function(code, cb) {
-        return cb(null, code);
+        return setTimeout(function() {
+          return cb(null, code);
+        });
       });
     case "LESS":
       return f("css", function(code, cb) {
-        return (new less.Parser({})).parse(code, function(err, tree) {
-          if (err) {
-            return cb(err);
-          } else {
-            return cb(err, tree.toCSS({}));
-          }
+        return setTimeout(function() {
+          return (new less.Parser({})).parse(code, function(err, tree) {
+            if (err) {
+              return cb(err);
+            } else {
+              return cb(err, tree.toCSS({}));
+            }
+          });
         });
       });
     case "Stylus":
       return f("css", function(code, cb) {
-        return stylus.render(code, {}, cb);
+        return setTimeout(function() {
+          return stylus.render(code, {}, cb);
+        });
       });
     default:
       throw new TypeError("unknown compiler");
   }
 };
 
-compile = function(altFoo, code, callback) {
-  var compilerFn;
-  compilerFn = getCompilerSetting(altFoo).compile;
-  return setTimeout(function() {
-    var err;
-    try {
-      return compilerFn(code, function(err, _code) {
-        return callback(err, _code);
-      });
-    } catch (_error) {
-      err = _error;
-      console.error(err, err.stack);
-      return callback(err, code);
-    }
+compileAll = function(codes) {
+  var compile, promises;
+  compile = function(lang, code) {
+    return new Promise(function(resolve, reject) {
+      var compilerFn, err;
+      compilerFn = getCompilerSetting(lang).compile;
+      try {
+        return compilerFn(code, function(err, _code) {
+          return resolve([err, _code]);
+        });
+      } catch (_error) {
+        err = _error;
+        return reject([err, code]);
+      }
+    });
+  };
+  promises = codes.map(function(_arg) {
+    var code, lang;
+    lang = _arg.lang, code = _arg.code;
+    return compile(lang, code);
+  });
+  return Promise.all(promises).then(function(results) {
+    return callback(results);
+  })["catch"](function(err) {
+    return console.error(err, err.stack);
   });
 };
 
@@ -372,12 +419,4 @@ build = function(_arg, _arg1, _arg2, callback) {
   })["catch"](function(err) {
     return console.error(err, err.stack);
   });
-};
-
-getElmVal = function(elm) {
-  if (elm instanceof HTMLInputElement && $(elm).attr("type") === "checkbox") {
-    return $(elm).is(':checked');
-  } else {
-    return $(elm).val();
-  }
 };
