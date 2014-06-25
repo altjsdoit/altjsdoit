@@ -348,18 +348,7 @@ build = function(_arg, _arg1, _arg2, callback) {
           specials = [];
           if (enableFirebugLite) {
             specials.push(new Promise(function(resolve) {
-              return URLToArrayBuffer("thirdparty/firebug/skin/xp/sprite.png", function(data) {
-                var spriteURL;
-                spriteURL = createBlobURL(data, "image/png");
-                return URLToText("thirdparty/firebug/build/firebug-lite.js", function(text) {
-                  var firebugURL;
-                  text = text.replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png", spriteURL);
-                  text = text.replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;", "var m=['build/', 'build']; path='" + (makeURL(location)) + "thirdparty/firebug/build/'");
-                  firebugURL = createBlobURL(text, "text/javascript");
-                  js.code = "try{" + js.code + "}catch(err){console.error(err, err.stack);}";
-                  return resolve("<script id='FirebugLite' FirebugLite='4' src='" + firebugURL + "'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true,\n    useLocalSkin:true\n  }\n<" + "/" + "script>");
-                });
-              });
+              return resolve("<script id='FirebugLite' FirebugLite='4' src='https://getfirebug.com/firebug-lite.js'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true\n  }\n<" + "/" + "script>");
             }));
           }
           return Promise.all(specials).then(function(heads) {

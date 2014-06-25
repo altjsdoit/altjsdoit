@@ -208,20 +208,19 @@ build = ({altjs, althtml, altcss},
           specials = []
           if enableFirebugLite
             specials.push  new Promise (resolve)->
-              URLToArrayBuffer "thirdparty/firebug/skin/xp/sprite.png", (data)->
-                spriteURL = createBlobURL(data, "image/png")
-                URLToText "thirdparty/firebug/build/firebug-lite.js", (text)->
-                  text = text.replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png", spriteURL)
-                  text = text.replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;", "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
-                  firebugURL = createBlobURL(text, "text/javascript")
-                  js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
-                  resolve """<script id='FirebugLite' FirebugLite='4' src='#{firebugURL}'>
+              #URLToArrayBuffer "thirdparty/firebug/skin/xp/sprite.png", (data)->
+              #  spriteURL = createBlobURL(data, "image/png")
+              #  URLToText "thirdparty/firebug/build/firebug-lite.js", (text)->
+              #    text = text.replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png", spriteURL)
+              #    text = text.replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;", "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
+              #    firebugURL = createBlobURL(text, "text/javascript")
+              #    js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
+                  resolve """<script id='FirebugLite' FirebugLite='4' src='https://getfirebug.com/firebug-lite.js'>
                     {
                       overrideConsole:true,
                       showIconWhenHidden:true,
                       startOpened:true,
-                      enableTrace:true,
-                      useLocalSkin:true
+                      enableTrace:true
                     }
                   <#{"/"}script>"""
           Promise.all(specials).then((heads)->
