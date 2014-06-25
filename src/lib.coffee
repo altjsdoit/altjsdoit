@@ -9,6 +9,8 @@
 #!   hash :: String
 #!   search :: String
 
+window.URL = window.URL or window.webkitURL or window.mozURL
+
 #! createBlobURL :: (String | ArrayBuffer | Blob) * String -> String # not referential transparency
 createBlobURL = (data, mimetype)->
   URL.createObjectURL(new Blob([data], {type: mimetype}))
