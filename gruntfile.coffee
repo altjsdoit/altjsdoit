@@ -42,7 +42,7 @@ module.exports = (grunt) ->
       options:
         inline : true
         context:
-          DEBUG: true
+          DEBUG: false
       compile:
         src: [
           "./public/*.appcache"

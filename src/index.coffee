@@ -12,10 +12,6 @@ Main = Backbone.View.extend
   el: "#layout"
   events:
     "click #setting-project-save": "saveURI"
-  sideMenu: ->
-    $("#layout").toggleClass("active")
-    $("#menu").toggleClass("active")
-    $("#menuLink").toggleClass("active")
   saveURI: ->
     @model.set("timestamp", Date.now())
     config = JSON.stringify(@model.toJSON())
@@ -25,38 +21,42 @@ Main = Backbone.View.extend
     $("#setting-project-size").html(url.length)
     $("#setting-project-twitter").html("")
     history.pushState(null, null, url)
-    $.ajax
-      url: 'https://www.googleapis.com/urlshortener/v1/url'
-      type: 'POST'
-      contentType: 'application/json; charset=utf-8'
-      data: JSON.stringify({longUrl: url})
-      dataType: 'json'
-      success: (res)=>
-        $("#setting-project-url").val(res.id)
-        $("#setting-project-twitter").html($("""
-          <a href="https://twitter.com/share" class="twitter-share-button" data-size="large" data-text="'#{@model.get('title')}'" data-url="#{res.id}" data-hashtags="altjsdoit" data-count="none" data-lang="en">Tweet</a>
-        """))
-        twttr.widgets.load()
+    shortenURL url, (_url)=>
+      $("#setting-project-url").val(_url)
+      $("#setting-project-twitter").html(
+        $("<a />").attr({
+          "href": "https://twitter.com/share"
+          "class": "twitter-share-button"
+          "data-size": "large"
+          "data-text": "'#{@model.get('title')}'"
+          "data-url": _url
+          "data-hashtags": "altjsdoit"
+          "data-count": "none"
+          "data-lang": "en"
+        }).html("Tweet"))
+      twttr.widgets.load()
   loadURI: ->
     {zip} = decodeURIQuery(location.hash.slice(1))
     if zip?
-      {config, script, markup, style} = unzipDataURI(decodeURIComponent(location.hash.slice(5)))
+      {config, script, markup, style} = unzipDataURI(zip)
       config = JSON.parse(config or "{}")
       @model.set(config)
       @setValues({script, markup, style})
   run: ->
     @saveURI()
-    {altjs, althtml, altcss,
-     enableViewSource, enableFirebugLite, enableJQuery, enableUnderscore,
-     enableES6shim, enableMathjs, enableProcessing} = @model.toJSON()
+    opt = @model.toJSON()
+    {altjs, althtml, altcss} = opt
     {script, markup, style} = @getValues()
-    build {altjs, althtml, altcss},
-          {script, markup, style},
-          {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim, enableMathjs, enableProcessing},
-          (srcdoc)->
-            #$("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
-            console.log url = createBlobURL(srcdoc, (if enableViewSource then "text/plain" else "text/html"))
-            $("#box-sandbox-iframe").attr({"src": url})
+    dic = {}
+    dic[altjs] = script
+    dic[althtml] = markup
+    dic[altcss] = style
+    build dic, opt, (srcdoc)->
+      #$("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
+      console.log url = createBlobURL(srcdoc, (if opt.enableViewSource then "text/plain" else "text/html"))
+      $("#box-sandbox-iframe").attr({"src": url})
+      #encodeDataURI srcdoc, "text/html", (base64)->
+      #  $("#box-sandbox-iframe").attr({"src": base64})
   initialize: ->
     @model    = new Config()
     @menu     = new Menu({@model})
@@ -135,8 +135,6 @@ Setting = Backbone.View.extend
         .find("[data-config='enableES6shim']").attr("checked", enableES6shim).end()
         .find("[data-config='enableProcessing']").attr("checked", enableProcessing).end()
         .find("[data-config='enableMathjs']").attr("checked", enableMathjs).end()
-
-
 
 Editor = Backbone.View.extend
   initialize: ({@type})->

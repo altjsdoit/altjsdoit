@@ -54,6 +54,7 @@ QUnit.asyncTest("URLToArrayBuffer", function(assert) {
     n++;
     url = createBlobURL(val, 'text/plain');
     return URLToArrayBuffer(url, function(arrayBuffer) {
+      console.log(arrayBuffer);
       assert.strictEqual(arrayBuffer.byteLength, expected, arrayBuffer.byteLength);
       if (--n === 0) {
         return QUnit.start();
@@ -64,6 +65,24 @@ QUnit.asyncTest("URLToArrayBuffer", function(assert) {
   test("🐲", 4);
   test(new ArrayBuffer(12), 12);
   return expect(n);
+});
+
+QUnit.asyncTest("encodeDataURI, decodeDataURI", function(assert) {
+  var dic;
+  expect(1);
+  dic = {
+    a: "a",
+    b: "𠮟",
+    c: "🐲"
+  };
+  return encodeDataURI(JSON.stringify(dic), "text/plain", function(base64) {
+    return decodeDataURI(base64, function(json) {
+      var _dic;
+      _dic = JSON.parse(json);
+      assert.deepEqual(_dic, dic, json);
+      return QUnit.start();
+    });
+  });
 });
 
 QUnit.test("makeURL", function(assert) {
@@ -127,9 +146,12 @@ QUnit.test("getElmVal", function(assert) {
 QUnit.module("Compiler");
 
 QUnit.asyncTest("getCompilerSetting", function(assert) {
-  var n, test;
+  var n, test, test1;
   n = 0;
   test = function(lang, o) {
+    return test1(lang, o);
+  };
+  test1 = function(lang, o) {
     var compile, mode, _ref;
     n++;
     _ref = getCompilerSetting(lang), mode = _ref.mode, compile = _ref.compile;
@@ -142,11 +164,6 @@ QUnit.asyncTest("getCompilerSetting", function(assert) {
       }
     });
   };
-  test("JavaScript", {
-    mode: "javascript",
-    before: "(function(){}());",
-    after: "(function(){}());"
-  });
   test("CoffeeScript", {
     mode: "coffeescript",
     before: "do ->",
@@ -180,6 +197,55 @@ QUnit.asyncTest("getCompilerSetting", function(assert) {
   return expect(n * 3);
 });
 
-QUnit.asyncTest("compileAll", function(assert) {});
+QUnit.asyncTest("compileAll", function(assert) {
+  var dic, tests;
+  tests = [
+    {
+      lang: "CoffeeScript",
+      code: "}{"
+    }, {
+      lang: "LESS",
+      code: "}{"
+    }, {
+      lang: "Stylus",
+      code: "}{"
+    }
+  ];
+  dic = tests.reduce((function(dic, _arg) {
+    var code, lang;
+    lang = _arg.lang, code = _arg.code;
+    dic[lang] = code;
+    return dic;
+  }), {});
+  expect(tests.length);
+  return compileAll(dic, function(codes) {
+    codes.forEach(function(_arg, i) {
+      var code, err;
+      err = _arg[0], code = _arg[1];
+      return assert.ok(JSON.stringify(err).length > 10, tests[i].lang + ": " + JSON.stringify(err) + " : " + code);
+    });
+    return QUnit.start();
+  });
+});
 
 QUnit.module("Complex");
+
+QUnit.asyncTest("zipURI, URIQuery makeURL, shortenURL", function(assert) {
+  var dic;
+  expect(1);
+  dic = {
+    a: "a",
+    b: "𠮟",
+    c: "🐲"
+  };
+  return shortenURL(makeURL(location) + "#" + encodeURIQuery({
+    zip: zipDataURI(dic)
+  }), function(url) {
+    return expandURL(url, function(_url) {
+      var _dic;
+      _dic = unzipDataURI(decodeURIQuery(_url.split("#")[1]).zip);
+      assert.deepEqual(_dic, dic, JSON.stringify(_dic));
+      return QUnit.start();
+    });
+  });
+});

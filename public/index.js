@@ -19,11 +19,6 @@ Main = Backbone.View.extend({
   events: {
     "click #setting-project-save": "saveURI"
   },
-  sideMenu: function() {
-    $("#layout").toggleClass("active");
-    $("#menu").toggleClass("active");
-    return $("#menuLink").toggleClass("active");
-  },
   saveURI: function() {
     var config, markup, script, style, url, _ref;
     this.model.set("timestamp", Date.now());
@@ -41,28 +36,28 @@ Main = Backbone.View.extend({
     $("#setting-project-size").html(url.length);
     $("#setting-project-twitter").html("");
     history.pushState(null, null, url);
-    return $.ajax({
-      url: 'https://www.googleapis.com/urlshortener/v1/url',
-      type: 'POST',
-      contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify({
-        longUrl: url
-      }),
-      dataType: 'json',
-      success: (function(_this) {
-        return function(res) {
-          $("#setting-project-url").val(res.id);
-          $("#setting-project-twitter").html($("<a href=\"https://twitter.com/share\" class=\"twitter-share-button\" data-size=\"large\" data-text=\"'" + (_this.model.get('title')) + "'\" data-url=\"" + res.id + "\" data-hashtags=\"altjsdoit\" data-count=\"none\" data-lang=\"en\">Tweet</a>"));
-          return twttr.widgets.load();
-        };
-      })(this)
-    });
+    return shortenURL(url, (function(_this) {
+      return function(_url) {
+        $("#setting-project-url").val(_url);
+        $("#setting-project-twitter").html($("<a />").attr({
+          "href": "https://twitter.com/share",
+          "class": "twitter-share-button",
+          "data-size": "large",
+          "data-text": "'" + (_this.model.get('title')) + "'",
+          "data-url": _url,
+          "data-hashtags": "altjsdoit",
+          "data-count": "none",
+          "data-lang": "en"
+        }).html("Tweet"));
+        return twttr.widgets.load();
+      };
+    })(this));
   },
   loadURI: function() {
     var config, markup, script, style, zip, _ref;
     zip = decodeURIQuery(location.hash.slice(1)).zip;
     if (zip != null) {
-      _ref = unzipDataURI(decodeURIComponent(location.hash.slice(5))), config = _ref.config, script = _ref.script, markup = _ref.markup, style = _ref.style;
+      _ref = unzipDataURI(zip), config = _ref.config, script = _ref.script, markup = _ref.markup, style = _ref.style;
       config = JSON.parse(config || "{}");
       this.model.set(config);
       return this.setValues({
@@ -73,28 +68,18 @@ Main = Backbone.View.extend({
     }
   },
   run: function() {
-    var altcss, althtml, altjs, enableES6shim, enableFirebugLite, enableJQuery, enableMathjs, enableProcessing, enableUnderscore, enableViewSource, markup, script, style, _ref, _ref1;
+    var altcss, althtml, altjs, dic, markup, opt, script, style, _ref;
     this.saveURI();
-    _ref = this.model.toJSON(), altjs = _ref.altjs, althtml = _ref.althtml, altcss = _ref.altcss, enableViewSource = _ref.enableViewSource, enableFirebugLite = _ref.enableFirebugLite, enableJQuery = _ref.enableJQuery, enableUnderscore = _ref.enableUnderscore, enableES6shim = _ref.enableES6shim, enableMathjs = _ref.enableMathjs, enableProcessing = _ref.enableProcessing;
-    _ref1 = this.getValues(), script = _ref1.script, markup = _ref1.markup, style = _ref1.style;
-    return build({
-      altjs: altjs,
-      althtml: althtml,
-      altcss: altcss
-    }, {
-      script: script,
-      markup: markup,
-      style: style
-    }, {
-      enableFirebugLite: enableFirebugLite,
-      enableJQuery: enableJQuery,
-      enableUnderscore: enableUnderscore,
-      enableES6shim: enableES6shim,
-      enableMathjs: enableMathjs,
-      enableProcessing: enableProcessing
-    }, function(srcdoc) {
+    opt = this.model.toJSON();
+    altjs = opt.altjs, althtml = opt.althtml, altcss = opt.altcss;
+    _ref = this.getValues(), script = _ref.script, markup = _ref.markup, style = _ref.style;
+    dic = {};
+    dic[altjs] = script;
+    dic[althtml] = markup;
+    dic[altcss] = style;
+    return build(dic, opt, function(srcdoc) {
       var url;
-      console.log(url = createBlobURL(srcdoc, (enableViewSource ? "text/plain" : "text/html")));
+      console.log(url = createBlobURL(srcdoc, (opt.enableViewSource ? "text/plain" : "text/html")));
       return $("#box-sandbox-iframe").attr({
         "src": url
       });

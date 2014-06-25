@@ -1,4 +1,3 @@
-#! type Dictionary<T> = Any
 #! Struct Dictionary<T>
 #!   [key :: String] :: T
 
@@ -29,10 +28,32 @@ URLToArrayBuffer = (url, callback)->
   xhr = new XMLHttpRequest()
   xhr.open('GET', url, true)
   xhr.responseType = 'arraybuffer'
+  xhr.onerror = (err)-> throw new Error(err)
   xhr.onload = ->
-    if this.status is 200 and this.readyState is 4
+    if this.status is 200 or this.status is 0 and this.readyState is 4
       callback(this.response)
   xhr.send()
+
+#! encodeDataURI :: String * String * (String -> Void) -> Void
+encodeDataURI = (data, mimetype, callback)->
+  reader = new FileReader()
+  reader.readAsDataURL(new Blob([data], {type: mimetype}))
+  reader.onloadend = ->
+    callback(reader.result.replace(";base64,", ";charset=utf-8;base64,"))
+  reader.onerror = (err)-> throw new Error(err)
+
+#! decodeDataURI :: String * String * (String -> Void) -> Void
+decodeDataURI = (dataURI, callback)->
+  tmp = dataURI.split(',')
+  mimeString = tmp[0].split(':')[1].split(';')[0]
+  byteString = atob(tmp[1])
+  ab = new ArrayBuffer(byteString.length)
+  ia = new Uint8Array(ab)
+  for i in [0..byteString.length]
+    ia[i] = byteString.charCodeAt(i)
+  reader = new FileReader()
+  reader.readAsText(new Blob([ab], {type: mimeString}))
+  reader.onloadend = -> callback(reader.result)
 
 #! makeURL :: Location -> String
 makeURL = (location)->
@@ -79,6 +100,7 @@ expandURL = (url, callback)->
       callback(res.longUrl)
     error: (err)-> console.error(err, err.stack)
 
+
 #! zipDataURI :: Dictionary<String> -> Stirng # not referential transparency
 zipDataURI = (dic)->
   zip = new JSZip()
@@ -94,23 +116,24 @@ unzipDataURI = (base64)->
     hash[key] = zip.file(key).asText()
   hash
 
+
 #! getElmVal :: HTMLElement -> String | Number | Boolean
 getElmVal = (elm)->
   if elm instanceof HTMLInputElement and $(elm).attr("type") is "checkbox"
   then $(elm).is(':checked')
   else $(elm).val()
 
-#! struct CompilerSetting
-#!   mode :: String
-#!   compile :: String * (String? * String -> Void) -> Void
 
-#! getCompilerSetting :: String -> CompilerSetting
+#! getCompilerSetting :: String -> {mode :: String, compile :: String * (String? * String -> Void) -> Void}
 getCompilerSetting = (lang)->
   f = (a, b)-> { mode:a, compile:b }
   switch lang
-    when "JavaScript"   then f "javascript",   (code, cb)-> setTimeout -> cb(null, code)
-    when "CoffeeScript" then f "coffeescript", (code, cb)-> setTimeout -> cb(null, CoffeeScript.compile(code, {bare:true}))
-    when "TypeScript"   then f "javascript",   (code, cb)-> setTimeout ->
+    when "JavaScript"   then f "javascript",   (code, cb)->
+      setTimeout -> cb(null, code)
+    when "CoffeeScript" then f "coffeescript", (code, cb)->
+      _code = CoffeeScript.compile(code, {bare:true})
+      setTimeout -> cb(null, _code)
+    when "TypeScript"   then f "javascript",   (code, cb)->
       filename = "jsdo.it.ts"
       source = code
       _compiler = new TypeScript.TypeScriptCompiler(filename)
@@ -126,8 +149,8 @@ getCompilerSetting = (lang)->
         err = diagnostics.map((d)-> d.text()).join("\n")
         if !output then throw new Error(err)
         console.error err
-      cb(null, output)
-    when "TypedCoffeeScript" then f "coffeescript", (code, cb)-> setTimeout ->
+      setTimeout -> cb(null, output)
+    when "TypedCoffeeScript" then f "coffeescript", (code, cb)->
         preprocessed = TypedCoffeeScript.Preprocessor.process(code)
         parsed = TypedCoffeeScript.Parser.parse(preprocessed, {raw: null, inputSource: null, optimise: null})
         TypedCoffeeScript.TypeWalker.checkNodes(parsed)
@@ -138,51 +161,60 @@ getCompilerSetting = (lang)->
           TypedCoffeeScript.reporter.clean()
         jsAST = TypedCoffeeScript.Compiler.compile(parsed, {bare: true}).toBasicObject()
         jsCode = escodegen.generate(jsAST)
-        cb(null, jsCode)
-    when "Traceur"      then f "javascript",   (code, cb)-> setTimeout ->
+        setTimeout -> cb(null, jsCode)
+    when "Traceur"      then f "javascript",   (code, cb)->
       reporter = new traceur.util.ErrorReporter()
       reporter.reportMessageInternal = (location, kind, format, args)->
         throw new Error(traceur.util.ErrorReporter.format(location, format, args))
       project = new traceur.semantics.symbols.Project(location.href)
       project.addFile(new traceur.syntax.SourceFile('a.js', code))
-      cb(null, traceur.outputgeneration.ProjectWriter.write(traceur.codegeneration.Compiler.compile(reporter, project, false)))
-    when "LiveScript"   then f "coffeescript", (code, cb)->  setTimeout -> cb(null, LiveScript.compile(code))
-    when "GorillaScript" then f "coffeescript", (code, cb)-> setTimeout -> cb(null, GorillaScript.compileSync(code).code)
-    when "Wisp"         then f "clojure",      (code, cb)-> setTimeout -> result = wisp.compiler.compile(code); cb(result.error, result.code)
-    when "LispyScript"  then f "scheme",       (code, cb)-> setTimeout -> cb(null, lispyscript._compile(code))
-    when "HTML"         then f "xml",          (code, cb)-> setTimeout -> cb(null, code)
-    when "Jade"         then f "jade",         (code, cb)-> setTimeout -> cb(null, jade.compile(code,{pretty:true})({}))
-    when "CSS"          then f "css",          (code, cb)-> setTimeout -> cb(null, code)
-    when "LESS"         then f "css",          (code, cb)-> setTimeout -> (new less.Parser({})).parse code, (err, tree)-> (if err then cb(err) else cb(err, tree.toCSS({})))
-    when "Stylus"       then f "css",          (code, cb)-> setTimeout -> stylus.render(code, {}, cb)
+      _code = traceur.outputgeneration.ProjectWriter.write(traceur.codegeneration.Compiler.compile(reporter, project, false))
+      setTimeout -> cb(null, _code)
+    when "LiveScript"   then f "coffeescript", (code, cb)->
+      _code = LiveScript.compile(code)
+      setTimeout -> cb(null, _code)
+    when "GorillaScript" then f "coffeescript", (code, cb)->
+      _code = GorillaScript.compileSync(code).code
+      setTimeout -> cb(null, _code)
+    when "Wisp"         then f "clojure",      (code, cb)->
+      result = wisp.compiler.compile(code)
+      setTimeout -> cb(result.error, result.code)
+    when "LispyScript"  then f "scheme",       (code, cb)->
+      _code = lispyscript._compile(code)
+      setTimeout -> cb(null, _code)
+    when "HTML"         then f "xml",          (code, cb)->
+      setTimeout -> cb(null, code)
+    when "Jade"         then f "jade",         (code, cb)->
+      _code = jade.compile(code,{pretty:true})({})
+      setTimeout -> cb(null, _code)
+    when "CSS"          then f "css",          (code, cb)->
+      setTimeout -> cb(null, code)
+    when "LESS"         then f "css",          (code, cb)->
+      (new less.Parser({})).parse code, (err, tree)->
+        if err
+        then setTimeout -> cb(err, code)
+        else setTimeout -> cb(err, tree.toCSS({}))
+    when "Stylus"       then f "css",          (code, cb)->
+      stylus.render code, {}, (err, code)->
+        setTimeout -> cb(err, code)
     else throw new TypeError "unknown compiler"
 
-#! compileAll :: {lang :: String, code :: String}[] * (String[] -> Void) -> Void
-compileAll = (codes)->
+#! compileAll :: Dictionary<String> * ([String?, String][] -> Void) -> Void
+compileAll = (dic, callback)->
   compile = (lang, code)->
     new Promise (resolve, reject)->
       compilerFn = getCompilerSetting(lang).compile
       try compilerFn code, (err, _code)-> resolve([err, _code])
-      catch err then reject([err, code])
-  promises = codes.map ({lang, code})-> compile(lang, code)
+      catch err then resolve([err, code])
+  promises = (compile(key, val) for key, val of dic)
   Promise
     .all(promises)
     .then((results)-> callback(results))
     .catch((err)-> console.error(err, err.stack))
 
-#! build :: AltFoo * Codes * Config * (String -> Void) -> Void
-build = ({altjs, althtml, altcss},
-         {script, markup, style},
-         {enableFirebugLite, enableJQuery, enableUnderscore, enableES6shim, enableProcessing, enableMathjs},
-         callback)->
-  Promise.all([
-    new Promise (resolve)->
-      compile altjs, script, (err, code)-> resolve({err, code})
-    new Promise (resolve)->
-      compile althtml, markup, (err, code)-> resolve({err, code})
-    new Promise (resolve)->
-      compile altcss, style, (err, code)-> resolve({err, code})
-  ]).then(([js, html, css])->
+#! build :: Dictionary<String> * Dictionary<Boolean> * (String -> Void) -> Void
+build = (dic, opt, callback)->
+  compileAll dic, ([js, html, css])->
     if js.err? or html.err? or css.err?
       callback buildHTML
         css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';"
@@ -193,16 +225,16 @@ build = ({altjs, althtml, altcss},
       pstyles = styles.map (url)-> pBlobURL(url)
       Promise.all(pstyles).then((blobStyles)->
         scripts = []
-        if enableJQuery      then scripts.push "thirdparty/jquery/jquery.min.js"
-        if enableUnderscore  then scripts.push "thirdparty/underscore.js/underscore-min.js"
-        if enableES6shim     then scripts.push "thirdparty/es6-shim/es6-shim.min.js"
-        if enableMathjs      then scripts.push "thirdparty/mathjs/math.min.js"
-        if enableProcessing  then scripts.push "thirdparty/processing.js/processing.min.js"
+        if opt.enableJQuery      then scripts.push "thirdparty/jquery/jquery.min.js"
+        if opt.enableUnderscore  then scripts.push "thirdparty/underscore.js/underscore-min.js"
+        if opt.enableES6shim     then scripts.push "thirdparty/es6-shim/es6-shim.min.js"
+        if opt.enableMathjs      then scripts.push "thirdparty/mathjs/math.min.js"
+        if opt.enableProcessing  then scripts.push "thirdparty/processing.js/processing.min.js"
         pBlobURL = (url)-> new Promise (resolve)-> URLToText url, (text)-> resolve(createBlobURL(text, "text/javascript"))
         pscripts = scripts.map (url)-> pBlobURL(url)
         Promise.all(pscripts).then((blobScripts)->
           specials = []
-          if enableFirebugLite
+          if opt.enableFirebugLite
             specials.push  new Promise (resolve)->
               #URLToArrayBuffer "thirdparty/firebug/skin/xp/sprite.png", (data)->
               #  spriteURL = createBlobURL(data, "image/png")
@@ -243,4 +275,3 @@ build = ({altjs, althtml, altcss},
           ).catch((err)-> console.error(err, err.stack))
         ).catch((err)-> console.error(err, err.stack))
       ).catch((err)-> console.error(err, err.stack))
-    ).catch((err)-> console.error(err, err.stack))
