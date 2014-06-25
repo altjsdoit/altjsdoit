@@ -95,6 +95,6 @@ module.exports = (grunt) ->
       jade:
         files:["./src/**/*.jade"]
         tasks:["compile"]
-  grunt.registerTask("compile", ["replace:compile", "preprocess:compile", "coffee:compile", "jade:compile", "less:compile", "clean:compile"])
+  grunt.registerTask("compile", ["replace:compile", "coffee:compile", "jade:compile", "less:compile", "clean:compile"])
   grunt.registerTask("make", ["clean:before", "copy:build", "compile"])
   grunt.registerTask("default", ["make"])

@@ -344,12 +344,18 @@ compileAll = function(dic, callback) {
       var compilerFn, err;
       compilerFn = getCompilerSetting(lang).compile;
       try {
-        return compilerFn(code, function(err, _code) {
-          return resolve([err, _code]);
+        return compilerFn(code, function(err, code) {
+          return resolve({
+            err: err,
+            code: code
+          });
         });
       } catch (_error) {
         err = _error;
-        return resolve([err, code]);
+        return resolve({
+          err: err,
+          code: code
+        });
       }
     });
   };
@@ -373,6 +379,7 @@ build = function(dic, opt, callback) {
   return compileAll(dic, function(_arg) {
     var css, html, js, pBlobURL, pstyles, styles;
     js = _arg[0], html = _arg[1], css = _arg[2];
+    console.log([js, html, css]);
     if ((js.err != null) || (html.err != null) || (css.err != null)) {
       return callback(buildHTML({
         css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';",
@@ -423,7 +430,7 @@ build = function(dic, opt, callback) {
           specials = [];
           if (opt.enableFirebugLite) {
             specials.push(new Promise(function(resolve) {
-              return resolve("<script id='FirebugLite' FirebugLite='4' src='https://getfirebug.com/firebug-lite.js'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true\n  }\n<" + "/" + "script>");
+              return resolve("<script id='FirebugLite' FirebugLite='4' src='https://getfirebug.com/firebug-lite.js'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true\n  }\n<" + "/" + "script>\n<style>\n  body{\n    margin-bottom: 400px;\n  }\n</style>");
             }));
           }
           return Promise.all(specials).then(function(heads) {

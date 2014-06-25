@@ -141,7 +141,7 @@ QUnit.asyncTest "compileAll", (assert)->
   ), {})
   expect(tests.length)
   compileAll dic, (codes)->
-    codes.forEach ([err, code], i)->
+    codes.forEach ({err, code}, i)->
       assert.ok(JSON.stringify(err).length > 10,
                 tests[i].lang+": "+JSON.stringify(err)+" : "+code)
     QUnit.start()

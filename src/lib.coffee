@@ -204,8 +204,8 @@ compileAll = (dic, callback)->
   compile = (lang, code)->
     new Promise (resolve, reject)->
       compilerFn = getCompilerSetting(lang).compile
-      try compilerFn code, (err, _code)-> resolve([err, _code])
-      catch err then resolve([err, code])
+      try compilerFn code, (err, code)-> resolve({err, code})
+      catch err then resolve({err, code})
   promises = (compile(key, val) for key, val of dic)
   Promise
     .all(promises)
@@ -215,6 +215,7 @@ compileAll = (dic, callback)->
 #! build :: Dictionary<String> * Dictionary<Boolean> * (String -> Void) -> Void
 build = (dic, opt, callback)->
   compileAll dic, ([js, html, css])->
+    console.log [js, html, css]
     if js.err? or html.err? or css.err?
       callback buildHTML
         css: "font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';"
@@ -250,7 +251,12 @@ build = (dic, opt, callback)->
                       startOpened:true,
                       enableTrace:true
                     }
-                  <#{"/"}script>"""
+                  <#{"/"}script>
+                  <style>
+                    body{
+                      margin-bottom: 400px;
+                    }
+                  </style>"""
           Promise.all(specials).then((heads)->
             blobStyles.forEach (url)-> heads.push "<link rel='stylesheet' href='#{url}' />"
             blobScripts.forEach (url)-> heads.push "<script src='#{url}'><#{"/"}script>"

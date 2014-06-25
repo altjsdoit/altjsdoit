@@ -221,7 +221,7 @@ QUnit.asyncTest("compileAll", function(assert) {
   return compileAll(dic, function(codes) {
     codes.forEach(function(_arg, i) {
       var code, err;
-      err = _arg[0], code = _arg[1];
+      err = _arg.err, code = _arg.code;
       return assert.ok(JSON.stringify(err).length > 10, tests[i].lang + ": " + JSON.stringify(err) + " : " + code);
     });
     return QUnit.start();
