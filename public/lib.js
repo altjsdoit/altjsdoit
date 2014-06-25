@@ -1,5 +1,7 @@
 var URLToArrayBuffer, URLToText, build, compileAll, createBlobURL, decodeDataURI, decodeURIQuery, encodeDataURI, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
 
+window.URL = window.URL || window.webkitURL || window.mozURL;
+
 createBlobURL = function(data, mimetype) {
   return URL.createObjectURL(new Blob([data], {
     type: mimetype
