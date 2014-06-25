@@ -160,3 +160,64 @@ QUnit.asyncTest "zipURI, URIQuery makeURL, shortenURL", (assert)->
       _dic = unzipDataURI(decodeURIQuery(_url.split("#")[1]).zip)
       assert.deepEqual(_dic, dic, JSON.stringify(_dic))
       QUnit.start()
+
+
+QUnit.module("iframe")
+
+do ->
+  script = """
+    target = (parent.postMessage ? parent : (parent.document.postMessage ? parent.document : undefined))
+    if(target) target.postMessage("blob: "+location.href, "#{location.href}");
+      document.write("<p>blob</p>");
+  """
+  srcdoc = """
+    <script type="text/javascript" src="https://getfirebug.com/firebug-lite.js">
+    {
+      overrideConsole:true,
+      showIconWhenHidden:true,
+      startOpened:true,
+      enableTrace:true
+    }
+    </script>
+    <script src="#{createBlobURL(script, "text/javascript")}"></script>
+    <script>
+      try{
+        target = (parent.postMessage ? parent : (parent.document.postMessage ? parent.document : undefined))
+        if(target) target.postMessage("inline: "+location.href, "#{location.href}");
+        document.write("<p>inline</p>");
+        document.write("<a target='_blank' href='"+location.href+"'>"+location.href+"</a>");
+      }catch(err){console.error(err, err.stack);}
+    </script>
+  """
+  style = height: "400px"
+  QUnit.asyncTest "check BlobURL iframe behavior", (assert)->
+    $div = $("<div>")
+      .appendTo("body")
+      .append blobURLIframe = $("<iframe />").css(style).attr({"src": createBlobURL(srcdoc, "text/html")})[0]
+    n = 0
+    expect(2)
+    window.onmessage = (ev)->
+      $("<p />").html(ev.data).appendTo($div)
+      assert.ok(true, ev.data)
+      if ++n is 2 then QUnit.start()
+  QUnit.asyncTest "check srcdoc iframe behavior", (assert)->
+    $div = $("<div>")
+      .appendTo("body")
+      .append srcdocIframe = $("<iframe />").css(style).attr({"srcdoc": srcdoc})[0]
+    n = 0
+    expect(2)
+    window.onmessage = (ev)->
+      $("<p />").html(ev.data).appendTo($div)
+      assert.ok(true, ev.data)
+      if ++n is 2 then QUnit.start()
+  QUnit.asyncTest "check DataURI iframe behavior", (assert)->
+    encodeDataURI srcdoc, "text/html", (base64)->
+      $div = $("<div>")
+        .appendTo("body")
+        .append base64Iframe = $("<iframe />").css(style).attr({"src": base64})[0] # cannot load blob url
+      n = 0
+      expect(2)
+      window.onmessage = (ev)->
+        $("<p />").html(ev.data).appendTo($div)
+        assert.ok(true, ev.data)
+        if ++n is 2 then QUnit.start()

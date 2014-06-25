@@ -11,6 +11,9 @@
 
 window.URL = window.URL or window.webkitURL or window.mozURL
 
+dir = (a)-> console.dir.apply(console, arguments); a
+log = (a)-> console.log.apply(console, arguments); a
+
 #! createBlobURL :: (String | ArrayBuffer | Blob) * String -> String # not referential transparency
 createBlobURL = (data, mimetype)->
   URL.createObjectURL(new Blob([data], {type: mimetype}))
@@ -233,7 +236,9 @@ build = (dic, opt, callback)->
         if opt.enableES6shim     then scripts.push "thirdparty/es6-shim/es6-shim.min.js"
         if opt.enableMathjs      then scripts.push "thirdparty/mathjs/math.min.js"
         if opt.enableProcessing  then scripts.push "thirdparty/processing.js/processing.min.js"
-        pBlobURL = (url)-> new Promise (resolve)-> URLToText url, (text)-> resolve(createBlobURL(text, "text/javascript"))
+        # blob url script do not run on firefox os simulator 2.0 on firefox nightly 32.0a1 (2014-05-30) issue #58
+        #pBlobURL = (url)-> new Promise (resolve)-> URLToText url, (text)-> resolve(createBlobURL(text, "text/javascript"))
+        pBlobURL = (url)-> new Promise (resolve)-> resolve(url)
         pscripts = scripts.map (url)-> pBlobURL(url)
         Promise.all(pscripts).then((blobScripts)->
           specials = []
@@ -245,7 +250,7 @@ build = (dic, opt, callback)->
               #    text = text.replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png", spriteURL)
               #    text = text.replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;", "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
               #    firebugURL = createBlobURL(text, "text/javascript")
-              #    js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
+                  js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
                   resolve """<script id='FirebugLite' FirebugLite='4' src='https://getfirebug.com/firebug-lite.js'>
                     {
                       overrideConsole:true,

@@ -249,3 +249,61 @@ QUnit.asyncTest("zipURI, URIQuery makeURL, shortenURL", function(assert) {
     });
   });
 });
+
+QUnit.module("iframe");
+
+(function() {
+  var script, srcdoc, style;
+  script = "target = (parent.postMessage ? parent : (parent.document.postMessage ? parent.document : undefined))\nif(target) target.postMessage(\"blob: \"+location.href, \"" + location.href + "\");\n  document.write(\"<p>blob</p>\");";
+  srcdoc = "<script type=\"text/javascript\" src=\"https://getfirebug.com/firebug-lite.js\">\n{\n  overrideConsole:true,\n  showIconWhenHidden:true,\n  startOpened:true,\n  enableTrace:true\n}\n</script>\n<script src=\"" + (createBlobURL(script, "text/javascript")) + "\"></script>\n<script>\n  try{\n    target = (parent.postMessage ? parent : (parent.document.postMessage ? parent.document : undefined))\n    if(target) target.postMessage(\"inline: \"+location.href, \"" + location.href + "\");\n    document.write(\"<p>inline</p>\");\n    document.write(\"<a target='_blank' href='\"+location.href+\"'>\"+location.href+\"</a>\");\n  }catch(err){console.error(err, err.stack);}\n</script>";
+  style = {
+    height: "400px"
+  };
+  QUnit.asyncTest("check BlobURL iframe behavior", function(assert) {
+    var $div, blobURLIframe, n;
+    $div = $("<div>").appendTo("body").append(blobURLIframe = $("<iframe />").css(style).attr({
+      "src": createBlobURL(srcdoc, "text/html")
+    })[0]);
+    n = 0;
+    expect(2);
+    return window.onmessage = function(ev) {
+      $("<p />").html(ev.data).appendTo($div);
+      assert.ok(true, ev.data);
+      if (++n === 2) {
+        return QUnit.start();
+      }
+    };
+  });
+  QUnit.asyncTest("check srcdoc iframe behavior", function(assert) {
+    var $div, n, srcdocIframe;
+    $div = $("<div>").appendTo("body").append(srcdocIframe = $("<iframe />").css(style).attr({
+      "srcdoc": srcdoc
+    })[0]);
+    n = 0;
+    expect(2);
+    return window.onmessage = function(ev) {
+      $("<p />").html(ev.data).appendTo($div);
+      assert.ok(true, ev.data);
+      if (++n === 2) {
+        return QUnit.start();
+      }
+    };
+  });
+  return QUnit.asyncTest("check DataURI iframe behavior", function(assert) {
+    return encodeDataURI(srcdoc, "text/html", function(base64) {
+      var $div, base64Iframe, n;
+      $div = $("<div>").appendTo("body").append(base64Iframe = $("<iframe />").css(style).attr({
+        "src": base64
+      })[0]);
+      n = 0;
+      expect(2);
+      return window.onmessage = function(ev) {
+        $("<p />").html(ev.data).appendTo($div);
+        assert.ok(true, ev.data);
+        if (++n === 2) {
+          return QUnit.start();
+        }
+      };
+    });
+  });
+})();

@@ -1,6 +1,16 @@
-var URLToArrayBuffer, URLToText, build, compileAll, createBlobURL, decodeDataURI, decodeURIQuery, encodeDataURI, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, makeURL, shortenURL, unzipDataURI, zipDataURI;
+var URLToArrayBuffer, URLToText, build, compileAll, createBlobURL, decodeDataURI, decodeURIQuery, dir, encodeDataURI, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, log, makeURL, shortenURL, unzipDataURI, zipDataURI;
 
 window.URL = window.URL || window.webkitURL || window.mozURL;
+
+dir = function(a) {
+  console.dir.apply(console, arguments);
+  return a;
+};
+
+log = function(a) {
+  console.log.apply(console, arguments);
+  return a;
+};
 
 createBlobURL = function(data, mimetype) {
   return URL.createObjectURL(new Blob([data], {
@@ -419,9 +429,7 @@ build = function(dic, opt, callback) {
         }
         pBlobURL = function(url) {
           return new Promise(function(resolve) {
-            return URLToText(url, function(text) {
-              return resolve(createBlobURL(text, "text/javascript"));
-            });
+            return resolve(url);
           });
         };
         pscripts = scripts.map(function(url) {
@@ -432,6 +440,7 @@ build = function(dic, opt, callback) {
           specials = [];
           if (opt.enableFirebugLite) {
             specials.push(new Promise(function(resolve) {
+              js.code = "try{" + js.code + "}catch(err){console.error(err, err.stack);}";
               return resolve("<script id='FirebugLite' FirebugLite='4' src='https://getfirebug.com/firebug-lite.js'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true\n  }\n<" + "/" + "script>\n<style>\n  body{\n    margin-bottom: 400px;\n  }\n</style>");
             }));
           }
