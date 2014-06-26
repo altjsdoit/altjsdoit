@@ -151,10 +151,14 @@ QUnit.asyncTest "compileAll", (assert)->
     QUnit.start()
 
 QUnit.asyncTest "getIncludeStyleURLs", (assert)->
-  expect(0); QUnit.start()
+  QUnit.start()
+  expect(0)
+
 
 QUnit.asyncTest "getIncludeScriptURLs", (assert)->
-  expect(0); QUnit.start()
+  QUnit.start()
+  expect(0)
+
 
 QUnit.test "buildStyles", (assert)->
   expect(0)
@@ -169,10 +173,12 @@ QUnit.test "buildErr", (assert)->
   expect(0)
 
 QUnit.asyncTest "includeFirebugLite", (assert)->
-  expect(0); QUnit.start()
+  expect(0)
+  QUnit.start()
 
 QUnit.asyncTest "build", (assert)->
-  expect(0); QUnit.start()
+  expect(0)
+  QUnit.start()
 
 
 QUnit.module("Complex")
@@ -192,60 +198,80 @@ QUnit.asyncTest "zipURI, URIQuery makeURL, shortenURL", (assert)->
 
 QUnit.module("iframe")
 
-do ->
-  script = """
-    target = (parent.postMessage ? parent : (parent.document.postMessage ? parent.document : undefined))
-    if(target) target.postMessage("blob: "+location.href, "#{location.href}");
-      document.write("<p>blob</p>");
-  """
-  srcdoc = """
-    <script type="text/javascript" src="https://getfirebug.com/firebug-lite.js">
-    {
-      overrideConsole:true,
-      showIconWhenHidden:true,
-      startOpened:true,
-      enableTrace:true
-    }
-    </script>
-    <script src="#{createBlobURL(script, "text/javascript")}"></script>
-    <script>
+encodeDataURI """
+  try{
+    window.testResult = window.testResult || {};
+    window.testResult.dataURI = location.href;
+    document.write("<p>dataURI</p>");
+  }catch(err){
+    document.write(JSON.stringify(err))
+  }
+""", "text/javascript", (dataURI)->
+  createSrcdoc = (context)->
+    objectURI = createBlobURL("""
       try{
-        target = (parent.postMessage ? parent : (parent.document.postMessage ? parent.document : undefined))
-        if(target) target.postMessage("inline: "+location.href, "#{location.href}");
-        document.write("<p>inline</p>");
-        document.write("<a target='_blank' href='"+location.href+"'>"+location.href+"</a>");
-      }catch(err){console.error(err, err.stack);}
-    </script>
-  """
-  style = height: "400px"
-  QUnit.asyncTest "check BlobURL iframe behavior", (assert)->
-    $div = $("<div>")
-      .appendTo("body")
-      .append blobURLIframe = $("<iframe />").css(style).attr({"src": createBlobURL(srcdoc, "text/html")})[0]
-    n = 0
-    expect(2)
+        window.testResult = window.testResult || {};
+        window.testResult.objectURL = location.href;
+        document.write("<p>objectURL</p>");
+      }catch(err){
+        document.write(JSON.stringify(err))
+      }
+    """, "text/javascript")
+    srcdoc = """
+      <h2>#{context}</h2>
+      <script type="text/javascript" src="https://getfirebug.com/firebug-lite.js">
+      {
+        overrideConsole:true,
+        showIconWhenHidden:true,
+        startOpened:true,
+        enableTrace:true
+      }
+      </script>
+      <script src="#{dataURI}"></script>
+      <script src="#{objectURI}"></script>
+      <script>
+        try{
+          window.testResult = window.testResult || {};
+          window.testResult.inline = location.href;
+          window.testResult.context = "#{context}";
+          document.write("<p>inline</p>");
+          document.write("<p><a target='_blank' href='"+location.href+"'>"+location.href+"</a></p>");
+          target = (parent.postMessage ? parent : (parent.document.postMessage ? parent.document : undefined));
+          target.postMessage(JSON.stringify(window.testResult), "#{makeURL(location)}");
+        }catch(err){
+          document.write(JSON.stringify(err))
+        }
+      </script>
+    """
+  style = height: "400px", width: "400px"
+  QUnit.asyncTest "check objectURL iframe behavior", (assert)->
+    iframe = $("<iframe />").css(style).attr({"src": createBlobURL(createSrcdoc("objectURL"), "text/html")})
+    $("<div>").append(iframe).appendTo("body")
+    expect(3)
     window.onmessage = (ev)->
-      $("<p />").html(ev.data).appendTo($div)
-      assert.ok(true, ev.data)
-      if ++n is 2 then QUnit.start()
+      testResult = JSON.parse(ev.data)
+      assert.ok(testResult.dataURI,   ev.data)
+      assert.ok(testResult.objectURL, ev.data)
+      assert.ok(testResult.inline,    ev.data)
+      QUnit.start()
   QUnit.asyncTest "check srcdoc iframe behavior", (assert)->
-    $div = $("<div>")
-      .appendTo("body")
-      .append srcdocIframe = $("<iframe />").css(style).attr({"srcdoc": srcdoc})[0]
-    n = 0
-    expect(2)
+    iframe = $("<iframe />").css(style).attr({"srcdoc": createSrcdoc("srcdoc")})
+    $("<div>").append(iframe).appendTo("body")
+    expect(3)
     window.onmessage = (ev)->
-      $("<p />").html(ev.data).appendTo($div)
-      assert.ok(true, ev.data)
-      if ++n is 2 then QUnit.start()
-  QUnit.asyncTest "check DataURI iframe behavior", (assert)->
-    encodeDataURI srcdoc, "text/html", (base64)->
-      $div = $("<div>")
-        .appendTo("body")
-        .append base64Iframe = $("<iframe />").css(style).attr({"src": base64})[0] # cannot load blob url
-      n = 0
-      expect(2)
+      testResult = JSON.parse(ev.data)
+      assert.ok(testResult.dataURI,   ev.data)
+      assert.ok(testResult.objectURL, ev.data)
+      assert.ok(testResult.inline,    ev.data)
+      QUnit.start()
+  QUnit.asyncTest "check dataURI iframe behavior", (assert)->
+    encodeDataURI createSrcdoc("dataURI"), "text/html", (base64)->
+      iframe = $("<iframe />").css(style).attr({"src": base64})
+      $("<div>").append(iframe).appendTo("body")
+      expect(3)
       window.onmessage = (ev)->
-        $("<p />").html(ev.data).appendTo($div)
-        assert.ok(true, ev.data)
-        if ++n is 2 then QUnit.start()
+        testResult = JSON.parse(ev.data)
+        assert.ok(testResult.dataURI,   "dataURI")
+        assert.ok(testResult.objectURL, "objectURL");console.log testResult.objectURL
+        assert.ok(testResult.inline,    "inline")
+        QUnit.start()
