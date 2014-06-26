@@ -7,6 +7,7 @@ Config = Backbone.Model.extend
     altjs:   "JavaScript"
     althtml: "HTML"
     altcss:  "CSS"
+    iframeType: "blob"
 
 Main = Backbone.View.extend
   el: "#layout"
@@ -49,13 +50,17 @@ Main = Backbone.View.extend
     opt = @model.toJSON()
     {altjs, althtml, altcss} = opt
     {script, markup, style} = @getValues()
-    _obj = Object.create(opt)
-    build {altjs, althtml, altcss}, {script, markup, style}, _obj, (srcdoc)->
-      #$("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
-      console.log url = createBlobURL(srcdoc, (if opt.enableViewSource then "text/plain" else "text/html"))
-      $("#box-sandbox-iframe").attr({"src": url})
-      #encodeDataURI srcdoc, "text/html", (base64)->
-      #  $("#box-sandbox-iframe").attr({"src": base64})
+    _opt = Object.create(opt)
+    build {altjs, althtml, altcss}, {script, markup, style}, _opt, (srcdoc)->
+      switch _opt.iframeType
+        when "srcdoc" then $("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
+        when "base64"
+          encodeDataURI srcdoc, "text/html", (base64)->
+            $("#box-sandbox-iframe").attr({"src": base64})
+        when "blob"
+          console.log url = createBlobURL(srcdoc, (if opt.enableViewSource then "text/plain" else "text/html"))
+          $("#box-sandbox-iframe").attr({"src": url})
+        else throw new Error _opt.iframeType
   initialize: ->
     @model    = new Config()
     @menu     = new Menu({@model})
@@ -84,8 +89,7 @@ Main = Backbone.View.extend
     style:  @styleEd .getValue() or ""
   render: ->
     {title, timestamp} = @model.toJSON()
-    d = new Date(timestamp)
-    $("title").html(title + " - #{d} - altjsdo.it")
+    $("title").html(title + " - #{new Date(timestamp)} - altjsdo.it")
 
 Menu = Backbone.View.extend
   el: "#menu"
@@ -123,6 +127,7 @@ Setting = Backbone.View.extend
     opt = @model.toJSON()
     $(@el).find("[data-config]").each (i, v)=>
       key = $(v).attr("data-config")
+      console.log key, opt[key]
       if key.slice(0, 6) is "enable"
       then @$el.find("[data-config='#{key}']"  ).attr("checked", opt[key])
       else @$el.find("[data-config='#{key}']"  ).val(opt[key])

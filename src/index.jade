@@ -100,8 +100,14 @@ html(lang='ja', manifest="manifest.appcache")
                 | use cache:
                 input(data-config='enableCache', type='checkbox', checked='checked')
               label
-                | use blobCache
+                | use blobCache (when cache enable):
                 input(data-config='enableBlobCache', type='checkbox')
+              label
+                | iframe type:
+                select(data-config='iframeType')
+                  option(value='blob', selected='selected') objectURL
+                  option(value='srcdoc') srcdoc
+                  option(value='base64') dataURI
             fieldset
               legend Support
               ul
