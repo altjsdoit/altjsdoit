@@ -1,4 +1,4 @@
-$ -> new Main
+$ -> window.bbmain = new Main
 
 Config = Backbone.Model.extend
   defaults:

@@ -20,6 +20,9 @@ Change Log
 
 #### Version 0.8.4
 
+* replace jquery to zepto
+* remove es6-shim with Promise
+* remove TypeScript, LispyScript
 * a lot of bug fix
 
 #### Version 0.8.3

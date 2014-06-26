@@ -189,6 +189,7 @@ compileAll = (langs, callback)->
 
 getIncludeScriptURLs = (opt, callback)->
   urls = []
+  if opt.enableZepto       then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/zepto/zepto.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.3/zepto.min.js")
   if opt.enableJQuery      then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/jquery/jquery.min.js"            else "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js")
   if opt.enableUnderscore  then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/underscore.js/underscore-min.js" else "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js")
   if opt.enableES6shim     then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/es6-shim/es6-shim.min.js"        else "https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.11.0/es6-shim.min.js")
