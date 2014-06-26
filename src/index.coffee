@@ -63,10 +63,10 @@ Main = Backbone.View.extend
     @scriptEd = new Editor {@model, el:$("#box-altjs-textarea"  )[0], type:"altjs"}
     @markupEd = new Editor {@model, el:$("#box-althtml-textarea")[0], type:"althtml"}
     @styleEd  = new Editor {@model, el:$("#box-altcss-textarea" )[0], type:"altcss"}
-    @scriptEd.onsave = @markupEd.onsave = @styleEd.onsave = => @saveURI()
-    @scriptEd.onrun  = @markupEd.onrun  = @styleEd.onrun  = => @run()
     @setting.updateAll()
     @loadURI()
+    @scriptEd.onsave = @markupEd.onsave = @styleEd.onsave = => @saveURI()
+    @scriptEd.onrun  = @markupEd.onrun  = @styleEd.onrun  = => @run()
     $("#menu-altjs"  ).click => setTimeout => @scriptEd.refresh()
     $("#menu-althtml").click => setTimeout => @markupEd.refresh()
     $("#menu-altcss" ).click => setTimeout => @styleEd .refresh()
@@ -108,32 +108,24 @@ Setting = Backbone.View.extend
     "change input": "update"
   updateAll: ->
     config = {}
-    $(@el).find("[data-config]").each (a, b)->
+    $(@el).find("[data-config]").each (i, v)->
       config[$(@).attr("data-config")] = getElmVal(@)
     @model.set(config)
   update: (ev)->
     @model.set($(ev.target).attr("data-config"), getElmVal(ev.target))
   initialize: ->
     _.bindAll(this, "render")
+    _.bindAll(this, "update")
+    _.bindAll(this, "updateAll")
     @model.bind("change", @render)
     @render()
   render: ->
-    {title, altjs, althtml, altcss,
-     enableCodeMirror, enableViewSource, enableJQuery,
-     enableUnderscore, enableES6shim, enableFirebugLite,
-     enableProcessing, enableMathjs} = @model.toJSON()
-    @$el.find("[data-config='title']"  ).val(title  )
-    @$el.find("[data-config='altjs']"  ).val(altjs  )
-    @$el.find("[data-config='althtml']").val(althtml)
-    @$el.find("[data-config='altcss']" ).val(altcss )
-    @$el.find("[data-config='enableCodeMirror']").attr("checked", enableCodeMirror)
-    @$el.find("[data-config='enableViewSource']").attr("checked", enableViewSource)
-    @$el.find("[data-config='enableFirebugLite']").attr("checked", enableFirebugLite)
-    @$el.find("[data-config='enableJQuery']").attr("checked", enableJQuery)
-    @$el.find("[data-config='enableUnderscore']").attr("checked", enableUnderscore)
-    @$el.find("[data-config='enableES6shim']").attr("checked", enableES6shim)
-    @$el.find("[data-config='enableProcessing']").attr("checked", enableProcessing)
-    @$el.find("[data-config='enableMathjs']").attr("checked", enableMathjs)
+    opt = @model.toJSON()
+    $(@el).find("[data-config]").each (i, v)=>
+      key = $(v).attr("data-config")
+      if key.slice(0, 6) is "enable"
+      then @$el.find("[data-config='#{key}']"  ).attr("checked", opt[key])
+      else @$el.find("[data-config='#{key}']"  ).val(opt[key])
 
 Editor = Backbone.View.extend
   initialize: ({@type})->
