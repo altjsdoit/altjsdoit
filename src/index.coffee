@@ -43,15 +43,11 @@ Main = Backbone.View.extend
       @model.set(config)
       @setValues({script, markup, style})
   run: ->
-    @saveURI()
+    #@saveURI()
     opt = @model.toJSON()
     {altjs, althtml, altcss} = opt
     {script, markup, style} = @getValues()
-    dic = {}
-    dic[altjs] = script
-    dic[althtml] = markup
-    dic[altcss] = style
-    build dic, opt, (srcdoc)->
+    build {altjs, althtml, altcss}, {script, markup, style}, opt, (srcdoc)->
       #$("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
       console.log url = createBlobURL(srcdoc, (if opt.enableViewSource then "text/plain" else "text/html"))
       $("#box-sandbox-iframe").attr({"src": url})

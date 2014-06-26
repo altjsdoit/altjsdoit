@@ -1,12 +1,9 @@
 ![](http://altjsdoit.github.io/icon-128.png) altjsdoit
 ===========
+
 A Simple WebApp Editor on WebBrowser
------------
 
-Try it now!
----------------
-
-* [altjsdoit.github.io](https://altjsdoit.github.io/)
+[Try it now!](https://altjsdoit.github.io/)
 
 
 Build
