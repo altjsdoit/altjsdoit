@@ -18,11 +18,14 @@ grunt
 Change Log
 ---------------
 
-#### Version 0.8.4
+#### Version 0.8.5
 
 * replace jquery to zepto
 * remove es6-shim with Promise
 * remove TypeScript, LispyScript
+
+#### Version 0.8.4
+
 * a lot of bug fix
 
 #### Version 0.8.3
