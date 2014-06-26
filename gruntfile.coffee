@@ -91,10 +91,10 @@ module.exports = (grunt) ->
         tasks:["replace:compile", "coffee:compile", "clean:compile"]
       less:
         files:["./src/**/*.less"]
-        tasks:["replace:compile", "jade:compile", "clean:compile"]
+        tasks:["replace:compile", "less:compile", "clean:compile"]
       jade:
         files:["./src/**/*.jade"]
-        tasks:["replace:compile", "less:compile", "clean:compile"]
+        tasks:["replace:compile", "jade:compile", "clean:compile"]
   grunt.registerTask("compile", ["replace:compile", "coffee:compile", "jade:compile", "less:compile", "clean:compile"])
   grunt.registerTask("make", ["clean:before", "copy:build", "compile"])
   grunt.registerTask("default", ["make"])

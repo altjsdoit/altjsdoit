@@ -22,6 +22,14 @@ createBlobURL = (data, mimetype)->
 
 #! URLToText :: String * (String -> Void) -> String # not referential transparency
 URLToText = (url, callback)->
+  xhr = new XMLHttpRequest()
+  xhr.open('GET', url, true)
+  xhr.onerror = (err)-> throw new Error(err)
+  xhr.onload = ->
+    if this.status is 200 or this.status is 0 and this.readyState is 4
+      callback(this.response)
+  xhr.send()
+  ###
   $.ajax
     url:url
     error: (err)->
@@ -29,6 +37,7 @@ URLToText = (url, callback)->
       then callback(err.responseText)
       else console.error(err, err.stack)
     success: (res)-> callback(res)
+  ###
 
 #! URLToArrayBuffer :: String * (ArrayBuffer -> Void) -> Void # not referential transparency
 URLToArrayBuffer = (url, callback)->
@@ -236,20 +245,24 @@ compileAll = (langs, callback)->
     .then((results)-> callback(results))
     .catch((err)-> console.error(err, err.stack))
 
-getIncludeScriptURLs = (opt, cb)->
+getIncludeScriptURLs = (opt, callback)->
   urls = []
-  if opt.enableJQuery      then urls.push "thirdparty/jquery/jquery.min.js"
-  if opt.enableUnderscore  then urls.push "thirdparty/underscore.js/underscore-min.js"
-  if opt.enableES6shim     then urls.push "thirdparty/es6-shim/es6-shim.min.js"
-  if opt.enableMathjs      then urls.push "thirdparty/mathjs/math.min.js"
-  if opt.enableProcessing  then urls.push "thirdparty/processing.js/processing.min.js"
-  createProxyURLs urls, "text/javascript", (_urls)-> cb(_urls)
+  if opt.enableJQuery      then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/jquery/jquery.min.js"            else "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js")
+  if opt.enableUnderscore  then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/underscore.js/underscore-min.js" else "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js")
+  if opt.enableES6shim     then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/es6-shim/es6-shim.min.js"        else "https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.11.0/es6-shim.min.js")
+  if opt.enableMathjs      then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/mathjs/math.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/mathjs/0.23.0/math.min.js")
+  if opt.enableProcessing  then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/processing.js/processing.min.js" else "https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.8/processing.min.js")
+  if opt.enableCache and opt.enableBlobCache
+  then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
+  else setTimeout -> callback(urls)
 
-getIncludeStyleURLs = (opt, cb)->
+getIncludeStyleURLs = (opt, callback)->
   urls = []
-  createProxyURLs urls, "text/javascript", (_urls)-> cb(_urls)
+  if opt.enableCache and opt.enableBlobCache
+  then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
+  else setTimeout -> callback(urls)
 
-buildScripts = (urls)-> urls.reduce(((str, url)-> str + """<script src='#{url}'><#{"/"}script>"\n"""), "")
+buildScripts = (urls)-> urls.reduce(((str, url)-> str + """<script src='#{url}'><#{"/"}script>\n"""), "")
 
 buildStyles  = (urls)-> urls.reduce(((str, url)-> str + """<link rel='stylesheet' href='#{url}' />\n"""), "")
 
@@ -298,41 +311,42 @@ buildErr = (jsResult, htmlResult, cssResult)->
     </html>
   """
 
-includeFirebugLite = (head, jsResult, htmlResult, cssResult, callback)->
-      ###
-  createProxyURLs ["thirdparty/firebug/skin/xp/sprite.png"], "image/png", ([spriteURL])->
-    URLToText "thirdparty/firebug/build/firebug-lite.js", (text)->
-      _text = text
-        .replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png",
-                 spriteURL)
-        .replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;",
-                 "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
-      ###
-      firebugURL = "https://getfirebug.com/firebug-lite.js"#createBlobURL(_text, "text/javascript")
-      jsResult.code = """
-        try{
-          #{jsResult.code}
-        }catch(err){
-          console.error(err, err.stack);
+includeFirebugLite = (head, jsResult, htmlResult, cssResult, opt, callback)->
+  caching = (next)->
+    if opt.enableCache and opt.enableBlobCache
+      URLToText makeURL(location)+"thirdparty/firebug/firebug-lite.js", (text)->
+        _text = text
+          .replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;",
+                   "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
+        next(createBlobURL(_text, "text/javascript"))
+    else if opt.enableCache
+    then setTimeout -> next(makeURL(location)+"thirdparty/firebug/firebug-lite.js")
+    else setTimeout -> next("https://cdnjs.cloudflare.com/ajax/libs/firebug-lite/1.4.0/firebug-lite.js")
+  caching (firebugURL)->
+    jsResult.code = """
+      try{
+        #{jsResult.code}
+      }catch(err){
+        console.error(err, err.stack);
+      }
+    """
+    head = """
+      <script id='FirebugLite' FirebugLite='4' src='#{firebugURL}'>
+        {
+          overrideConsole:true,
+          showIconWhenHidden:true,
+          startOpened:true,
+          enableTrace:true
         }
-      """
-      head = """
-        <script id='FirebugLite' FirebugLite='4' src='#{firebugURL}'>
-          {
-            overrideConsole:true,
-            showIconWhenHidden:true,
-            startOpened:true,
-            enableTrace:true
-          }
-        <#{"/"}script>
-        <style>
-          body{
-            margin-bottom: 400px;
-          }
-        </style>
-        #{head}
-      """
-      callback(head, jsResult, htmlResult, cssResult)
+      <#{"/"}script>
+      <style>
+        body{
+          margin-bottom: 400px;
+        }
+      </style>
+      #{head}
+    """
+    callback(head, jsResult, htmlResult, cssResult)
 
 build = ({altjs, althtml, altcss}, {script, markup, style}, opt, callback)->
   compileAll [
@@ -350,6 +364,6 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, opt, callback)->
               srcdoc = buildHTML(head, jsResult, htmlResult, cssResult)
               setTimeout -> callback(srcdoc)
             else
-              includeFirebugLite head, jsResult, htmlResult, cssResult, (_head, _jsResult, _htmlResult, _cssResult)->
+              includeFirebugLite head, jsResult, htmlResult, cssResult, opt, (_head, _jsResult, _htmlResult, _cssResult)->
                 srcdoc = buildHTML(_head, _jsResult, _htmlResult, _cssResult)
                 setTimeout -> callback(srcdoc)

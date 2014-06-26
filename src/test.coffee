@@ -1,4 +1,4 @@
-QUnit.config.testTimeout = 2000
+QUnit.config.testTimeout = 3000
 
 QUnit.module("URL")
 

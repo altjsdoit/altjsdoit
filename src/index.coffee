@@ -12,6 +12,7 @@ Main = Backbone.View.extend
   el: "#layout"
   events:
     "click #setting-project-save": "saveURI"
+    "click #setting-project-shorten": "shorten"
   saveURI: ->
     @model.set("timestamp", Date.now())
     config = JSON.stringify(@model.toJSON())
@@ -19,9 +20,9 @@ Main = Backbone.View.extend
     url = makeURL(location) + "#" + encodeURIQuery {zip:zipDataURI({config, script, markup, style})}
     $("#setting-project-url").val(url)
     $("#setting-project-size").html(url.length)
-    $("#setting-project-twitter").html("")
     history.pushState(null, null, url)
-    shortenURL url, (_url)=>
+  shorten: ->
+    shortenURL $("#setting-project-url").val(), (_url)=>
       $("#setting-project-url").val(_url)
       $("#setting-project-twitter").html(
         $("<a />").attr({
@@ -34,6 +35,7 @@ Main = Backbone.View.extend
           "data-count": "none"
           "data-lang": "en"
         }).html("Tweet"))
+      $("#setting-project-size").html(_url.length)
       twttr.widgets.load()
   loadURI: ->
     {zip} = decodeURIQuery(location.hash.slice(1))
@@ -43,11 +45,12 @@ Main = Backbone.View.extend
       @model.set(config)
       @setValues({script, markup, style})
   run: ->
-    #@saveURI()
+    @saveURI()
     opt = @model.toJSON()
     {altjs, althtml, altcss} = opt
     {script, markup, style} = @getValues()
-    build {altjs, althtml, altcss}, {script, markup, style}, opt, (srcdoc)->
+    _obj = Object.create(opt)
+    build {altjs, althtml, altcss}, {script, markup, style}, _obj, (srcdoc)->
       #$("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
       console.log url = createBlobURL(srcdoc, (if opt.enableViewSource then "text/plain" else "text/html"))
       $("#box-sandbox-iframe").attr({"src": url})
