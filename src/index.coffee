@@ -11,8 +11,7 @@ Config = Backbone.Model.extend
 Main = Backbone.View.extend
   el: "#layout"
   events:
-    "click #setting-project-save": "saveURI"
-    "click #setting-project-shorten": "shorten"
+    "click #setting-project-save": "saveAndShorten"
   saveURI: ->
     @model.set("timestamp", Date.now())
     config = JSON.stringify(@model.toJSON())
@@ -21,7 +20,8 @@ Main = Backbone.View.extend
     $("#setting-project-url").val(url)
     $("#setting-project-size").html(url.length)
     history.pushState(null, null, url)
-  shorten: ->
+  saveAndShorten: ->
+    @saveURI()
     shortenURL $("#setting-project-url").val(), (_url)=>
       $("#setting-project-url").val(_url)
       $("#setting-project-twitter").html(
