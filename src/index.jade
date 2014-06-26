@@ -109,15 +109,16 @@ html(lang='ja', manifest="manifest.appcache")
                   option(value='blob', selected='selected') objectURL
                   option(value='srcdoc') srcdoc
                   option(value='base64') dataURI
+                p: a.pure-button(target='_blank' href="./test.html") SelfTest
             fieldset
               legend About
               div. @@name
               div. version: @@version
               div. build: @@timestamp
-              ul
-                li: a(target='_blank' href="https://github.com/altjsdoit/altjsdoit") github
-                li: a(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") twitter
-                li: a(target='_blank' href="./test.html") test
+              p
+                a.pure-button(target='_blank' href="https://github.com/altjsdoit/altjsdoit") github
+                | &nbsp;
+                a.pure-button(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") twitter
         #box-altjs
           textarea#box-altjs-textarea(wrap='off', placeholder='script')!="\n\n\n"
         #box-althtml
