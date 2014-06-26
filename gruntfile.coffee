@@ -30,6 +30,7 @@ module.exports = (grunt) ->
         options:
           patterns: [
             {match: 'timestamp', replacement: '<%= grunt.template.today() %>'}
+            {match: "name",      replacement: '<%= pkg.name %>'}
             {match: "version",   replacement: '<%= pkg.version %>'}
           ]
         files: [

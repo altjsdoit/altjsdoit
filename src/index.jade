@@ -50,8 +50,6 @@ html(lang='ja', manifest="manifest.appcache")
                 select(data-config='altjs')
                   option(value='JavaScript', selected='selected') JavaScript
                   option(value='CoffeeScript') CoffeeScript(1.7.1)
-                  //option(value='TypeScript') TypeScript(1.0.0)
-                  //option(value='LispyScript') LispyScript(0.3.6)
               label
                 | altHTML:
                 select(data-config='althtml')
@@ -112,7 +110,10 @@ html(lang='ja', manifest="manifest.appcache")
                   option(value='srcdoc') srcdoc
                   option(value='base64') dataURI
             fieldset
-              legend Support
+              legend About
+              div. @@name
+              div. version: @@version
+              div. build: @@timestamp
               ul
                 li: a(target='_blank' href="https://github.com/altjsdoit/altjsdoit") github
                 li: a(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") twitter
