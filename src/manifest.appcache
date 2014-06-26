@@ -4,65 +4,48 @@ CACHE MANIFEST
 
 
 CACHE:
-index.html
-
 icon-128.png
 
 thirdparty/codemirror/codemirror.css
 thirdparty/codemirror/theme/solarized.css
-thirdparty/codemirror/addon/fold/foldgutter.css
 thirdparty/codemirror/addon/dialog/dialog.css
-
 thirdparty/pure/pure-min.css
 thirdparty/pure/main.css
 thirdparty/pure/baby-blue.css
-
 index.css
 
-thirdparty/es6-shim/es6-shim.min.js
-thirdparty/jquery/jquery.min.js
-
+cache.js
+thirdparty/zepto/zepto.min.js
 ui.js
-
 thirdparty/underscore.js/underscore-min.js
 thirdparty/backbone.js/backbone-min.js
 thirdparty/jszip/jszip.min.js
-
 thirdparty/codemirror/codemirror.min.js
 thirdparty/codemirror/addon/search/searchcursor.js
 thirdparty/codemirror/addon/search/search.js
 thirdparty/codemirror/addon/dialog/dialog.js
 thirdparty/codemirror/addon/edit/matchbrackets.js
 thirdparty/codemirror/addon/edit/closebrackets.js
-thirdparty/codemirror/addon/comment/comment.js
-thirdparty/codemirror/addon/wrap/hardwrap.js
-thirdparty/codemirror/addon/fold/foldcode.js
-thirdparty/codemirror/addon/fold/brace-fold.js
 thirdparty/codemirror/mode/javascript/javascript.js
 thirdparty/codemirror/mode/coffeescript/coffeescript.js
-thirdparty/codemirror/mode/scheme/scheme.js
 thirdparty/codemirror/mode/xml/xml.js
 thirdparty/codemirror/mode/jade/jade.js
 thirdparty/codemirror/mode/css/css.js
-
 thirdparty/coffee-script/coffee-script.min.js
-thirdparty/typescript/typescript.min.js
-thirdparty/lispyscript/lispyscript.js
 thirdparty/jade/jade.min.js
 thirdparty/less.js/less.min.js
 thirdparty/stylus/stylus.min.js
-
 thirdparty/twitter/widgets.js
-
 lib.js
 index.js
 
+thirdparty/firebug/firebug-lite.js
+thirdparty/jquery/jquery.min.js
 thirdparty/processing.js/processing.min.js
 thirdparty/mathjs/math.min.js
 
-thirdparty/qunit/qunit.js
-thirdparty/qunit/qunit.css
 
 NETWORK:
 *
+
 FALLBACK:

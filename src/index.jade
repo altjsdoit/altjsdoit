@@ -9,7 +9,6 @@ html(lang='ja', manifest="manifest.appcache")
     link(rel="apple-touch-icon" href="./icon-128.png")
     link(rel='stylesheet', href='./thirdparty/codemirror/codemirror.css')
     link(rel='stylesheet', href='./thirdparty/codemirror/theme/solarized.css')
-    link(rel='stylesheet', href='./thirdparty/codemirror/addon/fold/foldgutter.css')
     link(rel='stylesheet', href='./thirdparty/codemirror/addon/dialog/dialog.css')
     link(rel='stylesheet', href='./thirdparty/pure/pure-min.css')
     link(rel='stylesheet', href='./thirdparty/pure/main.css')
@@ -51,8 +50,8 @@ html(lang='ja', manifest="manifest.appcache")
                 select(data-config='altjs')
                   option(value='JavaScript', selected='selected') JavaScript
                   option(value='CoffeeScript') CoffeeScript(1.7.1)
-                  option(value='TypeScript') TypeScript(1.0.0)
-                  option(value='LispyScript') LispyScript(0.3.6)
+                  //option(value='TypeScript') TypeScript(1.0.0)
+                  //option(value='LispyScript') LispyScript(0.3.6)
               label
                 | altHTML:
                 select(data-config='althtml')
@@ -78,14 +77,14 @@ html(lang='ja', manifest="manifest.appcache")
                 | Firebug-Lite(1.4.0):
                 input(data-config='enableFirebugLite', type='checkbox')
               label
+                | Zepto(1.1.3):
+                input(data-config='enableJQuery', type='checkbox')
+              label
                 | jQuery(2.1.1):
                 input(data-config='enableJQuery', type='checkbox')
               label
                 | Underscore.js(1.6.0):
                 input(data-config='enableUnderscore', type='checkbox')
-              label
-                | es6-shim(0.11.0):
-                input(data-config='enableES6shim', type='checkbox')
               label
                 | Processing.js(1.4.8):
                 input(data-config='enableProcessing', type='checkbox')
@@ -104,8 +103,7 @@ html(lang='ja', manifest="manifest.appcache")
               legend Support
               ul
                 li: a(target='_blank' href="https://github.com/altjsdoit/altjsdoit") github
-                li: a(target='_blank' href="https://github.com/altjsdoit/altjsdoit/issues") github/issues
-                li: a(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") twitter/search
+                li: a(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") twitter
                 li: a(target='_blank' href="./test.html") test
         #box-altjs
           textarea#box-altjs-textarea(wrap='off', placeholder='script')!="\n\n\n"
@@ -116,8 +114,7 @@ html(lang='ja', manifest="manifest.appcache")
         #box-sandbox
           iframe#box-sandbox-iframe
     script(src='./cache.js')
-    script(src='./thirdparty/es6-shim/es6-shim.min.js')
-    script(src='./thirdparty/jquery/jquery.min.js')
+    script(src='./thirdparty/zepto/zepto.min.js')
     script(src='./ui.js')
     script(src='./thirdparty/underscore.js/underscore-min.js')
     script(src='./thirdparty/backbone.js/backbone-min.js')
@@ -128,20 +125,12 @@ html(lang='ja', manifest="manifest.appcache")
     script(src='./thirdparty/codemirror/addon/dialog/dialog.js')
     script(src='./thirdparty/codemirror/addon/edit/matchbrackets.js')
     script(src='./thirdparty/codemirror/addon/edit/closebrackets.js')
-    script(src='./thirdparty/codemirror/addon/comment/comment.js')
-    script(src='./thirdparty/codemirror/addon/wrap/hardwrap.js')
-    script(src='./thirdparty/codemirror/addon/fold/foldcode.js')
-    script(src='./thirdparty/codemirror/addon/fold/brace-fold.js')
     script(src='./thirdparty/codemirror/mode/javascript/javascript.js')
     script(src='./thirdparty/codemirror/mode/coffeescript/coffeescript.js')
-    script(src='./thirdparty/codemirror/mode/scheme/scheme.js')
     script(src='./thirdparty/codemirror/mode/css/css.js')
     script(src='./thirdparty/codemirror/mode/xml/xml.js')
     script(src='./thirdparty/codemirror/mode/jade/jade.js')
-    script(src='./thirdparty/codemirror/mode/css/css.js')
     script(async='async', src='./thirdparty/coffee-script/coffee-script.min.js')
-    script(async='async', src='./thirdparty/typescript/typescript.min.js')
-    script(async='async', src='./thirdparty/lispyscript/lispyscript.js')
     script(async='async', src='./thirdparty/jade/jade.min.js')
     script(async='async', src='./thirdparty/less.js/less.min.js')
     script(async='async', src='./thirdparty/stylus/stylus.min.js')

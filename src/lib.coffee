@@ -24,20 +24,12 @@ createBlobURL = (data, mimetype)->
 URLToText = (url, callback)->
   xhr = new XMLHttpRequest()
   xhr.open('GET', url, true)
-  xhr.onerror = (err)-> throw new Error(err)
+  xhr.responseType = 'text'
+  xhr.onerror = (err)-> throw new Error(JSON.strigify(err))
   xhr.onload = ->
     if this.status is 200 or this.status is 0 and this.readyState is 4
       callback(this.response)
   xhr.send()
-  ###
-  $.ajax
-    url:url
-    error: (err)->
-      if err.status is 200 and err.readyState is 4 # offline appcache behavior
-      then callback(err.responseText)
-      else console.error(err, err.stack)
-    success: (res)-> callback(res)
-  ###
 
 #! URLToArrayBuffer :: String * (ArrayBuffer -> Void) -> Void # not referential transparency
 URLToArrayBuffer = (url, callback)->
@@ -52,14 +44,13 @@ URLToArrayBuffer = (url, callback)->
 
 #! createProxyURLs :: String[] * String * (String[] -> Void) -> Void
 createProxyURLs = (urls, mimetype, callback)->
-  promises = urls.map (url)->
-    new Promise (resolve)->
-      URLToArrayBuffer url, (arrayBuffer)->
-        resolve(createBlobURL(arrayBuffer, mimetype))
-  Promise
-    .all(promises)
-    .then((_urls)-> callback(_urls))
-    .catch((err)-> console.error(err, err.stack))
+  n = 0
+  _urls = []
+  urls.forEach (url, i)->
+    n++
+    URLToArrayBuffer url, (arrayBuffer)->
+      _urls[i] = createBlobURL(arrayBuffer, mimetype)
+      if --n is 0 then callback(_urls)
 
 #! encodeDataURI :: String * String * (String -> Void) -> Void
 encodeDataURI = (data, mimetype, callback)->
@@ -166,55 +157,6 @@ getCompilerSetting = (lang)->
     when "CoffeeScript" then f "coffeescript", (code, cb)->
       _code = CoffeeScript.compile(code, {bare:true})
       setTimeout -> cb(null, _code)
-    when "TypeScript"   then f "javascript",   (code, cb)->
-      filename = "jsdo.it.ts"
-      source = code
-      _compiler = new TypeScript.TypeScriptCompiler(filename)
-      snapshot = TypeScript.ScriptSnapshot.fromString(source)
-      _compiler.addFile(filename, snapshot)
-      iter = _compiler.compile()
-      output = ''
-      while iter.moveNext()
-        current = iter.current().outputFiles[0]
-        output += if !!current then current.text else ''
-      diagnostics = _compiler.getSemanticDiagnostics(filename)
-      if diagnostics.length
-        err = diagnostics.map((d)-> d.text()).join("\n")
-        if !output then throw new Error(err)
-        console.error err
-      setTimeout -> cb(null, output)
-    when "TypedCoffeeScript" then f "coffeescript", (code, cb)->
-        preprocessed = TypedCoffeeScript.Preprocessor.process(code)
-        parsed = TypedCoffeeScript.Parser.parse(preprocessed, {raw: null, inputSource: null, optimise: null})
-        TypedCoffeeScript.TypeWalker.checkNodes(parsed)
-        TypedCoffeeScript.reporter.clean()
-        TypedCoffeeScript.TypeWalker.checkNodes(parsed)
-        if TypedCoffeeScript.reporter.has_errors()
-          console.error TypedCoffeeScript.reporter.report()
-          TypedCoffeeScript.reporter.clean()
-        jsAST = TypedCoffeeScript.Compiler.compile(parsed, {bare: true}).toBasicObject()
-        jsCode = escodegen.generate(jsAST)
-        setTimeout -> cb(null, jsCode)
-    when "Traceur"      then f "javascript",   (code, cb)->
-      reporter = new traceur.util.ErrorReporter()
-      reporter.reportMessageInternal = (location, kind, format, args)->
-        throw new Error(traceur.util.ErrorReporter.format(location, format, args))
-      project = new traceur.semantics.symbols.Project(location.href)
-      project.addFile(new traceur.syntax.SourceFile('a.js', code))
-      _code = traceur.outputgeneration.ProjectWriter.write(traceur.codegeneration.Compiler.compile(reporter, project, false))
-      setTimeout -> cb(null, _code)
-    when "LiveScript"   then f "coffeescript", (code, cb)->
-      _code = LiveScript.compile(code)
-      setTimeout -> cb(null, _code)
-    when "GorillaScript" then f "coffeescript", (code, cb)->
-      _code = GorillaScript.compileSync(code).code
-      setTimeout -> cb(null, _code)
-    when "Wisp"         then f "clojure",      (code, cb)->
-      result = wisp.compiler.compile(code)
-      setTimeout -> cb(result.error, result.code)
-    when "LispyScript"  then f "scheme",       (code, cb)->
-      _code = lispyscript._compile(code)
-      setTimeout -> cb(null, _code)
     when "HTML"         then f "xml",          (code, cb)->
       setTimeout -> cb(null, code)
     when "Jade"         then f "jade",         (code, cb)->
@@ -234,16 +176,16 @@ getCompilerSetting = (lang)->
 
 #! compileAll :: {lang :: String, code :: String}[] * ({lang :: String, err :: Any?, code :: String}[] -> Void) -> Void
 compileAll = (langs, callback)->
-  compile = (lang, code)->
+  n = 0
+  results = []
+  next = (result, i)->
+    results[i] = result
+    if --n is 0 then callback(results)
+  langs.forEach ({lang, code}, i)->
+    n++
     compilerFn = getCompilerSetting(lang).compile
-    new Promise (resolve)->
-      try compilerFn code, (err, code)-> resolve({lang, err, code})
-      catch err then                     resolve({lang, err, code})
-  promises = langs.map ({lang, code})->  compile(lang, code)
-  Promise
-    .all(promises)
-    .then((results)-> callback(results))
-    .catch((err)-> console.error(err, err.stack))
+    try compilerFn code, (err, code)-> next({lang, err, code}, i)
+    catch err then       setTimeout -> next({lang, err, code}, i)
 
 getIncludeScriptURLs = (opt, callback)->
   urls = []
@@ -321,7 +263,7 @@ includeFirebugLite = (head, jsResult, htmlResult, cssResult, opt, callback)->
         next(createBlobURL(_text, "text/javascript"))
     else if opt.enableCache
     then setTimeout -> next(makeURL(location)+"thirdparty/firebug/firebug-lite.js")
-    else setTimeout -> next("https://cdnjs.cloudflare.com/ajax/libs/firebug-lite/1.4.0/firebug-lite.js")
+    else setTimeout -> next("https://getfirebug.com/firebug-lite.js")
   caching (firebugURL)->
     jsResult.code = """
       try{

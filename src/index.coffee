@@ -122,18 +122,18 @@ Setting = Backbone.View.extend
      enableCodeMirror, enableViewSource, enableJQuery,
      enableUnderscore, enableES6shim, enableFirebugLite,
      enableProcessing, enableMathjs} = @model.toJSON()
-    @$el.find("[data-config='title']"  ).val(title  ).end()
-        .find("[data-config='altjs']"  ).val(altjs  ).end()
-        .find("[data-config='althtml']").val(althtml).end()
-        .find("[data-config='altcss']" ).val(altcss ).end()
-        .find("[data-config='enableCodeMirror']").attr("checked", enableCodeMirror).end()
-        .find("[data-config='enableViewSource']").attr("checked", enableViewSource).end()
-        .find("[data-config='enableFirebugLite']").attr("checked", enableFirebugLite).end()
-        .find("[data-config='enableJQuery']").attr("checked", enableJQuery).end()
-        .find("[data-config='enableUnderscore']").attr("checked", enableUnderscore).end()
-        .find("[data-config='enableES6shim']").attr("checked", enableES6shim).end()
-        .find("[data-config='enableProcessing']").attr("checked", enableProcessing).end()
-        .find("[data-config='enableMathjs']").attr("checked", enableMathjs).end()
+    @$el.find("[data-config='title']"  ).val(title  )
+    @$el.find("[data-config='altjs']"  ).val(altjs  )
+    @$el.find("[data-config='althtml']").val(althtml)
+    @$el.find("[data-config='altcss']" ).val(altcss )
+    @$el.find("[data-config='enableCodeMirror']").attr("checked", enableCodeMirror)
+    @$el.find("[data-config='enableViewSource']").attr("checked", enableViewSource)
+    @$el.find("[data-config='enableFirebugLite']").attr("checked", enableFirebugLite)
+    @$el.find("[data-config='enableJQuery']").attr("checked", enableJQuery)
+    @$el.find("[data-config='enableUnderscore']").attr("checked", enableUnderscore)
+    @$el.find("[data-config='enableES6shim']").attr("checked", enableES6shim)
+    @$el.find("[data-config='enableProcessing']").attr("checked", enableProcessing)
+    @$el.find("[data-config='enableMathjs']").attr("checked", enableMathjs)
 
 Editor = Backbone.View.extend
   initialize: ({@type})->
