@@ -341,7 +341,6 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, opt, callback)->
     {lang: altcss,  code: style }
   ], ([jsResult, htmlResult, cssResult])->
       if jsResult.err? or htmlResult.err? or cssResult.err?
-        console.log "aaaaaaaaaaaaaaaa"
         srcdoc = buildErr(jsResult, htmlResult, cssResult); setTimeout -> callback(srcdoc)
       else
         getIncludeScriptURLs opt, (scriptURLs)->
