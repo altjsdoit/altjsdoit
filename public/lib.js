@@ -490,7 +490,6 @@ build = function(_arg, _arg1, opt, callback) {
     var cssResult, htmlResult, jsResult, srcdoc;
     jsResult = _arg2[0], htmlResult = _arg2[1], cssResult = _arg2[2];
     if ((jsResult.err != null) || (htmlResult.err != null) || (cssResult.err != null)) {
-      console.log("aaaaaaaaaaaaaaaa");
       srcdoc = buildErr(jsResult, htmlResult, cssResult);
       return setTimeout(function() {
         return callback(srcdoc);
