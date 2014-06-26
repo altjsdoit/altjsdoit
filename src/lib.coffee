@@ -265,7 +265,7 @@ includeFirebugLite = (head, jsResult, htmlResult, cssResult, opt, callback)->
         next(createBlobURL(_text, "text/javascript"))
     else if opt.enableCache
     then setTimeout -> next(makeURL(location)+"thirdparty/firebug/firebug-lite.js")
-    else setTimeout -> next("https://cdnjs.cloudflare.com/ajax/libs/firebug-lite/1.4.0/firebug-lite.min.js")
+    else setTimeout -> next("https://getfirebug.com/firebug-lite.js")
   caching (firebugURL)->
     jsResult.code = """
       try{
