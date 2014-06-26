@@ -80,14 +80,17 @@ html(lang='ja', manifest="manifest.appcache")
                 | Zepto(1.1.3):
                 input(data-config='enableZepto', type='checkbox')
               label
-                | es6-shim(0.11.0):
-                input(data-config='enableES6shim', type='checkbox')
-              label
                 | jQuery(2.1.1):
                 input(data-config='enableJQuery', type='checkbox')
               label
                 | Underscore.js(1.6.0):
                 input(data-config='enableUnderscore', type='checkbox')
+              label
+                | Backbone.js(1.1.2):
+                input(data-config='enableBackbone', type='checkbox')
+              label
+                | es6-shim(0.11.0):
+                input(data-config='enableES6shim', type='checkbox')
               label
                 | Processing.js(1.4.8):
                 input(data-config='enableProcessing', type='checkbox')
@@ -130,17 +133,8 @@ html(lang='ja', manifest="manifest.appcache")
     script(src='./lib.js')
     script(src='./index.js')
     script(src='./thirdparty/jszip/jszip.min.js')
-    script(src='./thirdparty/codemirror/codemirror.min.js')
-    script(src='./thirdparty/codemirror/addon/search/searchcursor.js')
-    script(src='./thirdparty/codemirror/addon/search/search.js')
-    script(src='./thirdparty/codemirror/addon/dialog/dialog.js')
-    script(src='./thirdparty/codemirror/addon/edit/matchbrackets.js')
-    script(src='./thirdparty/codemirror/addon/edit/closebrackets.js')
-    script(src='./thirdparty/codemirror/mode/javascript/javascript.js')
-    script(src='./thirdparty/codemirror/mode/coffeescript/coffeescript.js')
-    script(src='./thirdparty/codemirror/mode/css/css.js')
-    script(src='./thirdparty/codemirror/mode/xml/xml.js')
-    script(src='./thirdparty/codemirror/mode/jade/jade.js')
+    script(src="./thirdparty/codemirror/codemirror.min.js")
+    script(src='./thirdparty/codemirror/options.min.js')
     script(async='async', src='./thirdparty/coffee-script/coffee-script.min.js')
     script(async='async', src='./thirdparty/jade/jade.min.js')
     script(async='async', src='./thirdparty/less.js/less.min.js')

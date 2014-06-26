@@ -6,17 +6,18 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-contrib-jade')
   grunt.loadNpmTasks('grunt-contrib-less')
   grunt.loadNpmTasks('grunt-contrib-copy')
+  grunt.loadNpmTasks('grunt-contrib-uglify')
   grunt.loadNpmTasks("grunt-contrib-watch")
   grunt.initConfig
-    pkg: grunt.file.readJSON('./package.json')
+    pkg: grunt.file.readJSON('package.json')
     clean:
       before:
-        src: ["./public/*", "!./public/.git"]
+        src: ["public/*", "!public/.git"]
       compile:
         src: [
-          "./public/*.coffee"
-          "./public/*.jade"
-          "./public/*.less"
+          "public/*.coffee"
+          "public/*.jade"
+          "public/*.less"
         ]
     copy:
       build:
@@ -45,11 +46,11 @@ module.exports = (grunt) ->
           DEBUG: false
       compile:
         src: [
-          "./public/*.appcache"
-          "./public/*.webapp"
-          "./public/*.coffee"
-          "./public/*.jade"
-          "./public/*.less"
+          "public/*.appcache"
+          "public/*.webapp"
+          "public/*.coffee"
+          "public/*.jade"
+          "public/*.less"
         ]
     coffee:
       compile:
@@ -82,19 +83,37 @@ module.exports = (grunt) ->
       options:
         compress: false
         sourceMap: false
+    uglify:
+      options:
+        mangle: true
+        compress: true
+      build:
+        files:
+          'public/thirdparty/codemirror/options.min.js': [
+            "public/thirdparty/codemirror/addon/search/searchcursor.js"
+            "public/thirdparty/codemirror/addon/search/search.js"
+            "public/thirdparty/codemirror/addon/dialog/dialog.js"
+            "public/thirdparty/codemirror/addon/edit/matchbrackets.js"
+            "public/thirdparty/codemirror/addon/edit/closebrackets.js"
+            "public/thirdparty/codemirror/mode/javascript/javascript.js"
+            "public/thirdparty/codemirror/mode/coffeescript/coffeescript.js"
+            "public/thirdparty/codemirror/mode/xml/xml.js"
+            "public/thirdparty/codemirror/mode/jade/jade.js"
+            "public/thirdparty/codemirror/mode/css/css.js"
+          ]
     watch:
       gruntfile:
-        files:["./gruntfile.coffee", "./src/manifest.webapp"]
+        files:["gruntfile.coffee", "src/manifest.webapp", "src/manifest.appcache"]
         tasks:["make"]
       coffee:
-        files:["./src/**/*.coffee"]
+        files:["src/**/*.coffee"]
         tasks:["replace:compile", "coffee:compile", "clean:compile"]
       less:
-        files:["./src/**/*.less"]
+        files:["src/**/*.less"]
         tasks:["replace:compile", "less:compile", "clean:compile"]
       jade:
-        files:["./src/**/*.jade"]
+        files:["src/**/*.jade"]
         tasks:["replace:compile", "jade:compile", "clean:compile"]
   grunt.registerTask("compile", ["replace:compile", "coffee:compile", "jade:compile", "less:compile", "clean:compile"])
-  grunt.registerTask("make", ["clean:before", "copy:build", "compile"])
+  grunt.registerTask("make", ["clean:before", "copy:build", "uglify:build", "compile"])
   grunt.registerTask("default", ["make"])

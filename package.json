@@ -1,6 +1,6 @@
 {
   "name": "altjsdoit",
-  "version": "0.8.4",
+  "version": "0.8.6",
   "private": true,
   "description": "",
   "main": "public/index.html",
@@ -17,6 +17,7 @@
     "grunt-contrib-copy": "*",
     "grunt-contrib-clean": "*",
     "grunt-preprocess": "*",
-    "grunt-replace": "*"
+    "grunt-replace": "*",
+    "grunt-contrib-uglify": "^0.5.0"
   }
 }

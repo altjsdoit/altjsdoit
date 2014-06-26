@@ -127,7 +127,6 @@ Setting = Backbone.View.extend
     opt = @model.toJSON()
     $(@el).find("[data-config]").each (i, v)=>
       key = $(v).attr("data-config")
-      console.log key, opt[key]
       if key.slice(0, 6) is "enable"
       then @$el.find("[data-config='#{key}']"  ).attr("checked", opt[key])
       else @$el.find("[data-config='#{key}']"  ).val(opt[key])

@@ -18,6 +18,10 @@ grunt
 Change Log
 ---------------
 
+#### Version 0.8.6
+
+* more light weight
+
 #### Version 0.8.5
 
 * replace jquery to zepto

@@ -192,6 +192,7 @@ getIncludeScriptURLs = (opt, callback)->
   if opt.enableZepto       then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/zepto/zepto.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.3/zepto.min.js")
   if opt.enableJQuery      then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/jquery/jquery.min.js"            else "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js")
   if opt.enableUnderscore  then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/underscore.js/underscore-min.js" else "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js")
+  if opt.enableBackbone    then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/backbone.js/backbone-min.js"     else "https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js")
   if opt.enableES6shim     then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/es6-shim/es6-shim.min.js"        else "https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.11.0/es6-shim.min.js")
   if opt.enableMathjs      then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/mathjs/math.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/mathjs/0.23.0/math.min.js")
   if opt.enableProcessing  then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/processing.js/processing.min.js" else "https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.8/processing.min.js")
@@ -264,7 +265,7 @@ includeFirebugLite = (head, jsResult, htmlResult, cssResult, opt, callback)->
         next(createBlobURL(_text, "text/javascript"))
     else if opt.enableCache
     then setTimeout -> next(makeURL(location)+"thirdparty/firebug/firebug-lite.js")
-    else setTimeout -> next("https://getfirebug.com/firebug-lite.js")
+    else setTimeout -> next("https://cdnjs.cloudflare.com/ajax/libs/firebug-lite/1.4.0/firebug-lite.min.js")
   caching (firebugURL)->
     jsResult.code = """
       try{
