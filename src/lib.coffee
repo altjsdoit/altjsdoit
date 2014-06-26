@@ -73,12 +73,14 @@ decodeDataURI = (dataURI, callback)->
   reader.readAsText(new Blob([ab], {type: mimeString}))
   reader.onloadend = -> callback(reader.result)
 
-#! makeURL :: Location -> String
-makeURL = (location)->
+makeDomain = (location)->
   location.protocol + '//' +
   location.hostname +
-  (if location.port then ":"+location.port else "") +
-  location.pathname
+  (if location.port then ":"+location.port else "")
+
+#! makeURL :: Location -> String
+makeURL = (location)->
+  makeDomain(location) + location.pathname
 
 #! encodeURIQuery :: Dictionary<String> -> Stirng
 encodeURIQuery = (dic)->
@@ -105,8 +107,9 @@ shortenURL = (url, callback)->
     data: JSON.stringify({longUrl: url})
     dataType: 'json'
     success: (res)->
-      console.info res
-      callback(res.id)
+      if res.longUrl is url
+      then callback(res.id)
+      else console.error "url shorten failed. ", res
     error: (err)-> console.error(err, err.stack)
 
 #! expandURL :: String * (String -> Void) -> Void
@@ -114,8 +117,9 @@ expandURL = (url, callback)->
   $.ajax
     url:"https://www.googleapis.com/urlshortener/v1/url?shortUrl="+url
     success: (res)->
-      console.info res
-      callback(res.longUrl)
+      if res.longUrl
+      then callback(res.longUrl)
+      else console.error "url expand failed", res
     error: (err)-> console.error(err, err.stack)
 
 
@@ -189,13 +193,13 @@ compileAll = (langs, callback)->
 
 getIncludeScriptURLs = (opt, callback)->
   urls = []
-  if opt.enableZepto       then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/zepto/zepto.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.3/zepto.min.js")
-  if opt.enableJQuery      then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/jquery/jquery.min.js"            else "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js")
-  if opt.enableUnderscore  then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/underscore.js/underscore-min.js" else "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js")
-  if opt.enableBackbone    then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/backbone.js/backbone-min.js"     else "https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js")
-  if opt.enableES6shim     then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/es6-shim/es6-shim.min.js"        else "https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.11.0/es6-shim.min.js")
-  if opt.enableMathjs      then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/mathjs/math.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/mathjs/0.23.0/math.min.js")
-  if opt.enableProcessing  then urls.push (if opt.enableCache then makeURL(location)+"thirdparty/processing.js/processing.min.js" else "https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.8/processing.min.js")
+  if opt.enableZepto       then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/zepto/zepto.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.3/zepto.min.js")
+  if opt.enableJQuery      then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/jquery/jquery.min.js"            else "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js")
+  if opt.enableUnderscore  then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/underscore.js/underscore-min.js" else "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js")
+  if opt.enableBackbone    then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/backbone.js/backbone-min.js"     else "https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js")
+  if opt.enableES6shim     then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/es6-shim/es6-shim.min.js"        else "https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.11.0/es6-shim.min.js")
+  if opt.enableMathjs      then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/mathjs/math.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/mathjs/0.23.0/math.min.js")
+  if opt.enableProcessing  then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/processing.js/processing.min.js" else "https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.8/processing.min.js")
   if opt.enableCache and opt.enableBlobCache
   then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
   else setTimeout -> callback(urls)
@@ -258,13 +262,13 @@ buildErr = (jsResult, htmlResult, cssResult)->
 includeFirebugLite = (head, jsResult, htmlResult, cssResult, opt, callback)->
   caching = (next)->
     if opt.enableCache and opt.enableBlobCache
-      URLToText makeURL(location)+"thirdparty/firebug/firebug-lite.js", (text)->
+      URLToText makeDomain(location)+"/"+"thirdparty/firebug/firebug-lite.js", (text)->
         _text = text
           .replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;",
-                   "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
+                   "var m=['build/', 'build']; path='#{makeDomain(location)}/thirdparty/firebug/build/'")
         next(createBlobURL(_text, "text/javascript"))
     else if opt.enableCache
-    then setTimeout -> next(makeURL(location)+"thirdparty/firebug/firebug-lite.js")
+    then setTimeout -> next(makeDomain(location)+"/"+"thirdparty/firebug/firebug-lite.js")
     else setTimeout -> next("https://getfirebug.com/firebug-lite.js")
   caching (firebugURL)->
     jsResult.code = """

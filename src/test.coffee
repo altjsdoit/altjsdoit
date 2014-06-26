@@ -69,6 +69,11 @@ QUnit.asyncTest "encodeDataURI, decodeDataURI", (assert)->
       assert.deepEqual(_dic, dic, json)
       QUnit.start()
 
+QUnit.test "makeDomain", (assert)->
+  expect(1)
+  url = makeDomain(location)
+  assert.ok(typeof url is "string", url)
+
 QUnit.test "makeURL", (assert)->
   expect(1)
   assert.strictEqual(makeURL(location)+location.search+location.hash, location.href)
@@ -145,40 +150,75 @@ QUnit.asyncTest "compileAll", (assert)->
   expect(langs.length)
   compileAll langs, (results)->
     results.forEach ({err, code}, i)->
-      console.log err
       assert.ok(JSON.stringify(err).length > 10,
                 langs[i].lang+": "+JSON.stringify(err)+" : "+code)
     QUnit.start()
 
 QUnit.asyncTest "getIncludeStyleURLs", (assert)->
-  QUnit.start()
-  expect(0)
-
+  expect(1)
+  getIncludeStyleURLs {}, (urls)->
+    assert.strictEqual(urls.length, 0, JSON.stringify(urls))
+    QUnit.start()
 
 QUnit.asyncTest "getIncludeScriptURLs", (assert)->
-  QUnit.start()
-  expect(0)
-
-
-QUnit.test "buildStyles", (assert)->
-  expect(0)
+  expect(3)
+  getIncludeScriptURLs {enableZepto:true}, (urls)->
+    assert.deepEqual(urls, ["https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.3/zepto.min.js"], JSON.stringify(urls))
+    getIncludeScriptURLs {enableJQuery:true, enableCache:true}, (urls)->
+      assert.deepEqual(urls, [makeDomain(location)+"/"+"thirdparty/jquery/jquery.min.js"], JSON.stringify(urls))
+      getIncludeScriptURLs {enableUnderscore:true, enableCache:true, enableBlobCache:true}, (urls)->
+        URLToText urls[0], (_text)->
+          URLToText makeDomain(location)+"/"+"thirdparty/underscore.js/underscore-min.js", (text)->
+            assert.strictEqual(_text, text, _text)
+            QUnit.start()
 
 QUnit.test "buildScripts", (assert)->
-  expect(0)
+  expect(1)
+  tags = buildScripts ["hoge.js","huga.js"]
+  assert.strictEqual(tags, "<script src='hoge.js'></script>\n<script src='huga.js'></script>\n", tags)
+
+QUnit.test "buildStyles", (assert)->
+  expect(1)
+  tags = buildStyles ["hoge.css","huga.css"]
+  assert.strictEqual(tags, "<link rel='stylesheet' href='hoge.css' />\n<link rel='stylesheet' href='huga.css' />\n", tags)
 
 QUnit.test "buildHTML", (assert)->
-  expect(0)
+  expect(1)
+  srcdoc = buildHTML("", {code:""}, {code:""}, {code:""})
+  assert.ok(srcdoc, srcdoc)
 
 QUnit.test "buildErr", (assert)->
-  expect(0)
+  expect(1)
+  a =
+    lang: ""
+    code: ""
+  srcdoc = buildErr(a, a, a)
+  assert.ok(srcdoc, srcdoc)
 
 QUnit.asyncTest "includeFirebugLite", (assert)->
-  expect(0)
-  QUnit.start()
+  expect(1)
+  a =
+    lang: ""
+    code: ""
+  includeFirebugLite "", a, a, a, {}, ->
+    assert.ok(true, JSON.stringify(arguments))
+    QUnit.start()
 
 QUnit.asyncTest "build", (assert)->
-  expect(0)
-  QUnit.start()
+  expect(1)
+  lang =
+    altjs: "JavaScript"
+    althtml: "HTML"
+    altcss: "CSS"
+  code =
+    script: ""
+    markup: ""
+    style: ""
+  opt = {}
+  build lang, code, opt, (srcdoc)->
+    assert.strictEqual(srcdoc, buildHTML("", {code:""}, {code:""}, {code:""}), srcdoc)
+    QUnit.start()
+
 
 
 QUnit.module("Complex")
@@ -272,6 +312,6 @@ encodeDataURI """
       window.onmessage = (ev)->
         testResult = JSON.parse(ev.data)
         assert.ok(testResult.dataURI,   "dataURI")
-        assert.ok(testResult.objectURL, "objectURL");console.log testResult.objectURL
+        assert.ok(testResult.objectURL, "objectURL")
         assert.ok(testResult.inline,    "inline")
         QUnit.start()
