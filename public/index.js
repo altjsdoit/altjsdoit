@@ -69,7 +69,6 @@ Main = Backbone.View.extend({
   },
   run: function() {
     var altcss, althtml, altjs, markup, opt, script, style, _ref;
-    this.saveURI();
     opt = this.model.toJSON();
     altjs = opt.altjs, althtml = opt.althtml, altcss = opt.altcss;
     _ref = this.getValues(), script = _ref.script, markup = _ref.markup, style = _ref.style;

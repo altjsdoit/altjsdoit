@@ -43,7 +43,7 @@ Main = Backbone.View.extend
       @model.set(config)
       @setValues({script, markup, style})
   run: ->
-    @saveURI()
+    #@saveURI()
     opt = @model.toJSON()
     {altjs, althtml, altcss} = opt
     {script, markup, style} = @getValues()

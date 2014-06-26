@@ -41,7 +41,7 @@ URLToArrayBuffer = (url, callback)->
       callback(this.response)
   xhr.send()
 
-#! createProxyURL :: String[] * String * (String[] -> Void) -> Void
+#! createProxyURLs :: String[] * String * (String[] -> Void) -> Void
 createProxyURLs = (urls, mimetype, callback)->
   promises = urls.map (url)->
     new Promise (resolve)->
@@ -236,7 +236,7 @@ compileAll = (langs, callback)->
     .then((results)-> callback(results))
     .catch((err)-> console.error(err, err.stack))
 
-getIncludeScriptURLs = (cb)->
+getIncludeScriptURLs = (opt, cb)->
   urls = []
   if opt.enableJQuery      then urls.push "thirdparty/jquery/jquery.min.js"
   if opt.enableUnderscore  then urls.push "thirdparty/underscore.js/underscore-min.js"
@@ -245,7 +245,7 @@ getIncludeScriptURLs = (cb)->
   if opt.enableProcessing  then urls.push "thirdparty/processing.js/processing.min.js"
   createProxyURLs urls, "text/javascript", (_urls)-> cb(_urls)
 
-getIncludeStyleURLs = (cb)->
+getIncludeStyleURLs = (opt, cb)->
   urls = []
   createProxyURLs urls, "text/javascript", (_urls)-> cb(_urls)
 
@@ -298,14 +298,16 @@ buildErr = (jsResult, htmlResult, cssResult)->
     </html>
   """
 
-includeFirebugLite = (head, jsResult, htmlResult, cssResult, cb)->
-  createProxyURL ["thirdparty/firebug/skin/xp/sprite.png"], "image/png", ([spriteURL])->
+includeFirebugLite = (head, jsResult, htmlResult, cssResult, callback)->
+      ###
+  createProxyURLs ["thirdparty/firebug/skin/xp/sprite.png"], "image/png", ([spriteURL])->
     URLToText "thirdparty/firebug/build/firebug-lite.js", (text)->
       _text = text
         .replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png",
                  spriteURL)
         .replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;",
                  "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
+      ###
       firebugURL = "https://getfirebug.com/firebug-lite.js"#createBlobURL(_text, "text/javascript")
       jsResult.code = """
         try{
@@ -330,7 +332,7 @@ includeFirebugLite = (head, jsResult, htmlResult, cssResult, cb)->
         </style>
         #{head}
       """
-      cb(head, jsResult, htmlResult, cssResult)
+      callback(head, jsResult, htmlResult, cssResult)
 
 build = ({altjs, althtml, altcss}, {script, markup, style}, opt, callback)->
   compileAll [
@@ -338,16 +340,17 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, opt, callback)->
     {lang: althtml, code: markup}
     {lang: altcss,  code: style }
   ], ([jsResult, htmlResult, cssResult])->
-    if jsResult.err? or htmlResult.err? or cssResult.err?
-    then srcdoc = buildErr(jsResult, htmlResult, cssResult); setTimeout -> callback(srcdoc)
-    else
-      getIncludeScriptURLs (scriptURLs)->
-        getIncludeStyleURLs (styleURLs)->
-          head = styleURLs + scriptURLs
-          if !opt.enableFirebugLite
-            srcdoc = _build(_head, jsResult, htmlResult, cssResult)
-            setTimeout -> callback(srcdoc)
-          else
-            includeFirebugLite head, (_head, _jsResult, _htmlResult, _cssResult)->
-              srcdoc = _build(_head, _jsResult, _htmlResult, _cssResult)
+      if jsResult.err? or htmlResult.err? or cssResult.err?
+        console.log "aaaaaaaaaaaaaaaa"
+        srcdoc = buildErr(jsResult, htmlResult, cssResult); setTimeout -> callback(srcdoc)
+      else
+        getIncludeScriptURLs opt, (scriptURLs)->
+          getIncludeStyleURLs opt, (styleURLs)->
+            head = buildStyles(styleURLs) + buildScripts(scriptURLs)
+            if !opt.enableFirebugLite
+              srcdoc = buildHTML(head, jsResult, htmlResult, cssResult)
               setTimeout -> callback(srcdoc)
+            else
+              includeFirebugLite head, jsResult, htmlResult, cssResult, (_head, _jsResult, _htmlResult, _cssResult)->
+                srcdoc = buildHTML(_head, _jsResult, _htmlResult, _cssResult)
+                setTimeout -> callback(srcdoc)

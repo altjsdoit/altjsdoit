@@ -402,7 +402,7 @@ compileAll = function(langs, callback) {
   });
 };
 
-getIncludeScriptURLs = function(cb) {
+getIncludeScriptURLs = function(opt, cb) {
   var urls;
   urls = [];
   if (opt.enableJQuery) {
@@ -425,7 +425,7 @@ getIncludeScriptURLs = function(cb) {
   });
 };
 
-getIncludeStyleURLs = function(cb) {
+getIncludeStyleURLs = function(opt, cb) {
   var urls;
   urls = [];
   return createProxyURLs(urls, "text/javascript", function(_urls) {
@@ -453,19 +453,22 @@ buildErr = function(jsResult, htmlResult, cssResult) {
   return "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n<style>\n*{font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';}\n</style>\n</head>\n<body>\n<pre>\n" + jsResult.lang + "\n" + jsResult.err + "\n\n" + htmlResult.lang + "\n" + htmlResult.err + "\n\n" + cssResult.lang + "\n" + cssResult.err + "\n</pre>\n</body>\n</html>";
 };
 
-includeFirebugLite = function(head, jsResult, htmlResult, cssResult, cb) {
-  return createProxyURL(["thirdparty/firebug/skin/xp/sprite.png"], "image/png", function(_arg) {
-    var spriteURL;
-    spriteURL = _arg[0];
-    return URLToText("thirdparty/firebug/build/firebug-lite.js", function(text) {
-      var firebugURL, _text;
-      _text = text.replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png", spriteURL).replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;", "var m=['build/', 'build']; path='" + (makeURL(location)) + "thirdparty/firebug/build/'");
-      firebugURL = "https://getfirebug.com/firebug-lite.js";
-      jsResult.code = "try{\n  " + jsResult.code + "\n}catch(err){\n  console.error(err, err.stack);\n}";
-      head = "<script id='FirebugLite' FirebugLite='4' src='" + firebugURL + "'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true\n  }\n<" + "/" + "script>\n<style>\n  body{\n    margin-bottom: 400px;\n  }\n</style>\n" + head;
-      return cb(head, jsResult, htmlResult, cssResult);
-    });
-  });
+includeFirebugLite = function(head, jsResult, htmlResult, cssResult, callback) {
+
+  /*
+    createProxyURLs ["thirdparty/firebug/skin/xp/sprite.png"], "image/png", ([spriteURL])->
+      URLToText "thirdparty/firebug/build/firebug-lite.js", (text)->
+  _text = text
+    .replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png",
+             spriteURL)
+    .replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;",
+             "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
+   */
+  var firebugURL;
+  firebugURL = "https://getfirebug.com/firebug-lite.js";
+  jsResult.code = "try{\n  " + jsResult.code + "\n}catch(err){\n  console.error(err, err.stack);\n}";
+  head = "<script id='FirebugLite' FirebugLite='4' src='" + firebugURL + "'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true\n  }\n<" + "/" + "script>\n<style>\n  body{\n    margin-bottom: 400px;\n  }\n</style>\n" + head;
+  return callback(head, jsResult, htmlResult, cssResult);
 };
 
 build = function(_arg, _arg1, opt, callback) {
@@ -487,23 +490,24 @@ build = function(_arg, _arg1, opt, callback) {
     var cssResult, htmlResult, jsResult, srcdoc;
     jsResult = _arg2[0], htmlResult = _arg2[1], cssResult = _arg2[2];
     if ((jsResult.err != null) || (htmlResult.err != null) || (cssResult.err != null)) {
+      console.log("aaaaaaaaaaaaaaaa");
       srcdoc = buildErr(jsResult, htmlResult, cssResult);
       return setTimeout(function() {
         return callback(srcdoc);
       });
     } else {
-      return getIncludeScriptURLs(function(scriptURLs) {
-        return getIncludeStyleURLs(function(styleURLs) {
+      return getIncludeScriptURLs(opt, function(scriptURLs) {
+        return getIncludeStyleURLs(opt, function(styleURLs) {
           var head;
-          head = styleURLs + scriptURLs;
+          head = buildStyles(styleURLs) + buildScripts(scriptURLs);
           if (!opt.enableFirebugLite) {
-            srcdoc = _build(_head, jsResult, htmlResult, cssResult);
+            srcdoc = buildHTML(head, jsResult, htmlResult, cssResult);
             return setTimeout(function() {
               return callback(srcdoc);
             });
           } else {
-            return includeFirebugLite(head, function(_head, _jsResult, _htmlResult, _cssResult) {
-              srcdoc = _build(_head, _jsResult, _htmlResult, _cssResult);
+            return includeFirebugLite(head, jsResult, htmlResult, cssResult, function(_head, _jsResult, _htmlResult, _cssResult) {
+              srcdoc = buildHTML(_head, _jsResult, _htmlResult, _cssResult);
               return setTimeout(function() {
                 return callback(srcdoc);
               });
