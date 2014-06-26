@@ -1,4 +1,4 @@
-var URLToArrayBuffer, URLToText, build, compileAll, createBlobURL, decodeDataURI, decodeURIQuery, dir, encodeDataURI, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, log, makeURL, shortenURL, unzipDataURI, zipDataURI;
+var URLToArrayBuffer, URLToText, build, buildErr, buildHTML, buildScripts, buildStyles, compileAll, createBlobURL, createProxyURLs, decodeDataURI, decodeURIQuery, dir, encodeDataURI, encodeURIQuery, expandURL, getCompilerSetting, getElmVal, getIncludeScriptURLs, getIncludeStyleURLs, includeFirebugLite, log, makeURL, shortenURL, unzipDataURI, zipDataURI;
 
 window.URL = window.URL || window.webkitURL || window.mozURL;
 
@@ -48,6 +48,22 @@ URLToArrayBuffer = function(url, callback) {
     }
   };
   return xhr.send();
+};
+
+createProxyURLs = function(urls, mimetype, callback) {
+  var promises;
+  promises = urls.map(function(url) {
+    return new Promise(function(resolve) {
+      return URLToArrayBuffer(url, function(arrayBuffer) {
+        return resolve(createBlobURL(arrayBuffer, mimetype));
+      });
+    });
+  });
+  return Promise.all(promises).then(function(_urls) {
+    return callback(_urls);
+  })["catch"](function(err) {
+    return console.error(err, err.stack);
+  });
 };
 
 encodeDataURI = function(data, mimetype, callback) {
@@ -349,15 +365,17 @@ getCompilerSetting = function(lang) {
   }
 };
 
-compileAll = function(dic, callback) {
-  var compile, key, promises, val;
+compileAll = function(langs, callback) {
+  var compile, promises;
   compile = function(lang, code) {
-    return new Promise(function(resolve, reject) {
-      var compilerFn, err;
-      compilerFn = getCompilerSetting(lang).compile;
+    var compilerFn;
+    compilerFn = getCompilerSetting(lang).compile;
+    return new Promise(function(resolve) {
+      var err;
       try {
         return compilerFn(code, function(err, code) {
           return resolve({
+            lang: lang,
             err: err,
             code: code
           });
@@ -365,21 +383,18 @@ compileAll = function(dic, callback) {
       } catch (_error) {
         err = _error;
         return resolve({
+          lang: lang,
           err: err,
           code: code
         });
       }
     });
   };
-  promises = (function() {
-    var _results;
-    _results = [];
-    for (key in dic) {
-      val = dic[key];
-      _results.push(compile(key, val));
-    }
-    return _results;
-  })();
+  promises = langs.map(function(_arg) {
+    var code, lang;
+    lang = _arg.lang, code = _arg.code;
+    return compile(lang, code);
+  });
   return Promise.all(promises).then(function(results) {
     return callback(results);
   })["catch"](function(err) {
@@ -387,76 +402,114 @@ compileAll = function(dic, callback) {
   });
 };
 
-build = function(dic, opt, callback) {
-  return compileAll(dic, function(_arg) {
-    var css, html, js, pBlobURL, pstyles, styles;
-    js = _arg[0], html = _arg[1], css = _arg[2];
-    console.log([js, html, css]);
-    if ((js.err != null) || (html.err != null) || (css.err != null)) {
-      return callback("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n<style>\n*{font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';}\n</style>\n</head>\n<body>\n<pre>\n" + altjs + "\n" + js.err + "\n\n" + althtml + "\n" + html.err + "\n\n" + altcss + "\n" + css.err + "\n</pre>\n</body>\n</html>");
-    } else {
-      styles = [];
-      pBlobURL = function(url) {
-        return new Promise(function(resolve) {
-          return URLToText(url, function(text) {
-            return resolve(createBlobURL(text, "text/css"));
-          });
-        });
-      };
-      pstyles = styles.map(function(url) {
-        return pBlobURL(url);
+getIncludeScriptURLs = function(cb) {
+  var urls;
+  urls = [];
+  if (opt.enableJQuery) {
+    urls.push("thirdparty/jquery/jquery.min.js");
+  }
+  if (opt.enableUnderscore) {
+    urls.push("thirdparty/underscore.js/underscore-min.js");
+  }
+  if (opt.enableES6shim) {
+    urls.push("thirdparty/es6-shim/es6-shim.min.js");
+  }
+  if (opt.enableMathjs) {
+    urls.push("thirdparty/mathjs/math.min.js");
+  }
+  if (opt.enableProcessing) {
+    urls.push("thirdparty/processing.js/processing.min.js");
+  }
+  return createProxyURLs(urls, "text/javascript", function(_urls) {
+    return cb(_urls);
+  });
+};
+
+getIncludeStyleURLs = function(cb) {
+  var urls;
+  urls = [];
+  return createProxyURLs(urls, "text/javascript", function(_urls) {
+    return cb(_urls);
+  });
+};
+
+buildScripts = function(urls) {
+  return urls.reduce((function(str, url) {
+    return str + ("<script src='" + url + "'><" + "/" + "script>\"\n");
+  }), "");
+};
+
+buildStyles = function(urls) {
+  return urls.reduce((function(str, url) {
+    return str + ("<link rel='stylesheet' href='" + url + "' />\n");
+  }), "");
+};
+
+buildHTML = function(head, jsResult, htmlResult, cssResult) {
+  return "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n" + (head || "") + "\n<style>\n" + (cssResult.code || "") + "\n</style>\n</head>\n<body>\n" + (htmlResult.code || "") + "\n<script>\n" + (jsResult.code || "") + "\n</script>\n</body>\n</html>";
+};
+
+buildErr = function(jsResult, htmlResult, cssResult) {
+  return "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n<style>\n*{font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';}\n</style>\n</head>\n<body>\n<pre>\n" + jsResult.lang + "\n" + jsResult.err + "\n\n" + htmlResult.lang + "\n" + htmlResult.err + "\n\n" + cssResult.lang + "\n" + cssResult.err + "\n</pre>\n</body>\n</html>";
+};
+
+includeFirebugLite = function(head, jsResult, htmlResult, cssResult, cb) {
+  return createProxyURL(["thirdparty/firebug/skin/xp/sprite.png"], "image/png", function(_arg) {
+    var spriteURL;
+    spriteURL = _arg[0];
+    return URLToText("thirdparty/firebug/build/firebug-lite.js", function(text) {
+      var firebugURL, _text;
+      _text = text.replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png", spriteURL).replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;", "var m=['build/', 'build']; path='" + (makeURL(location)) + "thirdparty/firebug/build/'");
+      firebugURL = "https://getfirebug.com/firebug-lite.js";
+      jsResult.code = "try{\n  " + jsResult.code + "\n}catch(err){\n  console.error(err, err.stack);\n}";
+      head = "<script id='FirebugLite' FirebugLite='4' src='" + firebugURL + "'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true\n  }\n<" + "/" + "script>\n<style>\n  body{\n    margin-bottom: 400px;\n  }\n</style>\n" + head;
+      return cb(head, jsResult, htmlResult, cssResult);
+    });
+  });
+};
+
+build = function(_arg, _arg1, opt, callback) {
+  var altcss, althtml, altjs, markup, script, style;
+  altjs = _arg.altjs, althtml = _arg.althtml, altcss = _arg.altcss;
+  script = _arg1.script, markup = _arg1.markup, style = _arg1.style;
+  return compileAll([
+    {
+      lang: altjs,
+      code: script
+    }, {
+      lang: althtml,
+      code: markup
+    }, {
+      lang: altcss,
+      code: style
+    }
+  ], function(_arg2) {
+    var cssResult, htmlResult, jsResult, srcdoc;
+    jsResult = _arg2[0], htmlResult = _arg2[1], cssResult = _arg2[2];
+    if ((jsResult.err != null) || (htmlResult.err != null) || (cssResult.err != null)) {
+      srcdoc = buildErr(jsResult, htmlResult, cssResult);
+      return setTimeout(function() {
+        return callback(srcdoc);
       });
-      return Promise.all(pstyles).then(function(blobStyles) {
-        var pscripts, scripts;
-        scripts = [];
-        if (opt.enableJQuery) {
-          scripts.push("thirdparty/jquery/jquery.min.js");
-        }
-        if (opt.enableUnderscore) {
-          scripts.push("thirdparty/underscore.js/underscore-min.js");
-        }
-        if (opt.enableES6shim) {
-          scripts.push("thirdparty/es6-shim/es6-shim.min.js");
-        }
-        if (opt.enableMathjs) {
-          scripts.push("thirdparty/mathjs/math.min.js");
-        }
-        if (opt.enableProcessing) {
-          scripts.push("thirdparty/processing.js/processing.min.js");
-        }
-        pBlobURL = function(url) {
-          return new Promise(function(resolve) {
-            return resolve(url);
-          });
-        };
-        pscripts = scripts.map(function(url) {
-          return pBlobURL(url);
-        });
-        return Promise.all(pscripts).then(function(blobScripts) {
-          var specials;
-          specials = [];
-          if (opt.enableFirebugLite) {
-            specials.push(new Promise(function(resolve) {
-              js.code = "try{" + js.code + "}catch(err){console.error(err, err.stack);}";
-              return resolve("<script id='FirebugLite' FirebugLite='4' src='https://getfirebug.com/firebug-lite.js'>\n  {\n    overrideConsole:true,\n    showIconWhenHidden:true,\n    startOpened:true,\n    enableTrace:true\n  }\n<" + "/" + "script>\n<style>\n  body{\n    margin-bottom: 400px;\n  }\n</style>");
-            }));
+    } else {
+      return getIncludeScriptURLs(function(scriptURLs) {
+        return getIncludeStyleURLs(function(styleURLs) {
+          var head;
+          head = styleURLs + scriptURLs;
+          if (!opt.enableFirebugLite) {
+            srcdoc = _build(_head, jsResult, htmlResult, cssResult);
+            return setTimeout(function() {
+              return callback(srcdoc);
+            });
+          } else {
+            return includeFirebugLite(head, function(_head, _jsResult, _htmlResult, _cssResult) {
+              srcdoc = _build(_head, _jsResult, _htmlResult, _cssResult);
+              return setTimeout(function() {
+                return callback(srcdoc);
+              });
+            });
           }
-          return Promise.all(specials).then(function(heads) {
-            blobStyles.forEach(function(url) {
-              return heads.push("<link rel='stylesheet' href='" + url + "' />");
-            });
-            blobScripts.forEach(function(url) {
-              return heads.push("<script src='" + url + "'><" + "/" + "script>");
-            });
-            return callback("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\" />\n" + (heads.join("\n") || "") + "\n<style>\n" + (css.code || "") + "\n</style>\n</head>\n<body>\n" + (html.code || "") + "\n<script>\n" + (js.code || "") + "\n</script>\n</body>\n</html>");
-          })["catch"](function(err) {
-            return console.error(err, err.stack);
-          });
-        })["catch"](function(err) {
-          return console.error(err, err.stack);
         });
-      })["catch"](function(err) {
-        return console.error(err, err.stack);
       });
     }
   });

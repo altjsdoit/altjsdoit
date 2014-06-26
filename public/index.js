@@ -68,16 +68,20 @@ Main = Backbone.View.extend({
     }
   },
   run: function() {
-    var altcss, althtml, altjs, dic, markup, opt, script, style, _ref;
+    var altcss, althtml, altjs, markup, opt, script, style, _ref;
     this.saveURI();
     opt = this.model.toJSON();
     altjs = opt.altjs, althtml = opt.althtml, altcss = opt.altcss;
     _ref = this.getValues(), script = _ref.script, markup = _ref.markup, style = _ref.style;
-    dic = {};
-    dic[altjs] = script;
-    dic[althtml] = markup;
-    dic[altcss] = style;
-    return build(dic, opt, function(srcdoc) {
+    return build({
+      altjs: altjs,
+      althtml: althtml,
+      altcss: altcss
+    }, {
+      script: script,
+      markup: markup,
+      style: style
+    }, opt, function(srcdoc) {
       var url;
       console.log(url = createBlobURL(srcdoc, (opt.enableViewSource ? "text/plain" : "text/html")));
       return $("#box-sandbox-iframe").attr({

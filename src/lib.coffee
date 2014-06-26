@@ -14,6 +14,8 @@ window.URL = window.URL or window.webkitURL or window.mozURL
 dir = (a)-> console.dir.apply(console, arguments); a
 log = (a)-> console.log.apply(console, arguments); a
 
+# module URL
+
 #! createBlobURL :: (String | ArrayBuffer | Blob) * String -> String # not referential transparency
 createBlobURL = (data, mimetype)->
   URL.createObjectURL(new Blob([data], {type: mimetype}))
@@ -38,6 +40,17 @@ URLToArrayBuffer = (url, callback)->
     if this.status is 200 or this.status is 0 and this.readyState is 4
       callback(this.response)
   xhr.send()
+
+#! createProxyURL :: String[] * String * (String[] -> Void) -> Void
+createProxyURLs = (urls, mimetype, callback)->
+  promises = urls.map (url)->
+    new Promise (resolve)->
+      URLToArrayBuffer url, (arrayBuffer)->
+        resolve(createBlobURL(arrayBuffer, mimetype))
+  Promise
+    .all(promises)
+    .then((_urls)-> callback(_urls))
+    .catch((err)-> console.error(err, err.stack))
 
 #! encodeDataURI :: String * String * (String -> Void) -> Void
 encodeDataURI = (data, mimetype, callback)->
@@ -106,6 +119,8 @@ expandURL = (url, callback)->
     error: (err)-> console.error(err, err.stack)
 
 
+# module ZIP
+
 #! zipDataURI :: Dictionary<String> -> Stirng # not referential transparency
 zipDataURI = (dic)->
   zip = new JSZip()
@@ -122,12 +137,16 @@ unzipDataURI = (base64)->
   hash
 
 
+# module DOM
+
 #! getElmVal :: HTMLElement -> String | Number | Boolean
 getElmVal = (elm)->
   if elm instanceof HTMLInputElement and $(elm).attr("type") is "checkbox"
   then $(elm).is(':checked')
   else $(elm).val()
 
+
+# module Compiler
 
 #! getCompilerSetting :: String -> {mode :: String, compile :: String * (String? * String -> Void) -> Void}
 getCompilerSetting = (lang)->
@@ -204,107 +223,131 @@ getCompilerSetting = (lang)->
         setTimeout -> cb(err, code)
     else throw new TypeError "unknown compiler"
 
-#! compileAll :: Dictionary<String> * ([String?, String][] -> Void) -> Void
-compileAll = (dic, callback)->
+#! compileAll :: {lang :: String, code :: String}[] * ({lang :: String, err :: Any?, code :: String}[] -> Void) -> Void
+compileAll = (langs, callback)->
   compile = (lang, code)->
-    new Promise (resolve, reject)->
-      compilerFn = getCompilerSetting(lang).compile
-      try compilerFn code, (err, code)-> resolve({err, code})
-      catch err then resolve({err, code})
-  promises = (compile(key, val) for key, val of dic)
+    compilerFn = getCompilerSetting(lang).compile
+    new Promise (resolve)->
+      try compilerFn code, (err, code)-> resolve({lang, err, code})
+      catch err then                     resolve({lang, err, code})
+  promises = langs.map ({lang, code})->  compile(lang, code)
   Promise
     .all(promises)
     .then((results)-> callback(results))
     .catch((err)-> console.error(err, err.stack))
 
-#! build :: Dictionary<String> * Dictionary<Boolean> * (String -> Void) -> Void
-build = (dic, opt, callback)->
-  compileAll dic, ([js, html, css])->
-    console.log [js, html, css]
-    if js.err? or html.err? or css.err?
-      callback """
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <meta charset="UTF-8" />
-        <style>
-        *{font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';}
-        </style>
-        </head>
-        <body>
-        <pre>
-        #{altjs}
-        #{js.err}
+getIncludeScriptURLs = (cb)->
+  urls = []
+  if opt.enableJQuery      then urls.push "thirdparty/jquery/jquery.min.js"
+  if opt.enableUnderscore  then urls.push "thirdparty/underscore.js/underscore-min.js"
+  if opt.enableES6shim     then urls.push "thirdparty/es6-shim/es6-shim.min.js"
+  if opt.enableMathjs      then urls.push "thirdparty/mathjs/math.min.js"
+  if opt.enableProcessing  then urls.push "thirdparty/processing.js/processing.min.js"
+  createProxyURLs urls, "text/javascript", (_urls)-> cb(_urls)
 
-        #{althtml}
-        #{html.err}
-        
-        #{altcss}
-        #{css.err}
-        </pre>
-        </body>
-        </html>
+getIncludeStyleURLs = (cb)->
+  urls = []
+  createProxyURLs urls, "text/javascript", (_urls)-> cb(_urls)
+
+buildScripts = (urls)-> urls.reduce(((str, url)-> str + """<script src='#{url}'><#{"/"}script>"\n"""), "")
+
+buildStyles  = (urls)-> urls.reduce(((str, url)-> str + """<link rel='stylesheet' href='#{url}' />\n"""), "")
+
+buildHTML = (head, jsResult, htmlResult, cssResult)->
+  """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8" />
+    #{head or ""}
+    <style>
+    #{cssResult.code or ""}
+    </style>
+    </head>
+    <body>
+    #{htmlResult.code or ""}
+    <script>
+    #{jsResult.code or ""}
+    </script>
+    </body>
+    </html>
+  """
+
+buildErr = (jsResult, htmlResult, cssResult)->
+  """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8" />
+    <style>
+    *{font-family: 'Source Code Pro','Menlo','Monaco','Andale Mono','lucida console','Courier New','monospace';}
+    </style>
+    </head>
+    <body>
+    <pre>
+    #{jsResult.lang}
+    #{jsResult.err}
+
+    #{htmlResult.lang}
+    #{htmlResult.err}
+
+    #{cssResult.lang}
+    #{cssResult.err}
+    </pre>
+    </body>
+    </html>
+  """
+
+includeFirebugLite = (head, jsResult, htmlResult, cssResult, cb)->
+  createProxyURL ["thirdparty/firebug/skin/xp/sprite.png"], "image/png", ([spriteURL])->
+    URLToText "thirdparty/firebug/build/firebug-lite.js", (text)->
+      _text = text
+        .replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png",
+                 spriteURL)
+        .replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;",
+                 "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
+      firebugURL = "https://getfirebug.com/firebug-lite.js"#createBlobURL(_text, "text/javascript")
+      jsResult.code = """
+        try{
+          #{jsResult.code}
+        }catch(err){
+          console.error(err, err.stack);
+        }
       """
+      head = """
+        <script id='FirebugLite' FirebugLite='4' src='#{firebugURL}'>
+          {
+            overrideConsole:true,
+            showIconWhenHidden:true,
+            startOpened:true,
+            enableTrace:true
+          }
+        <#{"/"}script>
+        <style>
+          body{
+            margin-bottom: 400px;
+          }
+        </style>
+        #{head}
+      """
+      cb(head, jsResult, htmlResult, cssResult)
+
+build = ({altjs, althtml, altcss}, {script, markup, style}, opt, callback)->
+  compileAll [
+    {lang: altjs,   code: script}
+    {lang: althtml, code: markup}
+    {lang: altcss,  code: style }
+  ], ([jsResult, htmlResult, cssResult])->
+    if jsResult.err? or htmlResult.err? or cssResult.err?
+    then srcdoc = buildErr(jsResult, htmlResult, cssResult); setTimeout -> callback(srcdoc)
     else
-      styles = []
-      pBlobURL = (url)-> new Promise (resolve)-> URLToText url, (text)-> resolve(createBlobURL(text, "text/css"))
-      pstyles = styles.map (url)-> pBlobURL(url)
-      Promise.all(pstyles).then((blobStyles)->
-        scripts = []
-        if opt.enableJQuery      then scripts.push "thirdparty/jquery/jquery.min.js"
-        if opt.enableUnderscore  then scripts.push "thirdparty/underscore.js/underscore-min.js"
-        if opt.enableES6shim     then scripts.push "thirdparty/es6-shim/es6-shim.min.js"
-        if opt.enableMathjs      then scripts.push "thirdparty/mathjs/math.min.js"
-        if opt.enableProcessing  then scripts.push "thirdparty/processing.js/processing.min.js"
-        # blob url script do not run on firefox os simulator 2.0 on firefox nightly 32.0a1 (2014-05-30) issue #58
-        #pBlobURL = (url)-> new Promise (resolve)-> URLToText url, (text)-> resolve(createBlobURL(text, "text/javascript"))
-        pBlobURL = (url)-> new Promise (resolve)-> resolve(url)
-        pscripts = scripts.map (url)-> pBlobURL(url)
-        Promise.all(pscripts).then((blobScripts)->
-          specials = []
-          if opt.enableFirebugLite
-            specials.push  new Promise (resolve)->
-              #URLToArrayBuffer "thirdparty/firebug/skin/xp/sprite.png", (data)->
-              #  spriteURL = createBlobURL(data, "image/png")
-              #  URLToText "thirdparty/firebug/build/firebug-lite.js", (text)->
-              #    text = text.replace("https://getfirebug.com/releases/lite/latest/skin/xp/sprite.png", spriteURL)
-              #    text = text.replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;", "var m=['build/', 'build']; path='#{makeURL(location)}thirdparty/firebug/build/'")
-              #    firebugURL = createBlobURL(text, "text/javascript")
-                  js.code = "try{"+js.code+"}catch(err){console.error(err, err.stack);}"
-                  resolve """<script id='FirebugLite' FirebugLite='4' src='https://getfirebug.com/firebug-lite.js'>
-                    {
-                      overrideConsole:true,
-                      showIconWhenHidden:true,
-                      startOpened:true,
-                      enableTrace:true
-                    }
-                  <#{"/"}script>
-                  <style>
-                    body{
-                      margin-bottom: 400px;
-                    }
-                  </style>"""
-          Promise.all(specials).then((heads)->
-            blobStyles.forEach (url)-> heads.push "<link rel='stylesheet' href='#{url}' />"
-            blobScripts.forEach (url)-> heads.push "<script src='#{url}'><#{"/"}script>"
-            callback """
-              <!DOCTYPE html>
-              <html>
-              <head>
-              <meta charset="UTF-8" />
-              #{heads.join("\n") or ""}
-              <style>
-              #{css.code or ""}
-              </style>
-              </head>
-              <body>
-              #{html.code or ""}
-              <script>
-              #{js.code or ""}
-              </script>
-              </body>
-              </html>
-            """
-          ).catch((err)-> console.error(err, err.stack))
-        ).catch((err)-> console.error(err, err.stack))
-      ).catch((err)-> console.error(err, err.stack))
+      getIncludeScriptURLs (scriptURLs)->
+        getIncludeStyleURLs (styleURLs)->
+          head = styleURLs + scriptURLs
+          if !opt.enableFirebugLite
+            srcdoc = _build(_head, jsResult, htmlResult, cssResult)
+            setTimeout -> callback(srcdoc)
+          else
+            includeFirebugLite head, (_head, _jsResult, _htmlResult, _cssResult)->
+              srcdoc = _build(_head, _jsResult, _htmlResult, _cssResult)
+              setTimeout -> callback(srcdoc)

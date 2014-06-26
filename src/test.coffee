@@ -1,3 +1,5 @@
+QUnit.config.testTimeout = 2000
+
 QUnit.module("URL")
 
 QUnit.asyncTest "createBlobURL", (assert)->
@@ -46,6 +48,20 @@ QUnit.asyncTest "URLToArrayBuffer", (assert)->
   test("🐲", 4)
   test(new ArrayBuffer(12), 12)
   expect(n)
+
+QUnit.asyncTest "createProxyURLs", (assert)->
+  expect(1)
+  urls = ["index.html"]
+  createProxyURLs urls, "text/html", (_urls)->
+    promises = _urls.map (_url, i)->
+      new Promise (resolve)->
+        URLToText urls[i], (html)->
+          URLToText _urls[i], (_html)->
+            assert.strictEqual(_html, html, _html)
+            resolve()
+    Promise
+      .all(promises)
+      .then(-> QUnit.start())
 
 QUnit.asyncTest "encodeDataURI, decodeDataURI", (assert)->
   expect(1)
@@ -128,23 +144,44 @@ QUnit.asyncTest "getCompilerSetting", (assert)->
   expect(n*3)
 
 QUnit.asyncTest "compileAll", (assert)->
-  tests = [
+  langs = [
     {lang: "CoffeeScript", code:"}{"}
-    #{lang: "TypeScript",   code:"}{"}
-    #{lang: "LispyScript",  code:")("}
-    #{lang: "Jade",         code:"><"}
+    {lang: "TypeScript",   code:"}{"}
+    {lang: "LispyScript",  code:")("}
+    {lang: "Jade",         code:"><"}
     {lang: "LESS",         code:"}{"}
     {lang: "Stylus",       code:"}{"}
   ]
-  dic = tests.reduce(((dic, {lang, code})->
-    dic[lang] = code; dic
-  ), {})
-  expect(tests.length)
-  compileAll dic, (codes)->
-    codes.forEach ({err, code}, i)->
+  expect(langs.length)
+  compileAll langs, (results)->
+    results.forEach ({err, code}, i)->
       assert.ok(JSON.stringify(err).length > 10,
-                tests[i].lang+": "+JSON.stringify(err)+" : "+code)
+                langs[i].lang+": "+JSON.stringify(err)+" : "+code)
     QUnit.start()
+
+QUnit.asyncTest "getIncludeStyleURLs", (assert)->
+  expect(0); QUnit.start()
+
+QUnit.asyncTest "getIncludeScriptURLs", (assert)->
+  expect(0); QUnit.start()
+
+QUnit.test "buildStyles", (assert)->
+  expect(0)
+
+QUnit.test "buildScripts", (assert)->
+  expect(0)
+
+QUnit.test "buildHTML", (assert)->
+  expect(0)
+
+QUnit.test "buildErr", (assert)->
+  expect(0)
+
+QUnit.asyncTest "includeFirebugLite", (assert)->
+  expect(0); QUnit.start()
+
+QUnit.asyncTest "build", (assert)->
+  expect(0); QUnit.start()
 
 
 QUnit.module("Complex")

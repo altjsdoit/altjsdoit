@@ -1,3 +1,5 @@
+QUnit.config.testTimeout = 2000;
+
 QUnit.module("URL");
 
 QUnit.asyncTest("createBlobURL", function(assert) {
@@ -65,6 +67,28 @@ QUnit.asyncTest("URLToArrayBuffer", function(assert) {
   test("🐲", 4);
   test(new ArrayBuffer(12), 12);
   return expect(n);
+});
+
+QUnit.asyncTest("createProxyURLs", function(assert) {
+  var urls;
+  expect(1);
+  urls = ["index.html"];
+  return createProxyURLs(urls, "text/html", function(_urls) {
+    var promises;
+    promises = _urls.map(function(_url, i) {
+      return new Promise(function(resolve) {
+        return URLToText(urls[i], function(html) {
+          return URLToText(_urls[i], function(_html) {
+            assert.strictEqual(_html, html, _html);
+            return resolve();
+          });
+        });
+      });
+    });
+    return Promise.all(promises).then(function() {
+      return QUnit.start();
+    });
+  });
 });
 
 QUnit.asyncTest("encodeDataURI, decodeDataURI", function(assert) {
@@ -198,11 +222,20 @@ QUnit.asyncTest("getCompilerSetting", function(assert) {
 });
 
 QUnit.asyncTest("compileAll", function(assert) {
-  var dic, tests;
-  tests = [
+  var langs;
+  langs = [
     {
       lang: "CoffeeScript",
       code: "}{"
+    }, {
+      lang: "TypeScript",
+      code: "}{"
+    }, {
+      lang: "LispyScript",
+      code: ")("
+    }, {
+      lang: "Jade",
+      code: "><"
     }, {
       lang: "LESS",
       code: "}{"
@@ -211,21 +244,51 @@ QUnit.asyncTest("compileAll", function(assert) {
       code: "}{"
     }
   ];
-  dic = tests.reduce((function(dic, _arg) {
-    var code, lang;
-    lang = _arg.lang, code = _arg.code;
-    dic[lang] = code;
-    return dic;
-  }), {});
-  expect(tests.length);
-  return compileAll(dic, function(codes) {
-    codes.forEach(function(_arg, i) {
+  expect(langs.length);
+  return compileAll(langs, function(results) {
+    results.forEach(function(_arg, i) {
       var code, err;
       err = _arg.err, code = _arg.code;
-      return assert.ok(JSON.stringify(err).length > 10, tests[i].lang + ": " + JSON.stringify(err) + " : " + code);
+      return assert.ok(JSON.stringify(err).length > 10, langs[i].lang + ": " + JSON.stringify(err) + " : " + code);
     });
     return QUnit.start();
   });
+});
+
+QUnit.asyncTest("getIncludeStyleURLs", function(assert) {
+  expect(0);
+  return QUnit.start();
+});
+
+QUnit.asyncTest("getIncludeScriptURLs", function(assert) {
+  expect(0);
+  return QUnit.start();
+});
+
+QUnit.test("buildStyles", function(assert) {
+  return expect(0);
+});
+
+QUnit.test("buildScripts", function(assert) {
+  return expect(0);
+});
+
+QUnit.test("buildHTML", function(assert) {
+  return expect(0);
+});
+
+QUnit.test("buildErr", function(assert) {
+  return expect(0);
+});
+
+QUnit.asyncTest("includeFirebugLite", function(assert) {
+  expect(0);
+  return QUnit.start();
+});
+
+QUnit.asyncTest("build", function(assert) {
+  expect(0);
+  return QUnit.start();
 });
 
 QUnit.module("Complex");
