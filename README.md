@@ -18,6 +18,10 @@ grunt
 Change Log
 ---------------
 
+#### Version 0.8.4
+
+* a lot of bug fix
+
 #### Version 0.8.3
 
 * write [test code](https://altjsdoit.github.io/test.html)
