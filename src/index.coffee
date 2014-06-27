@@ -17,13 +17,17 @@ Main = Backbone.View.extend
     @model.set("timestamp", Date.now())
     config = JSON.stringify(@model.toJSON())
     {script, markup, style} = @getValues()
-    url = makeURL(location) + "#" + encodeURIQuery {zip:zipDataURI({config, script, markup, style})}
+    url = makeURL(location) + "#" + encodeURIQuery {
+      zip: zipDataURI({config, script, markup, style})
+      date: @model.get("timestamp") or null
+      parent: @model.get("commit") or null
+    }
     $("#setting-project-url").val(url)
-    $("#setting-project-size").html(url.length)
     history.pushState(null, null, url)
   saveAndShorten: ->
     @saveURI()
     shortenURL $("#setting-project-url").val(), (_url)=>
+      @model.set("commit", _url)
       $("#setting-project-url").val(_url)
       $("#setting-project-twitter").html(
         $("<a />").attr({
@@ -36,7 +40,6 @@ Main = Backbone.View.extend
           "data-count": "none"
           "data-lang": "en"
         }).html("Tweet"))
-      $("#setting-project-size").html(_url.length)
       twttr.widgets.load()
   loadURI: ->
     {zip} = decodeURIQuery(location.hash.slice(1))
@@ -125,6 +128,9 @@ Setting = Backbone.View.extend
     @render()
   render: ->
     opt = @model.toJSON()
+    if opt.commit?
+      $("#setting-project-parent").html(
+        "<a class='pure-button' target='_blank' href='#{opt.commit}'>Go Back</a>")
     $(@el).find("[data-config]").each (i, v)=>
       key = $(v).attr("data-config")
       if opt[key]? and key.slice(0, 6) is "enable"
