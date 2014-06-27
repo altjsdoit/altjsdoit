@@ -16,3 +16,7 @@ $ ->
     $("#layout").toggleClass("active")
     $("#menu").toggleClass("active")
     $("#menuLink").toggleClass("active")
+  if $(window).width() > 640
+    $("#layout").toggleClass("active")
+    $("#menu").toggleClass("active")
+    $("#menuLink").toggleClass("active")
