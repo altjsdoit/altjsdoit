@@ -1,35 +1,42 @@
-$ -> window.bbmain = new Main
+$ ->
+  window.main = new Main
+  window.applicationCache.addEventListener 'updateready', (ev)->
+    if window.applicationCache.status is window.applicationCache.UPDATEREADY
+      window.applicationCache.swapCache()
+      if confirm('A new version of this site is available. Save and load it?')
+        window.main.saveURI()
+        location.reload()
 
-Config = Backbone.Model.extend
-  defaults:
-    timestamp: Date.now()
-    title: "no name"
-    altjs:   "JavaScript"
-    althtml: "HTML"
-    altcss:  "CSS"
-    iframeType: "blob"
-
-Main = Backbone.View.extend
-  el: "#layout"
-  events:
-    "click #setting-project-save": "saveAndShorten"
+class Main
+  constructor: ->
+    config = loadDOM($("#box-config")[0])
+    uriData = loadURI(location)
+    @model = new Model()
+    @model.set(_.extend(config, uriData.config))
+    @menu   = new Menu({@model})
+    @config = new Config({@model})
+    @editor = new Editor({@model})
+    @editor.setValues
+      script: uriData.script or ""
+      markup: uriData.markup or ""
+      style:  uriData.style  or ""
+    $("#config-project-save").click => @saveURI(); @shareURI()
+    @model.bind "change", =>
+      opt = @model.toJSON()
+      $("title").html(opt.title + " - #{new Date(opt.timestamp)} - altjsdo.it")
+  dump: ->
+    {script, markup, style} = @editor.getValues()
+    config = JSON.stringify(@model.toJSON())
+    {script, markup, style, config}
   saveURI: ->
     @model.set("timestamp", Date.now())
-    config = JSON.stringify(@model.toJSON())
-    {script, markup, style} = @getValues()
-    url = makeURL(location) + "#" + encodeURIQuery {
-      zip: zipDataURI({config, script, markup, style})
-      date: @model.get("timestamp") or null
-      parent: @model.get("commit") or null
-    }
-    $("#setting-project-url").val(url)
+    url = makeURL(location) + "#" + encodeURIQuery({zip: zipDataURI(@dump())})
+    $("#config-project-url").val(url)
     history.pushState(null, null, url)
-  saveAndShorten: ->
-    @saveURI()
-    shortenURL $("#setting-project-url").val(), (_url)=>
-      @model.set("commit", _url)
-      $("#setting-project-url").val(_url)
-      $("#setting-project-twitter").html(
+  shareURI: ->
+    shortenURL $("#config-project-url").val(), (_url)=>
+      $("#config-project-url").val(_url)
+      $("#config-project-twitter").html(
         $("<a />").attr({
           "href": "https://twitter.com/share"
           "class": "twitter-share-button"
@@ -41,22 +48,13 @@ Main = Backbone.View.extend
           "data-lang": "en"
         }).html("Tweet"))
       twttr.widgets.load()
-  loadURI: ->
-    {zip} = decodeURIQuery(location.hash.slice(1))
-    if zip?
-      {config, script, markup, style} = unzipDataURI(zip)
-      config = JSON.parse(config or "{}")
-      @model.set(config)
-      @setValues({script, markup, style})
   run: ->
-    @saveURI()
-    opt = @model.toJSON()
-    {altjs, althtml, altcss} = opt
-    {script, markup, style} = @getValues()
-    _opt = Object.create(opt)
-    build {altjs, althtml, altcss}, {script, markup, style}, _opt, (srcdoc)->
-      switch _opt.iframeType
-        when "srcdoc" then $("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
+    {altjs, althtml, altcss} = opt = @model.toJSON()
+    {script, markup, style} = @editor.getValues()
+    build {altjs, althtml, altcss}, {script, markup, style}, opt, (srcdoc)->
+      switch opt.iframeType
+        when "srcdoc"
+          $("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
         when "base64"
           encodeDataURI srcdoc, "text/html", (base64)->
             $("#box-sandbox-iframe").attr({"src": base64})
@@ -64,81 +62,88 @@ Main = Backbone.View.extend
           console.log url = createBlobURL(srcdoc, (if opt.enableViewSource then "text/plain" else "text/html"))
           $("#box-sandbox-iframe").attr({"src": url})
         else throw new Error _opt.iframeType
-  initialize: ->
-    @model    = new Config()
-    @menu     = new Menu({@model})
-    @setting  = new Setting({@model})
-    @scriptEd = new Editor {@model, el:$("#box-altjs-textarea"  )[0], type:"altjs"}
-    @markupEd = new Editor {@model, el:$("#box-althtml-textarea")[0], type:"althtml"}
-    @styleEd  = new Editor {@model, el:$("#box-altcss-textarea" )[0], type:"altcss"}
-    @setting.updateAll()
-    @loadURI()
-    @scriptEd.onsave = @markupEd.onsave = @styleEd.onsave = => @saveURI()
-    @scriptEd.onrun  = @markupEd.onrun  = @styleEd.onrun  = => @run()
-    $("#menu-altjs"  ).click => setTimeout => @scriptEd.refresh()
-    $("#menu-althtml").click => setTimeout => @markupEd.refresh()
-    $("#menu-altcss" ).click => setTimeout => @styleEd .refresh()
-    $("#menu-sandbox").click => @run()
-    _.bindAll(@, "render")
-    @model.bind("change", @render)
-    @render()
-  setValues: ({script, markup, style})->
-    @scriptEd.setValue(script or "")
-    @markupEd.setValue(markup or "")
-    @styleEd .setValue(style  or "")
-  getValues: ->
-    script: @scriptEd.getValue() or ""
-    markup: @markupEd.getValue() or ""
-    style:  @styleEd .getValue() or ""
-  render: ->
-    {title, timestamp} = @model.toJSON()
-    $("title").html(title + " - #{new Date(timestamp)} - altjsdo.it")
+
+Model = Backbone.Model.extend
+  defaults:
+    timestamp: Date.now()
+    title: "no name"
+    altjs:   "JavaScript"
+    althtml: "HTML"
+    altcss:  "CSS"
+    iframeType: "blob"
 
 Menu = Backbone.View.extend
   el: "#menu"
+  events:
+    "click #menu-page-tab li": "selectTab"
+  selectTab: (ev)->
+    $(@el).find(".select").removeClass("select")
+    $(ev.target).addClass("select")
+    $("#main").find(".active").removeClass("active")
+    $($(ev.target).attr("data-target")).addClass("active")
+    @render()
   initialize: ->
-    _.bindAll(@, "render")
+    _.bindAll(this, "render")
     @model.bind("change", @render)
     @render()
   render: ->
-    {title, altjs, althtml, altcss, enableViewSource} = @model.toJSON()
-    $("#menu-head")   .html(title)
-    $("#menu-altjs")  .html(altjs)
-    $("#menu-althtml").html(althtml)
-    $("#menu-altcss") .html(altcss)
-    $("#menu-sandbox").html((if enableViewSource then "Compiled code" else "Run"))
+    "click #menu-page-tab li": "selectTab"
 
-Setting = Backbone.View.extend
-  el: "#setting-config"
+
+Config = Backbone.View.extend
+  el: "#box-config"
   events:
-    "change select": "update"
-    "change input": "update"
-  updateAll: ->
-    config = {}
-    $(@el).find("[data-config]").each (i, v)->
-      config[$(@).attr("data-config")] = getElmVal(@)
-    @model.set(config)
-  update: (ev)->
+    "change select": "load"
+    "change input": "load"
+  load: (ev)->
     @model.set($(ev.target).attr("data-config"), getElmVal(ev.target))
   initialize: ->
     _.bindAll(this, "render")
-    _.bindAll(this, "update")
-    _.bindAll(this, "updateAll")
     @model.bind("change", @render)
     @render()
   render: ->
     opt = @model.toJSON()
-    if opt.commit?
-      $("#setting-project-parent").html(
-        "<a class='pure-button' target='_blank' href='#{opt.commit}'>Go Back</a>")
-    $(@el).find("[data-config]").each (i, v)=>
-      key = $(v).attr("data-config")
-      if opt[key]? and key.slice(0, 6) is "enable"
-      then @$el.find("[data-config='#{key}']"  ).attr("checked", if opt[key] then "checked" else null)
-      else @$el.find("[data-config='#{key}']"  ).val(opt[key])
+    Object.keys(opt).forEach (key)=>
+      if key.slice(0, 6) is "enable"
+        @$el.find("[data-config='#{key}']")
+          .attr("checked", (if !!opt[key] then "checked" else null))
+      else
+        @$el.find("[data-config='#{key}']").val(opt[key])
+
 
 Editor = Backbone.View.extend
-  initialize: ({@type})->
+  el: "#box-editor"
+  events:
+    "click #box-editor-tab li": "selectTab"
+    "click #box-editor-tab li[data-tab='compiled']": "compile"
+    "change #box-editor-config input[data-config='enableCodeMirror']": "changeEditor"
+  compile: (ev)->
+    {altjs, althtml, altcss} = opt = @model.toJSON()
+    {script, markup, style} = @getValues()
+    build {altjs, althtml, altcss}, {script, markup, style}, opt, (srcdoc)=>
+      @doc.compiled.setValue(srcdoc)
+      if @selected is "compiled"
+        $("#box-editor-textarea").val(srcdoc)
+      @render()
+  selectTab: (ev)->
+    $(@el).find(".selected").removeClass("selected")
+    $(ev.target).addClass("selected")
+    selected = $(ev.target).attr("data-tab")
+    if not @enableCodeMirror
+      @doc[@selected].setValue($("#box-editor-textarea").val())
+      $("#box-editor-textarea").val(@doc[selected].getValue())
+    @selected = selected
+    @render()
+  changeEditor: (ev)->
+    if @enableCodeMirror = getElmVal(ev.target)
+      @cm = CodeMirror.fromTextArea($("#box-editor-textarea")[0], @option)
+      @originDoc = @cm.swapDoc(@doc[@selected])
+    else
+      @cm.toTextArea()
+      @cm.swapDoc(@originDoc)
+      @cm = null
+    @render()
+  initialize: ->
     _.bindAll(this, "render")
     @model.bind("change", @render)
     @option =
@@ -151,35 +156,59 @@ Editor = Backbone.View.extend
       autoCloseBrackets: true
       showCursorWhenSelecting: true
       extraKeys:
-        "Tab": (cm)-> CodeMirror.commands[(if cm.getSelection().length then "indentMore" else "insertSoftTab")](cm)
+        "Tab": (cm)->
+          CodeMirror.commands[(
+            if cm.getSelection().length
+            then "indentMore"
+            else "insertSoftTab"
+          )](cm)
         "Shift-Tab": "indentLess"
-        "Cmd-R": (cm)=>  @onrun()
-        "Ctrl-R": (cm)=> @onrun()
-        "Cmd-S": (cm)=>  @onsave()
-        "Ctrl-S": (cm)=> @onsave()
-    @onrun = ->
-    @onsave = ->
-    @refreshed = false
-    @cm = CodeMirror.fromTextArea(@el, @option)
+        "Cmd-R": (cm)=> main.run()
+        "Ctrl-R": (cm)=> main.run()
+        "Cmd-S": (cm)=> main.saveToStorage()
+        "Ctrl-S": (cm)=> main.saveToStorage()
+        "Cmd-1": (cm)=> $("#box-editor-tab").children("*:nth-child(1)").click()
+        "Ctrl-1": (cm)=> $("#box-editor-tab").children("*:nth-child(1)").click()
+        "Cmd-2": (cm)=> $("#box-editor-tab").children("*:nth-child(2)").click()
+        "Ctrl-2": (cm)=> $("#box-editor-tab").children("*:nth-child(2)").click()
+        "Cmd-3": (cm)=> $("#box-editor-tab").children("*:nth-child(3)").click()
+        "Ctrl-3": (cm)=> $("#box-editor-tab").children("*:nth-child(3)").click()
+        "Cmd-4": (cm)=> $("#box-editor-tab").children("*:nth-child(4)").click()
+        "Ctrl-4": (cm)=> $("#box-editor-tab").children("*:nth-child(4)").click()
+    @enableCodeMirror = true
+    @selected = "script"
+    @mode =
+      script: "javascript"
+      markup: "xml"
+      style:  "css"
+      compiled: "xml"
+    @doc =
+      script: new CodeMirror.Doc("")
+      markup: new CodeMirror.Doc("")
+      style:  new CodeMirror.Doc("")
+      compiled: new CodeMirror.Doc("")
+    @cm = CodeMirror.fromTextArea($("#box-editor-textarea")[0], @option)
+    @originDoc = @cm.swapDoc(@doc.script)
     @cm.setSize("100%", "100%")
     @render()
-  setValue: (str)->
-    if @cm?
-    then @cm.setValue(str)
-    else @el.value = str
-  getValue: ->
-    if @cm?
-    then @cm.getValue()
-    else @el.value
-  refresh: ->
-    if @refreshed is false then setTimeout => @cm?.refresh()
-    @refreshed = true
+  setValues: ({script, markup, style})->
+    @doc.script.setValue(script) if script?
+    @doc.markup.setValue(markup) if markup?
+    @doc.style.setValue(style)   if style?
+  getValues: ->
+    script: @doc.script.getValue()
+    markup: @doc.markup.getValue()
+    style:  @doc.style.getValue()
   render: ->
-    if @cm? and  @cm.getOption("mode") isnt @model.get(@type)
-        @cm.setOption("mode", getCompilerSetting(@model.get(@type)).mode)
-    if @model.get("enableCodeMirror") is false and @cm?
-      @cm.toTextArea(); @cm = null
-    if  @model.get("enableCodeMirror") is true and !@cm?
-      @cm = CodeMirror.fromTextArea(@el, @option)
-      @cm.setSize("100%", "100%")
-      @refreshed = false
+    opt = @model.toJSON()
+    tmp = $("#box-editor-tab")
+    tmp.find("[data-tab='script']").html(opt.altjs)
+    tmp.find("[data-tab='markup']").html(opt.althtml)
+    tmp.find("[data-tab='style']").html(opt.altcss)
+    if @enableCodeMirror
+      @cm?.swapDoc(@doc[@selected])
+      @cm.setOption("mode", @mode[@selected])
+      if @selected is "compiled"
+      then @cm.setOption("readOnly", true)
+      else @cm.setOption("readOnly", false)
+      setTimeout => @cm.refresh()

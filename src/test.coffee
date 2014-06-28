@@ -110,6 +110,12 @@ QUnit.test "zipDataURI, unzipDataURI", (assert)->
 
 QUnit.module("DOM")
 
+QUnit.test "loadURI", (assert)->
+  expect(0)
+  
+QUnit.test "loadDOM", (assert)->
+  expect(0)
+
 QUnit.test "getElmVal", (assert)->
   expect(3)
   elm = $('<select><option value="a" selected="selected">a</option></option>')

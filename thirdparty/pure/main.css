@@ -518,7 +518,7 @@ a.pure-button-primary {
  * Responsive Styles
  * --------------------------
 */
-/*
+
 @media screen and (min-width: 35.5em) {
 
     .legal-license {
@@ -580,11 +580,11 @@ a.pure-button-primary {
     }
 
 }
-*//*
+
 @media (min-width: 58em) {
 
     #layout {
-        padding-left: 160px; *//* left col width "#menu" *//*
+        padding-left: 160px; *//* left col width "#menu" */
         left: 0;
     }
     #menu {
@@ -600,4 +600,3 @@ a.pure-button-primary {
     }
 
 }
-*/

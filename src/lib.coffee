@@ -42,10 +42,11 @@ URLToArrayBuffer = (url, callback)->
       callback(this.response)
   xhr.send()
 
-#! createProxyURLs :: String[] * String * (String[] -> Void) -> Void
+#! createProxyURLs :: String[] * String * (String[] -> Void) -> Void # not referential transparency
 createProxyURLs = (urls, mimetype, callback)->
   n = 0
   _urls = []
+  if urls.length is 0 then setTimeout -> callback(_urls)
   urls.forEach (url, i)->
     n++
     URLToArrayBuffer url, (arrayBuffer)->
@@ -143,6 +144,24 @@ unzipDataURI = (base64)->
 
 # module DOM
 
+# loadURI :: Location -> {config :: Config, script :: String?, markup :: String?, style :: String?}
+loadURI = (location)->
+  {zip} = decodeURIQuery(location.hash.slice(1))
+  if zip?
+    {config, script, markup, style} = unzipDataURI(zip)
+    config = JSON.parse(config) if config?
+  config: config or {}
+  script: script or null
+  markup: markup or null
+  style:  style  or null
+
+#! loadDOM :: HTMLElement -> Config
+loadDOM = (elm)->
+  config = {}
+  $(elm).find("input[data-config]").forEach (item)->
+    config[$(item).attr("data-config")] = getElmVal(item)
+  config
+
 #! getElmVal :: HTMLElement -> String | Number | Boolean
 getElmVal = (elm)->
   if elm instanceof HTMLInputElement and $(elm).attr("type") is "checkbox"
@@ -181,6 +200,7 @@ getCompilerSetting = (lang)->
 #! compileAll :: {lang :: String, code :: String}[] * ({lang :: String, err :: Any?, code :: String}[] -> Void) -> Void
 compileAll = (langs, callback)->
   n = 0
+  if langs.length is 0 then setTimeout -> callback([])
   results = []
   next = (result, i)->
     results[i] = result
@@ -205,10 +225,12 @@ getIncludeScriptURLs = (opt, callback)->
   else setTimeout -> callback(urls)
 
 getIncludeStyleURLs = (opt, callback)->
-  urls = []
-  if opt.enableCache and opt.enableBlobCache
-  then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
-  else setTimeout -> callback(urls)
+  try
+    urls = []
+    if opt.enableCache and opt.enableBlobCache
+    then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
+    else setTimeout -> callback(urls)
+  catch err then console.log err
 
 buildScripts = (urls)-> urls.reduce(((str, url)-> str + """<script src='#{url}'><#{"/"}script>\n"""), "")
 
@@ -307,7 +329,7 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, opt, callback)->
       else
         getIncludeScriptURLs opt, (scriptURLs)->
           getIncludeStyleURLs opt, (styleURLs)->
-            head = buildStyles(styleURLs) + buildScripts(scriptURLs)
+            head = buildStyles(styleURLs) + buildScripts(log scriptURLs)
             if !opt.enableFirebugLite
               srcdoc = buildHTML(head, jsResult, htmlResult, cssResult)
               setTimeout -> callback(srcdoc)

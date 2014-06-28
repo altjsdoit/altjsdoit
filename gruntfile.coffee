@@ -34,8 +34,8 @@ module.exports = (grunt) ->
             {match: "version",   replacement: '<%= pkg.version %>'}
           ]
         files: [
-          {expand: true, cwd: 'src/', src: ['*.appcache'], dest: 'public/'}
-          {expand: true, cwd: 'src/', src: ['*.webapp'],   dest: 'public/'}
+          #{expand: true, cwd: 'src/', src: ['*.appcache'], dest: 'public/'}
+          #{expand: true, cwd: 'src/', src: ['*.webapp'],   dest: 'public/'}
           {expand: true, cwd: 'src/', src: ['*.coffee'],   dest: 'public/'}
           {expand: true, cwd: 'src/', src: ['*.jade'],     dest: 'public/'}
           {expand: true, cwd: 'src/', src: ['*.less'],     dest: 'public/'}
