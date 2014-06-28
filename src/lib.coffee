@@ -225,12 +225,10 @@ getIncludeScriptURLs = (opt, callback)->
   else setTimeout -> callback(urls)
 
 getIncludeStyleURLs = (opt, callback)->
-  try
-    urls = []
-    if opt.enableCache and opt.enableBlobCache
-    then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
-    else setTimeout -> callback(urls)
-  catch err then console.log err
+  urls = []
+  if opt.enableCache and opt.enableBlobCache
+  then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
+  else setTimeout -> callback(urls)
 
 buildScripts = (urls)-> urls.reduce(((str, url)-> str + """<script src='#{url}'><#{"/"}script>\n"""), "")
 
@@ -329,7 +327,7 @@ build = ({altjs, althtml, altcss}, {script, markup, style}, opt, callback)->
       else
         getIncludeScriptURLs opt, (scriptURLs)->
           getIncludeStyleURLs opt, (styleURLs)->
-            head = buildStyles(styleURLs) + buildScripts(log scriptURLs)
+            head = buildStyles(styleURLs) + buildScripts(scriptURLs)
             if !opt.enableFirebugLite
               srcdoc = buildHTML(head, jsResult, htmlResult, cssResult)
               setTimeout -> callback(srcdoc)

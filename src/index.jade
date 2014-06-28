@@ -11,15 +11,15 @@ html(lang='ja')
     link(rel='stylesheet' href='./thirdparty/codemirror/theme/solarized.css')
     link(rel='stylesheet' href='./thirdparty/codemirror/addon/dialog/dialog.css')
     link(rel='stylesheet' href='./thirdparty/pure/pure-min.css')
-    link(rel='stylesheet' href='./thirdparty/pure/main-grid.css')
-    link(rel="stylesheet" href="./thirdparty/pure/baby-blue.css")
     link(rel='stylesheet' href='index.css')
   body
     header#menu
-      ul#menu-page-tab
-        li(data-target="#box-config") config
-        li(data-target="#box-editor") editor
-        li(data-target="#box-sandbox") run
+      div.home-menu.pure-menu.pure-menu-open.pure-menu-horizontal.pure-menu-fixed
+        a.pure-menu-heading altjsdoit
+        ul#menu-page-tab
+          li.selected(data-target="#box-config") Config
+          li(data-target="#box-editor") Editor
+          li(data-target="#box-sandbox") Run
     div#main
       section#box-config.active
         form
@@ -38,6 +38,10 @@ html(lang='ja')
                 span#config-project-twitter
             p
               a(target='_blank' href="#") New Project
+            p
+              label
+                | CodeMirror:
+                input#config-editor-codemirror(type='checkbox' checked="checked")
           fieldset
             legend Compiler
             p
@@ -124,16 +128,14 @@ html(lang='ja')
               a(target='_blank' href="https://github.com/altjsdoit/altjsdoit") Github
               a(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") Twitter
       section#box-editor
-        ul#box-editor-tab
-          li(data-tab="script" class="selected") Script
-          li(data-tab="markup") Markup
-          li(data-tab="style") Style
-          li(data-tab="compiled") Compiled
-        div#box-editor-config
-          label
-            | enable CodeMirror:
-            input(data-config='enableCodeMirror' type='checkbox' checked='checked')
-        textarea#box-editor-textarea(wrap='off')
+        div.home-menu.pure-menu.pure-menu-open.pure-menu-horizontal.pure-menu-fixed
+          ul#box-editor-tab
+            li.selected(data-tab="script") Script
+            li(data-tab="markup") Markup
+            li(data-tab="style") Style
+            li(data-tab="compiled") Compiled
+        div#box-editor-content
+          textarea#box-editor-textarea(wrap='off')
       section#box-sandbox
         iframe#box-sandbox-iframe
     script(src='./thirdparty/zepto/zepto.min.js')

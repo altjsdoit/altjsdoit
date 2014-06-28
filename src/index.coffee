@@ -13,14 +13,23 @@ class Main
     uriData = loadURI(location)
     @model = new Model()
     @model.set(_.extend(config, uriData.config))
-    @menu   = new Menu({@model})
     @config = new Config({@model})
     @editor = new Editor({@model})
     @editor.setValues
       script: uriData.script or ""
       markup: uriData.markup or ""
       style:  uriData.style  or ""
+    $("#config-editor-codemirror").change (ev)=> @editor.toggle(ev)
     $("#config-project-save").click => @saveURI(); @shareURI()
+    $("#menu-page-tab li[data-target='#box-sandbox']").click (ev)=> @run()
+    $("#menu-page-tab li").click (ev)=>
+      $("#menu").find(".selected").removeClass("selected")
+      $(ev.target).addClass("selected")
+      $("#main").find(".active").removeClass("active")
+      target = $(ev.target).attr("data-target")
+      $(target).addClass("active")
+      if target isnt "#box-sandbox" then @stop()
+      @editor.render()
     @model.bind "change", =>
       opt = @model.toJSON()
       $("title").html(opt.title + " - #{new Date(opt.timestamp)} - altjsdo.it")
@@ -51,6 +60,7 @@ class Main
   run: ->
     {altjs, althtml, altcss} = opt = @model.toJSON()
     {script, markup, style} = @editor.getValues()
+    console.log opt
     build {altjs, althtml, altcss}, {script, markup, style}, opt, (srcdoc)->
       switch opt.iframeType
         when "srcdoc"
@@ -59,9 +69,13 @@ class Main
           encodeDataURI srcdoc, "text/html", (base64)->
             $("#box-sandbox-iframe").attr({"src": base64})
         when "blob"
-          console.log url = createBlobURL(srcdoc, (if opt.enableViewSource then "text/plain" else "text/html"))
+          console.log url = createBlobURL(srcdoc, "text/html")
           $("#box-sandbox-iframe").attr({"src": url})
         else throw new Error _opt.iframeType
+    console.log("a")
+  stop: ->
+    $("#box-sandbox-iframe").attr({"src": null, "srcdoc": null})
+    console.log("b")
 
 Model = Backbone.Model.extend
   defaults:
@@ -72,28 +86,15 @@ Model = Backbone.Model.extend
     altcss:  "CSS"
     iframeType: "blob"
 
-Menu = Backbone.View.extend
-  el: "#menu"
-  events:
-    "click #menu-page-tab li": "selectTab"
-  selectTab: (ev)->
-    $(@el).find(".select").removeClass("select")
-    $(ev.target).addClass("select")
-    $("#main").find(".active").removeClass("active")
-    $($(ev.target).attr("data-target")).addClass("active")
-    @render()
-  initialize: ->
-    _.bindAll(this, "render")
-    @model.bind("change", @render)
-    @render()
-  render: ->
-    "click #menu-page-tab li": "selectTab"
+
+
+
 
 
 Config = Backbone.View.extend
   el: "#box-config"
   events:
-    "change select": "load"
+    "change selected": "load"
     "change input": "load"
   load: (ev)->
     @model.set($(ev.target).attr("data-config"), getElmVal(ev.target))
@@ -116,7 +117,6 @@ Editor = Backbone.View.extend
   events:
     "click #box-editor-tab li": "selectTab"
     "click #box-editor-tab li[data-tab='compiled']": "compile"
-    "change #box-editor-config input[data-config='enableCodeMirror']": "changeEditor"
   compile: (ev)->
     {altjs, althtml, altcss} = opt = @model.toJSON()
     {script, markup, style} = @getValues()
@@ -134,7 +134,7 @@ Editor = Backbone.View.extend
       $("#box-editor-textarea").val(@doc[selected].getValue())
     @selected = selected
     @render()
-  changeEditor: (ev)->
+  toggle: (ev)->
     if @enableCodeMirror = getElmVal(ev.target)
       @cm = CodeMirror.fromTextArea($("#box-editor-textarea")[0], @option)
       @originDoc = @cm.swapDoc(@doc[@selected])
@@ -165,8 +165,8 @@ Editor = Backbone.View.extend
         "Shift-Tab": "indentLess"
         "Cmd-R": (cm)=> main.run()
         "Ctrl-R": (cm)=> main.run()
-        "Cmd-S": (cm)=> main.saveToStorage()
-        "Ctrl-S": (cm)=> main.saveToStorage()
+        "Cmd-S": (cm)=>  $("#config-project-save").click()
+        "Ctrl-S": (cm)=> $("#config-project-save").click()
         "Cmd-1": (cm)=> $("#box-editor-tab").children("*:nth-child(1)").click()
         "Ctrl-1": (cm)=> $("#box-editor-tab").children("*:nth-child(1)").click()
         "Cmd-2": (cm)=> $("#box-editor-tab").children("*:nth-child(2)").click()
@@ -211,4 +211,4 @@ Editor = Backbone.View.extend
       if @selected is "compiled"
       then @cm.setOption("readOnly", true)
       else @cm.setOption("readOnly", false)
-      setTimeout => @cm.refresh()
+    setTimeout => @cm?.refresh()
