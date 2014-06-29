@@ -119,7 +119,6 @@ Editor = Backbone.View.extend
         $("#box-editor-textarea").val(srcdoc)
       @render()
   selectTab: (ev)->
-    console.log ev
     ev.preventDefault()
     $(@el).find(".selected").removeClass("selected")
     $(ev.target).addClass("selected")

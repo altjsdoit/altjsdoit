@@ -91,11 +91,11 @@ html(lang='ja' manifest="manifest.appcache")
             label
               | Chart.js(0.2.0):
               input(data-config='enableChartjs' type='checkbox')
+            label
+              | pure(0.5.0):
+              input(data-config='enablePure' type='checkbox')
           fieldset
             legend Debug
-            label
-              | use cache:
-              input(data-config='enableCache' type='checkbox' checked='checked')
             label
               | use blobCache:
               input(data-config='enableBlobCache' type='checkbox')

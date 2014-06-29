@@ -213,22 +213,22 @@ compileAll = (langs, callback)->
 
 getIncludeScriptURLs = (opt, callback)->
   urls = []
-  if opt.enableZepto       then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/zepto/zepto.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.3/zepto.min.js")
-  if opt.enableJQuery      then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/jquery/jquery.min.js"            else "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js")
-  if opt.enableUnderscore  then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/underscore.js/underscore-min.js" else "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js")
-  if opt.enableBackbone    then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/backbone.js/backbone-min.js"     else "https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js")
-  if opt.enableES6shim     then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/es6-shim/es6-shim.min.js"        else "https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.11.0/es6-shim.min.js")
-  if opt.enableMathjs      then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/mathjs/math.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/mathjs/0.23.0/math.min.js")
-  if opt.enableProcessing  then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/processing.js/processing.min.js" else "https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.8/processing.min.js")
-  if opt.enableChartjs     then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/Chart.js/Chart.min.js"           else "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/0.2.0/Chart.min.js")
-
-  if opt.enableCache and opt.enableBlobCache
+  if opt.enableZepto       then urls.push makeDomain(location)+"/"+"thirdparty/zepto/zepto.min.js"
+  if opt.enableJQuery      then urls.push makeDomain(location)+"/"+"thirdparty/jquery/jquery.min.js"
+  if opt.enableUnderscore  then urls.push makeDomain(location)+"/"+"thirdparty/underscore.js/underscore-min.js"
+  if opt.enableBackbone    then urls.push makeDomain(location)+"/"+"thirdparty/backbone.js/backbone-min.js"
+  if opt.enableES6shim     then urls.push makeDomain(location)+"/"+"thirdparty/es6-shim/es6-shim.min.js"
+  if opt.enableMathjs      then urls.push makeDomain(location)+"/"+"thirdparty/mathjs/math.min.js"
+  if opt.enableProcessing  then urls.push makeDomain(location)+"/"+"thirdparty/processing.js/processing.min.js"
+  if opt.enableChartjs     then urls.push makeDomain(location)+"/"+"thirdparty/Chart.js/Chart.min.js"
+  if opt.enableBlobCache
   then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
   else setTimeout -> callback(urls)
 
 getIncludeStyleURLs = (opt, callback)->
   urls = []
-  if opt.enableCache and opt.enableBlobCache
+  if opt.enablePure     then urls.push makeDomain(location)+"/"+"thirdparty/pure/pure-min.css"
+  if opt.enableBlobCache
   then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
   else setTimeout -> callback(urls)
 
@@ -283,15 +283,13 @@ buildErr = (jsResult, htmlResult, cssResult)->
 
 includeFirebugLite = (head, jsResult, htmlResult, cssResult, opt, callback)->
   caching = (next)->
-    if opt.enableCache and opt.enableBlobCache
+    if opt.enableBlobCache
       URLToText makeDomain(location)+"/"+"thirdparty/firebug/firebug-lite.js", (text)->
         _text = text
           .replace("var m=path&&path.match(/([^\\/]+)\\/$/)||null;",
                    "var m=['build/', 'build']; path='#{makeDomain(location)}/thirdparty/firebug/build/'")
         next(createBlobURL(_text, "text/javascript"))
-    else if opt.enableCache
-    then setTimeout -> next(makeDomain(location)+"/"+"thirdparty/firebug/firebug-lite.js")
-    else setTimeout -> next("https://getfirebug.com/firebug-lite.js")
+    else setTimeout -> next(makeDomain(location)+"/"+"thirdparty/firebug/firebug-lite.js")
   caching (firebugURL)->
     jsResult.code = """
       try{
