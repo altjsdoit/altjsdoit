@@ -15,14 +15,13 @@ html(lang='ja')
   body
     header#menu
       div.home-menu.pure-menu.pure-menu-open.pure-menu-horizontal.pure-menu-fixed
-        a.pure-menu-heading altjsdoit
         ul#menu-page-tab
-          li.selected(data-target="#box-config") Config
+          li.selected(data-target="#box-config") altjsdoit
           li(data-target="#box-editor") Editor
           li(data-target="#box-sandbox") Run
     div#main
       section#box-config.active
-        form
+        form.pure-form.pure-form-stacked
           fieldset
             legend Project
             p
@@ -33,11 +32,9 @@ html(lang='ja')
               label
                 | Commit as URL:
                 input#config-project-url(type='url' value='' placeholder='Press Save Button' onclick="this.select();")
-                input#config-project-save(type='button' value='Save')
+                input#config-project-save.pure-button.pure-button-primary(type='button' value='Save')
                 | &nbsp;
                 span#config-project-twitter
-            p
-              a(target='_blank' href="#") New Project
             p
               label
                 | CodeMirror:
@@ -65,68 +62,56 @@ html(lang='ja')
                   option(value='Stylus') Stylus(0.46.3)
           fieldset
             legend Libraries
-            ul
-              li
-                label
-                  | Firebug-Lite(1.4.0):
-                  input(data-config='enableFirebugLite' type='checkbox')
-              li
-                label
-                  | Zepto(1.1.3):
-                  input(data-config='enableZepto' type='checkbox')
-              li
-                label
-                  | jQuery(2.1.1):
-                  input(data-config='enableJQuery' type='checkbox')
-              li
-                label
-                  | Underscore.js(1.6.0):
-                  input(data-config='enableUnderscore' type='checkbox')
-              li
-                label
-                  | Backbone.js(1.1.2):
-                  input(data-config='enableBackbone' type='checkbox')
-              li
-                label
-                  | es6-shim(0.11.0):
-                  input(data-config='enableES6shim' type='checkbox')
-              li
-                label
-                  | Processing.js(1.4.8):
-                  input(data-config='enableProcessing' type='checkbox')
-              li
-                label
-                  | mathjs(0.23.0):
-                  input(data-config='enableMathjs' type='checkbox')
+            label
+              | Firebug-Lite(1.4.0):
+              input(data-config='enableFirebugLite' type='checkbox')
+            label
+              | Zepto(1.1.3):
+              input(data-config='enableZepto' type='checkbox')
+            label
+              | jQuery(2.1.1):
+              input(data-config='enableJQuery' type='checkbox')
+            label
+              | Underscore.js(1.6.0):
+              input(data-config='enableUnderscore' type='checkbox')
+            label
+              | Backbone.js(1.1.2):
+              input(data-config='enableBackbone' type='checkbox')
+            label
+              | es6-shim(0.11.0):
+              input(data-config='enableES6shim' type='checkbox')
+            label
+              | Processing.js(1.4.8):
+              input(data-config='enableProcessing' type='checkbox')
+            label
+              | mathjs(0.23.0):
+              input(data-config='enableMathjs' type='checkbox')
           fieldset
             legend Debug
-            ul
-              li
-                label
-                  | use cache:
-                  input(data-config='enableCache' type='checkbox' checked='checked')
-              li
-                label
-                  | use blobCache:
-                  input(data-config='enableBlobCache' type='checkbox')
-              li
-                label
-                  | iframe type:
-              li
-                  select(data-config='iframeType')
-                    option(value='blob' selected='selected') objectURL
-                    option(value='srcdoc') srcdoc
-                    option(value='base64') dataURI
+            label
+              | use cache:
+              input(data-config='enableCache' type='checkbox' checked='checked')
+            label
+              | use blobCache:
+              input(data-config='enableBlobCache' type='checkbox')
+            label
+              | iframe type:
+              select(data-config='iframeType')
+                option(value='blob' selected='selected') objectURL
+                option(value='srcdoc') srcdoc
+                option(value='base64') dataURI
             p
-              a(target='_blank' href="./test.html") Self Test
+              a.pure-button(target='_blank' href="./test.html") Self Test
           fieldset
             legend About
-            pre
+            p
               | @@name @@version
+              br
               | @@timestamp
             p
-              a(target='_blank' href="https://github.com/altjsdoit/altjsdoit") Github
-              a(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") Twitter
+              a.pure-button(target='_blank' href="https://github.com/altjsdoit/altjsdoit") Github
+              | &nbsp;
+              a.pure-button(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") Twitter
       section#box-editor
         div.home-menu.pure-menu.pure-menu-open.pure-menu-horizontal.pure-menu-fixed
           ul#box-editor-tab
