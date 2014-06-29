@@ -20,9 +20,10 @@ class Main
       markup: uriData.markup or "<p class='helloworld'>hello world</p>"
       style:  uriData.style  or ".helloworld { color: gray; }"
     $("#config-editor-codemirror").change (ev)=> @editor.toggle(ev)
-    $("#config-project-save").click => @saveURI(); @shareURI()
+    $("#config-project-save").click (ev)=> ev.preventDefault(); @saveURI(); @shareURI()
     $("#menu-page-tab li[data-target='#box-sandbox']").click (ev)=> @run()
     $("#menu-page-tab li").click (ev)=>
+      ev.preventDefault()
       $("#menu").find(".selected").removeClass("selected")
       $(ev.target).addClass("selected")
       $("#main").find(".active").removeClass("active")
@@ -118,6 +119,8 @@ Editor = Backbone.View.extend
         $("#box-editor-textarea").val(srcdoc)
       @render()
   selectTab: (ev)->
+    console.log ev
+    ev.preventDefault()
     $(@el).find(".selected").removeClass("selected")
     $(ev.target).addClass("selected")
     selected = $(ev.target).attr("data-tab")
