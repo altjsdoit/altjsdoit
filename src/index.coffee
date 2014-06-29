@@ -13,7 +13,6 @@ class Main
     uriData = loadURI(location)
     @model = new Model()
     @model.set(_.extend(config, uriData.config))
-    console.dir @model.toJSON()
     @config = new Config({@model})
     @editor = new Editor({@model})
     @editor.setValues
@@ -87,7 +86,7 @@ Model = Backbone.Model.extend
 Config = Backbone.View.extend
   el: "#box-config"
   events:
-    "change selected": "load"
+    "change select": "load"
     "change input": "load"
   load: (ev)->
     @model.set($(ev.target).attr("data-config"), getElmVal(ev.target))
