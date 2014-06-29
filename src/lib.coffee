@@ -221,6 +221,7 @@ getIncludeScriptURLs = (opt, callback)->
   if opt.enableMathjs      then urls.push makeDomain(location)+"/"+"thirdparty/mathjs/math.min.js"
   if opt.enableProcessing  then urls.push makeDomain(location)+"/"+"thirdparty/processing.js/processing.min.js"
   if opt.enableChartjs     then urls.push makeDomain(location)+"/"+"thirdparty/Chart.js/Chart.min.js"
+  if opt.enableMathjax     then urls.push makeDomain(location)+"/"+"thirdparty/mathjax/MathJax.js"
   if opt.enableBlobCache
   then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
   else setTimeout -> callback(urls)

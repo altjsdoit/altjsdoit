@@ -32,6 +32,7 @@ thirdparty/jquery/jquery.min.js
 thirdparty/es6-shim/es6-shim.min.js
 thirdparty/processing.js/processing.min.js
 thirdparty/mathjs/math.min.js
+thirdparty/mathjax/MathJax.js
 
 
 NETWORK:
