@@ -63,15 +63,19 @@ class Main
     {script, markup, style} = @editor.getValues()
     build {altjs, althtml, altcss}, {script, markup, style}, opt, (srcdoc)->
       switch opt.iframeType
+        when "blob"
+          console.log url = createBlobURL(srcdoc, "text/html")
+          $("#box-sandbox-iframe").attr({"src": url})
         when "srcdoc"
           $("#box-sandbox-iframe").attr({"srcdoc": srcdoc})
         when "base64"
           encodeDataURI srcdoc, "text/html", (base64)->
             $("#box-sandbox-iframe").attr({"src": base64})
-        when "blob"
-          console.log url = createBlobURL(srcdoc, "text/html")
-          $("#box-sandbox-iframe").attr({"src": url})
-        else throw new Error _opt.iframeType
+        when "message"
+          $("#box-sandbox-iframe").attr({"src": "iframe.html"}).on "load", (ev)->
+            console.log srcdoc
+            @contentWindow.postMessage(srcdoc, "*")
+        else throw new Error opt.iframeType
   stop: ->
     $("#box-sandbox-iframe").attr({"src": null, "srcdoc": null})
 

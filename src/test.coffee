@@ -1,4 +1,4 @@
-QUnit.config.testTimeout = 3000
+QUnit.config.testTimeout = 3500
 
 QUnit.module("URL")
 
@@ -112,7 +112,7 @@ QUnit.module("DOM")
 
 QUnit.test "loadURI", (assert)->
   expect(0)
-  
+
 QUnit.test "loadDOM", (assert)->
   expect(0)
 
@@ -283,7 +283,7 @@ encodeDataURI """
           document.write("<p>inline</p>");
           document.write("<p><a target='_blank' href='"+location.href+"'>"+location.href+"</a></p>");
           target = (parent.postMessage ? parent : (parent.document.postMessage ? parent.document : undefined));
-          target.postMessage(JSON.stringify(window.testResult), "#{makeURL(location)}");
+          target.postMessage(JSON.stringify(window.testResult), "*");
         }catch(err){
           document.write(JSON.stringify(err))
         }
@@ -296,6 +296,7 @@ encodeDataURI """
     expect(3)
     window.onmessage = (ev)->
       testResult = JSON.parse(ev.data)
+      console.dir ev
       assert.ok(testResult.dataURI,   ev.data)
       assert.ok(testResult.objectURL, ev.data)
       assert.ok(testResult.inline,    ev.data)
@@ -321,3 +322,15 @@ encodeDataURI """
         assert.ok(testResult.objectURL, "objectURL")
         assert.ok(testResult.inline,    "inline")
         QUnit.start()
+  QUnit.asyncTest "check message iframe behavior", (assert)->
+    iframe = $("<iframe />").css(style).attr({"src": "iframe.html"})
+    $("<div>").append(iframe).appendTo("body")
+    iframe[0].onload =->
+      iframe[0].contentWindow.postMessage(createSrcdoc("message"), "*")
+    expect(3)
+    window.onmessage = (ev)->
+      console.dir testResult = JSON.parse(ev.data)
+      assert.ok(testResult.dataURI,   ev.data)
+      assert.ok(testResult.objectURL, ev.data)
+      assert.ok(testResult.inline,    ev.data)
+      QUnit.start()
