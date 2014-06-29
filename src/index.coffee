@@ -187,7 +187,6 @@ Editor = Backbone.View.extend
       compiled: new CodeMirror.Doc("")
     @cm = CodeMirror.fromTextArea($("#box-editor-textarea")[0], @option)
     @originDoc = @cm.swapDoc(@doc.script)
-    @cm.setSize("100%", "100%")
     @render()
   setValues: ({script, markup, style})->
     @doc.script.setValue(script) if script?
@@ -204,6 +203,7 @@ Editor = Backbone.View.extend
     tmp.find("[data-tab='markup']").html(opt.althtml)
     tmp.find("[data-tab='style']").html(opt.altcss)
     if @enableCodeMirror
+      @cm.setSize("100%", "100%")
       @cm?.swapDoc(@doc[@selected])
       @cm.setOption("mode", @mode[@selected])
       if @selected is "compiled"
