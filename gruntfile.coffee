@@ -90,7 +90,8 @@ module.exports = (grunt) ->
         compress: true
       build:
         files:
-          'public/thirdparty/codemirror/options.min.js': [
+          'public/thirdparty/options.min.js': [
+            "public/thirdparty/zepto/touch.js"
             "public/thirdparty/codemirror/addon/search/searchcursor.js"
             "public/thirdparty/codemirror/addon/search/search.js"
             "public/thirdparty/codemirror/addon/dialog/dialog.js"

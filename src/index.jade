@@ -88,6 +88,9 @@ html(lang='ja' manifest="manifest.appcache")
             label
               | mathjs(0.23.0):
               input(data-config='enableMathjs' type='checkbox')
+            label
+              | Chart.js(0.2.0):
+              input(data-config='enableChartjs' type='checkbox')
           fieldset
             legend Debug
             label
@@ -126,12 +129,11 @@ html(lang='ja' manifest="manifest.appcache")
       section#box-sandbox
         iframe#box-sandbox-iframe
     script(src='./thirdparty/zepto/zepto.min.js')
-    script(src='./thirdparty/zepto/touch.js')
     script(src='./thirdparty/underscore.js/underscore-min.js')
     script(src='./thirdparty/backbone.js/backbone-min.js')
     script(src='./thirdparty/jszip/jszip.min.js')
     script(src="./thirdparty/codemirror/codemirror.min.js")
-    script(src='./thirdparty/codemirror/options.min.js')
+    script(src='./thirdparty/options.min.js')
     script(src='./lib.js')
     script(src='./index.js')
     script(async='async' src='./thirdparty/coffee-script/coffee-script.min.js')

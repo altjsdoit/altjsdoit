@@ -16,7 +16,7 @@ thirdparty/underscore.js/underscore-min.js
 thirdparty/backbone.js/backbone-min.js
 thirdparty/jszip/jszip.min.js
 thirdparty/codemirror/codemirror.min.js
-thirdparty/codemirror/options.min.js
+thirdparty/options.min.js
 
 lib.js
 index.js

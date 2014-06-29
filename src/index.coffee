@@ -16,7 +16,7 @@ class Main
     @config = new Config({@model})
     @editor = new Editor({@model})
     @editor.setValues
-      script: uriData.script or "alert('hello world');"
+      script: uriData.script or "console.log('hello world');"
       markup: uriData.markup or "<p class='helloworld'>hello world</p>"
       style:  uriData.style  or ".helloworld { color: gray; }"
     $("#config-editor-codemirror").change (ev)=> @editor.toggle(ev)

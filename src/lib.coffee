@@ -220,6 +220,8 @@ getIncludeScriptURLs = (opt, callback)->
   if opt.enableES6shim     then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/es6-shim/es6-shim.min.js"        else "https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.11.0/es6-shim.min.js")
   if opt.enableMathjs      then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/mathjs/math.min.js"              else "https://cdnjs.cloudflare.com/ajax/libs/mathjs/0.23.0/math.min.js")
   if opt.enableProcessing  then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/processing.js/processing.min.js" else "https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.8/processing.min.js")
+  if opt.enableChartjs     then urls.push (if opt.enableCache then makeDomain(location)+"/"+"thirdparty/Chart.js/Chart.min.js"           else "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/0.2.0/Chart.min.js")
+
   if opt.enableCache and opt.enableBlobCache
   then createProxyURLs urls, "text/javascript", (_urls)-> callback(_urls)
   else setTimeout -> callback(urls)
