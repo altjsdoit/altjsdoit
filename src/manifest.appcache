@@ -31,6 +31,7 @@ thirdparty/firebug/firebug-lite.js
 thirdparty/jquery/jquery.min.js
 thirdparty/es6-shim/es6-shim.min.js
 thirdparty/processing.js/processing.min.js
+thirdparty/Chart.js/Chart.min.js
 thirdparty/mathjs/math.min.js
 
 

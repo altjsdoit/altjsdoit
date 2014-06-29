@@ -18,6 +18,12 @@ grunt
 Change Log
 ---------------
 
+#### Version 0.9.0
+* change more useful ui for smartphone
+* add chartjs
+* add pure
+* bug fix
+
 #### Version 0.8.6
 
 * more light weight

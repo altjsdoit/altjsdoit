@@ -3,7 +3,6 @@ div.pure-menu {
   width: 512px !important;
   -webkit-user-select: none;
   & > ul {
-    //z-index: 99999;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     & > li {
@@ -44,8 +43,8 @@ div.pure-menu {
     }
   }
   & > #box-config {
-    padding: 0.5em;
     margin-top: 32px;
+    padding: 1em;
   }
   & > #box-editor {
     position: absolute;
@@ -90,79 +89,12 @@ div.pure-menu {
   }
 }
 
-
-
-
-
-/*#menu {
-  &.active+#main>* {
-    width: ~'-webkit-calc(100% - 160px)';
-    left: 160px;
-  }
-}
-#main {
-  &>* {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    -webkit-transition: all 0.2s ease-out;
-    -moz-transition: all 0.2s ease-out;
-    -ms-transition: all 0.2s ease-out;
-    -o-transition: all 0.2s ease-out;
-    transition: all 0.2s ease-out;
-    &.content {
-      max-width: 100%;
-    }
-  }
-  &>[id^=box-] {
-    display: none;
-    background-color: white;
-    &>textarea, &>#box-sandbox-iframe {
-      margin: 0px;
-      padding: 0px;
-      border: none;
-      width: 100%;
-      height: 100%;
-    }
-  }
-  &>[id^=box-].active {
-    display: block;
-  }
-}*/
-
-/*
-html, body, #layout, #main, #main>* {
-  height: 100%;
-}
-  #main>.content {
-    margin-bottom: 0px !important;
-    width: 100%;
-  }
-  #main>[id^=box-]>textarea, #box-sandbox-iframe {
-    margin: 0px;
-    padding: 0px;
-    border: none;
-    width: 100%;
-    height: 100%;
-    background-color: white;
-  }
-*/
-
-
-
-
 // --------------------------
 // Responsive Styles
 // --------------------------
 
-@media (min-width: 640px) {
-
-}
+//@media (min-width: 320px) {
+//}
 
 
 // --------------------------
