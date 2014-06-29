@@ -18,7 +18,15 @@ grunt
 Change Log
 ---------------
 
+#### Version 0.9.2
+
+* add iframe type
+
+#### Version 0.9.1
+* bug fix
+
 #### Version 0.9.0
+
 * change more useful ui for smartphone
 * add chartjs
 * add pure

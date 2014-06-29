@@ -47,7 +47,7 @@ QUnit.asyncTest "URLToArrayBuffer", (assert)->
 
 QUnit.asyncTest "createProxyURLs", (assert)->
   n = 0
-  urls = ["index.html", "test.html", "ui.js", "cache.js"]
+  urls = ["index.html", "test.html"]
   expect(urls.length)
   createProxyURLs urls, "text/html", (_urls)->
     _urls.forEach (_url, i)->
@@ -167,16 +167,14 @@ QUnit.asyncTest "getIncludeStyleURLs", (assert)->
     QUnit.start()
 
 QUnit.asyncTest "getIncludeScriptURLs", (assert)->
-  expect(3)
-  getIncludeScriptURLs {enableZepto:true}, (urls)->
-    assert.deepEqual(urls, ["https://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.3/zepto.min.js"], JSON.stringify(urls))
-    getIncludeScriptURLs {enableJQuery:true, enableCache:true}, (urls)->
-      assert.deepEqual(urls, [makeDomain(location)+"/"+"thirdparty/jquery/jquery.min.js"], JSON.stringify(urls))
-      getIncludeScriptURLs {enableUnderscore:true, enableCache:true, enableBlobCache:true}, (urls)->
-        URLToText urls[0], (_text)->
-          URLToText makeDomain(location)+"/"+"thirdparty/underscore.js/underscore-min.js", (text)->
-            assert.strictEqual(_text, text, _text)
-            QUnit.start()
+  expect(2)
+  getIncludeScriptURLs {enableJQuery:true}, (urls)->
+    assert.deepEqual(urls, [makeDomain(location)+"/"+"thirdparty/jquery/jquery.min.js"], JSON.stringify(urls))
+    getIncludeScriptURLs {enableUnderscore:true, enableCache:true, enableBlobCache:true}, (urls)->
+      URLToText urls[0], (_text)->
+        URLToText makeDomain(location)+"/"+"thirdparty/underscore.js/underscore-min.js", (text)->
+          assert.strictEqual(_text, text, _text)
+          QUnit.start()
 
 QUnit.test "buildScripts", (assert)->
   expect(1)
