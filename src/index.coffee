@@ -13,12 +13,13 @@ class Main
     uriData = loadURI(location)
     @model = new Model()
     @model.set(_.extend(config, uriData.config))
+    console.dir @model.toJSON()
     @config = new Config({@model})
     @editor = new Editor({@model})
     @editor.setValues
-      script: uriData.script or ""
-      markup: uriData.markup or ""
-      style:  uriData.style  or ""
+      script: uriData.script or "alert('hello world');"
+      markup: uriData.markup or "<p class='helloworld'>hello world</p>"
+      style:  uriData.style  or ".helloworld { color: gray; }"
     $("#config-editor-codemirror").change (ev)=> @editor.toggle(ev)
     $("#config-project-save").click => @saveURI(); @shareURI()
     $("#menu-page-tab li[data-target='#box-sandbox']").click (ev)=> @run()
@@ -60,7 +61,6 @@ class Main
   run: ->
     {altjs, althtml, altcss} = opt = @model.toJSON()
     {script, markup, style} = @editor.getValues()
-    console.log opt
     build {altjs, althtml, altcss}, {script, markup, style}, opt, (srcdoc)->
       switch opt.iframeType
         when "srcdoc"
@@ -72,10 +72,8 @@ class Main
           console.log url = createBlobURL(srcdoc, "text/html")
           $("#box-sandbox-iframe").attr({"src": url})
         else throw new Error _opt.iframeType
-    console.log("a")
   stop: ->
     $("#box-sandbox-iframe").attr({"src": null, "srcdoc": null})
-    console.log("b")
 
 Model = Backbone.Model.extend
   defaults:
@@ -85,11 +83,6 @@ Model = Backbone.Model.extend
     althtml: "HTML"
     altcss:  "CSS"
     iframeType: "blob"
-
-
-
-
-
 
 Config = Backbone.View.extend
   el: "#box-config"

@@ -2,7 +2,6 @@ CACHE MANIFEST
 # version: @@version
 # build: @@timestamp
 
-
 CACHE:
 icon-128.png
 
@@ -10,28 +9,27 @@ thirdparty/codemirror/codemirror.css
 thirdparty/codemirror/theme/solarized.css
 thirdparty/codemirror/addon/dialog/dialog.css
 thirdparty/pure/pure-min.css
-thirdparty/pure/main.css
-thirdparty/pure/baby-blue.css
 index.css
 
-cache.js
 thirdparty/zepto/zepto.min.js
-ui.js
 thirdparty/underscore.js/underscore-min.js
 thirdparty/backbone.js/backbone-min.js
 thirdparty/jszip/jszip.min.js
 thirdparty/codemirror/codemirror.min.js
 thirdparty/codemirror/options.min.js
+
+lib.js
+index.js
+
 thirdparty/coffee-script/coffee-script.min.js
 thirdparty/jade/jade.min.js
 thirdparty/less.js/less.min.js
 thirdparty/stylus/stylus.min.js
 thirdparty/twitter/widgets.js
-lib.js
-index.js
 
 thirdparty/firebug/firebug-lite.js
 thirdparty/jquery/jquery.min.js
+thirdparty/es6-shim/es6-shim.min.js
 thirdparty/processing.js/processing.min.js
 thirdparty/mathjs/math.min.js
 
