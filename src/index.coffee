@@ -186,7 +186,6 @@ Editor = Backbone.View.extend
       @doc.compile.setValue(srcdoc)
       if @selected is "compile"
         $("#box-editor-textarea").val(srcdoc)
-      @render()
   render: ->
     opt = @model.toJSON()
     tmp = $("#menu-page-tab")
