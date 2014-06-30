@@ -1,12 +1,12 @@
 doctype html
-html(lang='ja' manifest="manifest.appcache")
+html(lang='ja' manifest='manifest.appcache')
   head
     meta(charset='UTF-8')
     title altjsdo.it
     meta(name='Description' content='altjsdoit - A Simple WebApp Editor - ')
     meta(name='Keywords' content='JavaScript,CoffeeScript,HTML5,CSS,altjs,less,stylus,jade')
     meta(name='viewport' content='width=device-width user-scalable=no,initial-scale=1,maximum-scale=1')
-    link(rel="apple-touch-icon" href="./icon-128.png")
+    link(rel='apple-touch-icon' href='./icon-128.png')
     link(rel='stylesheet' href='./thirdparty/codemirror/codemirror.css')
     link(rel='stylesheet' href='./thirdparty/codemirror/theme/solarized.css')
     link(rel='stylesheet' href='./thirdparty/codemirror/addon/dialog/dialog.css')
@@ -16,12 +16,12 @@ html(lang='ja' manifest="manifest.appcache")
     header#menu
       div.home-menu.pure-menu.pure-menu-open.pure-menu-horizontal.pure-menu-fixed
         ul#menu-page-tab
-          li.selected(data-target="#box-config") altjsdoit
-          li(data-target="#box-editor" data-tab="script") Script
-          li(data-target="#box-editor" data-tab="markup") Markup
-          li(data-target="#box-editor" data-tab="style") Style
-          li(data-target="#box-editor" data-tab="compile") Compile
-          li(data-target="#box-sandbox") Run
+          li.selected(data-target='#box-config') altjsdoit
+          li(data-target='#box-editor' data-tab='script') Script
+          li(data-target='#box-editor' data-tab='markup') Markup
+          li(data-target='#box-editor' data-tab='style') Style
+          li(data-target='#box-editor' data-tab='compile') Compile
+          li(data-target='#box-sandbox') Run
     div#main
       section#box-config.active
         form.pure-form.pure-form-stacked
@@ -34,10 +34,10 @@ html(lang='ja' manifest="manifest.appcache")
             p
               label
                 | Save as URL:
-                input#config-project-url(type='url' value='' placeholder='Press Save Button' onclick="this.select();")
+                input#config-project-url(type='url' value='' placeholder='Press Save Button' onclick='this.select();')
                 input#config-project-save.pure-button.pure-button-primary(type='button' value='Save')
                 | &nbsp;
-                a.pure-button(target="_blank" href="/") New Project
+                a.pure-button(target='_blank' href='/') New Project
                 | &nbsp;
                 span#config-project-twitter
           fieldset
@@ -97,7 +97,7 @@ html(lang='ja' manifest="manifest.appcache")
             legend Debug
             label
               | use CodeMirror:
-              input#config-editor-codemirror(type='checkbox' checked="checked")
+              input(data-config='enableCodeMirror' type='checkbox' checked='checked')
             label
               | use blobCache:
               input(data-config='enableBlobCache' type='checkbox')
@@ -109,7 +109,7 @@ html(lang='ja' manifest="manifest.appcache")
                 option(value='base64') dataURI
                 option(value='message') message
             p
-              a.pure-button(target='_blank' href="./test.html") Self Test
+              a.pure-button(target='_blank' href='./test.html') Self Test
           fieldset
             legend About
             p
@@ -117,9 +117,9 @@ html(lang='ja' manifest="manifest.appcache")
               br
               | @@timestamp
             p
-              a.pure-button(target='_blank' href="https://github.com/altjsdoit/altjsdoit") Github
+              a.pure-button(target='_blank' href='https://github.com/altjsdoit/altjsdoit') Github
               | &nbsp;
-              a.pure-button(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") Twitter
+              a.pure-button(target='_blank' href='https://twitter.com/search?q=%23altjsdoit') Twitter
       section#box-editor
         textarea#box-editor-textarea(wrap='off')
       section#box-sandbox
@@ -128,7 +128,7 @@ html(lang='ja' manifest="manifest.appcache")
     script(src='./thirdparty/underscore.js/underscore-min.js')
     script(src='./thirdparty/backbone.js/backbone-min.js')
     script(src='./thirdparty/jszip/jszip.min.js')
-    script(src="./thirdparty/codemirror/codemirror.min.js")
+    script(src='./thirdparty/codemirror/codemirror.min.js')
     script(src='./thirdparty/options.min.js')
     script(src='./lib.js')
     script(src='./index.js')

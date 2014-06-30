@@ -29,12 +29,12 @@ module.exports = (grunt) ->
       compile:
         options:
           patterns: [
-            {match: 'timestamp', replacement: '<%= new Date() %>'}#grunt.template.today()
+            {match: 'timestamp', replacement: '<%= new Date() %>'}
             {match: "name",      replacement: '<%= pkg.name %>'}
             {match: "version",   replacement: '<%= pkg.version %>'}
           ]
         files: [
-          #{expand: true, cwd: 'src/', src: ['*.appcache'], dest: 'public/'}
+          {expand: true, cwd: 'src/', src: ['*.appcache'], dest: 'public/'}
           {expand: true, cwd: 'src/', src: ['*.webapp'],   dest: 'public/'}
           {expand: true, cwd: 'src/', src: ['*.coffee'],   dest: 'public/'}
           {expand: true, cwd: 'src/', src: ['*.jade'],     dest: 'public/'}

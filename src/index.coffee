@@ -1,12 +1,12 @@
+window.applicationCache.addEventListener 'updateready', (ev)->
+  if window.applicationCache.status is window.applicationCache.UPDATEREADY
+    window.applicationCache.swapCache()
+    if confirm('A new version of this site is available. Save and load it?')
+      window.main.saveURI()
+      location.reload()
 
 $ ->
   window.main = new Main
-  window.applicationCache.addEventListener 'updateready', (ev)->
-    if window.applicationCache.status is window.applicationCache.UPDATEREADY
-      window.applicationCache.swapCache()
-      if confirm('A new version of this site is available. Save and load it?')
-        window.main.saveURI()
-        location.reload()
 
 class Main
   constructor: ->
@@ -20,27 +20,21 @@ class Main
       script: uriData.script or "console.log('hello world');"
       markup: uriData.markup or "<p class='helloworld'>hello world</p>"
       style:  uriData.style  or ".helloworld { color: gray; }"
-    $("#config-editor-codemirror").change (ev)=> @editor.toggle(ev)
     $("#config-project-save").click (ev)=> @saveURI(); @shareURI()
     $("#menu-page-tab li").click (ev)=>
       ev.preventDefault()
-      $("#menu").find(".selected").removeClass("selected")
-      $(ev.target).addClass("selected")
-      $("#main").find(".active").removeClass("active")
       target = $(ev.target).attr("data-target")
-      $(target).addClass("active")
-      if target is "#box-sandbox"
-      then @run()
-      else @stop()
-      if target is "#box-editor" then @editor.selectTab(ev)
-      @editor.render()
+      tab = $(ev.target).attr("data-tab")
+      @model.set("tabPage",target)
+      @model.set("tabEditor", tab) if tab?
+      @saveURI()
     $(window).resize ->
-      $("#main").css "top", $("#menu-page-tab").height()
-      $("#main").height $(window).height() - $("#menu-page-tab").height()
+      $("#main")
+        .css("top", $("#menu-page-tab").height())
+        .height($(window).height() - $("#menu-page-tab").height())
     $(window).resize()
-    @model.bind "change", =>
-      opt = @model.toJSON()
-      $("title").html(opt.title + " - #{new Date(opt.timestamp)} - altjsdo.it")
+    @model.bind "change", => @render()
+    @render()
   dump: ->
     {script, markup, style} = @editor.getValues()
     config = JSON.stringify(@model.toJSON())
@@ -82,9 +76,19 @@ class Main
           $("#box-sandbox-iframe").attr({"src": "iframe.html"}).on "load", (ev)->
             console.log srcdoc
             @contentWindow.postMessage(srcdoc, "*")
-        else throw new Error opt.iframeType
+        else throw new Error "unknown iframe type: "+opt.iframeType
   stop: ->
     $("#box-sandbox-iframe").attr({"src": null, "srcdoc": null})
+  render: ->
+    opt = @model.toJSON()
+    $("title").html(opt.title + " - #{new Date(opt.timestamp)} - altjsdo.it")
+    $("#menu").find(".selected").removeClass("selected")
+    $("#main").find(".active").removeClass("active")
+    $("#menu").find("[data-target='#{opt.tabPage}'][data-tab='#{opt.tabEditor}']").addClass("selected")
+    $(opt.tabPage).addClass("active")
+    if opt.tabPage is "#box-sandbox"
+    then @run()
+    else @stop()
 
 Model = Backbone.Model.extend
   defaults:
@@ -94,6 +98,8 @@ Model = Backbone.Model.extend
     althtml: "HTML"
     altcss:  "CSS"
     iframeType: "blob"
+    tabPage: "#box-config"
+    tabEditor: "script"
 
 Config = Backbone.View.extend
   el: "#box-config"
@@ -111,30 +117,13 @@ Config = Backbone.View.extend
     Object.keys(opt).forEach (key)=>
       if key.slice(0, 6) is "enable"
         @$el.find("[data-config='#{key}']")
-          .attr("checked", (if !!opt[key] then "checked" else null))
+            .attr("checked", (if !!opt[key] then "checked" else null))
       else
         @$el.find("[data-config='#{key}']").val(opt[key])
 
 
 Editor = Backbone.View.extend
   el: "#box-editor"
-  selectTab: (ev)->
-    selected = $(ev.target).attr("data-tab")
-    if not @enableCodeMirror
-      @doc[@selected].setValue($("#box-editor-textarea").val())
-      $("#box-editor-textarea").val(@doc[selected].getValue())
-    if selected is "compile" then @compile()
-    @selected = selected
-    @render()
-  toggle: (ev)->
-    if @enableCodeMirror = getElmVal(ev.target)
-      @cm = CodeMirror.fromTextArea($("#box-editor-textarea")[0], @option)
-      @originDoc = @cm.swapDoc(@doc[@selected])
-    else
-      @cm.toTextArea()
-      @cm.swapDoc(@originDoc)
-      @cm = null
-    @render()
   initialize: ->
     _.bindAll(this, "render")
     @model.bind("change", @render)
@@ -201,12 +190,26 @@ Editor = Backbone.View.extend
   render: ->
     opt = @model.toJSON()
     tmp = $("#menu-page-tab")
-    tmp.find("[data-target='#box-editor'][data-tab='script']").html(@mode.script=opt.altjs)
-    tmp.find("[data-target='#box-editor'][data-tab='markup']").html(@mode.markup=opt.althtml)
-    tmp.find("[data-target='#box-editor'][data-tab='style']").html(@mode.style=opt.altcss)
+    tmp.find("[data-target='#box-editor'][data-tab='script']").html(@mode.script = opt.altjs)
+    tmp.find("[data-target='#box-editor'][data-tab='markup']").html(@mode.markup = opt.althtml)
+    tmp.find("[data-target='#box-editor'][data-tab='style']").html(@mode.style = opt.altcss)
+    if opt.tabEditor? and @selected isnt opt.tabEditor
+      if not @enableCodeMirror
+        @doc[@selected].setValue($("#box-editor-textarea").val())
+        $("#box-editor-textarea").val(@doc[opt.tabEditor].getValue())
+      @selected = opt.tabEditor
+    if @selected is "compile" then @compile()
+    if opt.enableCodeMirror? and @enableCodeMirror isnt opt.enableCodeMirror
+      if @enableCodeMirror = opt.enableCodeMirror
+        @cm = CodeMirror.fromTextArea($("#box-editor-textarea")[0], @option)
+        @originDoc = @cm.swapDoc(@doc[@selected])
+      else
+        @cm.toTextArea()
+        @cm.swapDoc(@originDoc)
+        @cm = null
     if @enableCodeMirror
       @cm.setSize("100%", "100%")
-      @cm?.swapDoc(@doc[@selected])
+      @cm.swapDoc(@doc[@selected])
       @cm.setOption("mode", getCompilerSetting(@mode[@selected]).mode)
       if @selected is "compile"
       then @cm.setOption("readOnly", true)
