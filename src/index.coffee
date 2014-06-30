@@ -1,3 +1,4 @@
+
 $ ->
   window.main = new Main
   window.applicationCache.addEventListener 'updateready', (ev)->
@@ -20,8 +21,7 @@ class Main
       markup: uriData.markup or "<p class='helloworld'>hello world</p>"
       style:  uriData.style  or ".helloworld { color: gray; }"
     $("#config-editor-codemirror").change (ev)=> @editor.toggle(ev)
-    $("#config-project-save").click (ev)=> ev.preventDefault(); @saveURI(); @shareURI()
-    $("#menu-page-tab li[data-target='#box-sandbox']").click (ev)=> @run()
+    $("#config-project-save").click (ev)=> @saveURI(); @shareURI()
     $("#menu-page-tab li").click (ev)=>
       ev.preventDefault()
       $("#menu").find(".selected").removeClass("selected")
@@ -29,8 +29,15 @@ class Main
       $("#main").find(".active").removeClass("active")
       target = $(ev.target).attr("data-target")
       $(target).addClass("active")
-      if target isnt "#box-sandbox" then @stop()
+      if target is "#box-sandbox"
+      then @run()
+      else @stop()
+      if target is "#box-editor" then @editor.selectTab(ev)
       @editor.render()
+    $(window).resize ->
+      $("#main").css "top", $("#menu-page-tab").height()
+      $("#main").height $(window).height() - $("#menu-page-tab").height()
+    $(window).resize()
     @model.bind "change", =>
       opt = @model.toJSON()
       $("title").html(opt.title + " - #{new Date(opt.timestamp)} - altjsdo.it")
@@ -111,25 +118,12 @@ Config = Backbone.View.extend
 
 Editor = Backbone.View.extend
   el: "#box-editor"
-  events:
-    "click #box-editor-tab li": "selectTab"
-    "click #box-editor-tab li[data-tab='compiled']": "compile"
-  compile: (ev)->
-    {altjs, althtml, altcss} = opt = @model.toJSON()
-    {script, markup, style} = @getValues()
-    build {altjs, althtml, altcss}, {script, markup, style}, opt, (srcdoc)=>
-      @doc.compiled.setValue(srcdoc)
-      if @selected is "compiled"
-        $("#box-editor-textarea").val(srcdoc)
-      @render()
   selectTab: (ev)->
-    ev.preventDefault()
-    $(@el).find(".selected").removeClass("selected")
-    $(ev.target).addClass("selected")
     selected = $(ev.target).attr("data-tab")
     if not @enableCodeMirror
       @doc[@selected].setValue($("#box-editor-textarea").val())
       $("#box-editor-textarea").val(@doc[selected].getValue())
+    if selected is "compile" then @compile()
     @selected = selected
     @render()
   toggle: (ev)->
@@ -165,26 +159,26 @@ Editor = Backbone.View.extend
         "Ctrl-R": (cm)=> main.run()
         "Cmd-S": (cm)=>  $("#config-project-save").click()
         "Ctrl-S": (cm)=> $("#config-project-save").click()
-        "Cmd-1": (cm)=> $("#box-editor-tab").children("*:nth-child(1)").click()
-        "Ctrl-1": (cm)=> $("#box-editor-tab").children("*:nth-child(1)").click()
-        "Cmd-2": (cm)=> $("#box-editor-tab").children("*:nth-child(2)").click()
-        "Ctrl-2": (cm)=> $("#box-editor-tab").children("*:nth-child(2)").click()
-        "Cmd-3": (cm)=> $("#box-editor-tab").children("*:nth-child(3)").click()
-        "Ctrl-3": (cm)=> $("#box-editor-tab").children("*:nth-child(3)").click()
-        "Cmd-4": (cm)=> $("#box-editor-tab").children("*:nth-child(4)").click()
-        "Ctrl-4": (cm)=> $("#box-editor-tab").children("*:nth-child(4)").click()
+        "Cmd-1": (cm)=> $("#menu-page-tab").children("[data-tab='script']").click()
+        "Ctrl-1": (cm)=> $("#menu-page-tab").children("[data-tab='script']").click()
+        "Cmd-2": (cm)=> $("#menu-page-tab").children("[data-tab='markup']").click()
+        "Ctrl-2": (cm)=> $("#menu-page-tab").children("[data-tab='markup']").click()
+        "Cmd-3": (cm)=> $("#menu-page-tab").children("[data-tab='style']").click()
+        "Ctrl-3": (cm)=> $("#menu-page-tab").children("[data-tab='style']").click()
+        "Cmd-4": (cm)=> $("#menu-page-tab").children("[data-tab='compile']").click()
+        "Ctrl-4": (cm)=> $("#menu-page-tab").children("[data-tab='compile']").click()
     @enableCodeMirror = true
     @selected = "script"
     @mode =
       script: "JavaScript"
       markup: "HTML"
       style:  "CSS"
-      compiled: "HTML"
+      compile: "HTML"
     @doc =
       script: new CodeMirror.Doc("")
       markup: new CodeMirror.Doc("")
       style:  new CodeMirror.Doc("")
-      compiled: new CodeMirror.Doc("")
+      compile: new CodeMirror.Doc("")
     @cm = CodeMirror.fromTextArea($("#box-editor-textarea")[0], @option)
     @originDoc = @cm.swapDoc(@doc.script)
     @render()
@@ -196,17 +190,25 @@ Editor = Backbone.View.extend
     script: @doc.script.getValue()
     markup: @doc.markup.getValue()
     style:  @doc.style.getValue()
+  compile: ->
+    {altjs, althtml, altcss} = opt = @model.toJSON()
+    {script, markup, style} = @getValues()
+    build {altjs, althtml, altcss}, {script, markup, style}, opt, (srcdoc)=>
+      @doc.compile.setValue(srcdoc)
+      if @selected is "compile"
+        $("#box-editor-textarea").val(srcdoc)
+      @render()
   render: ->
     opt = @model.toJSON()
-    tmp = $("#box-editor-tab")
-    tmp.find("[data-tab='script']").html(@mode.script=opt.altjs)
-    tmp.find("[data-tab='markup']").html(@mode.markup=opt.althtml)
-    tmp.find("[data-tab='style']").html(@mode.style=opt.altcss)
+    tmp = $("#menu-page-tab")
+    tmp.find("[data-target='#box-editor'][data-tab='script']").html(@mode.script=opt.altjs)
+    tmp.find("[data-target='#box-editor'][data-tab='markup']").html(@mode.markup=opt.althtml)
+    tmp.find("[data-target='#box-editor'][data-tab='style']").html(@mode.style=opt.altcss)
     if @enableCodeMirror
       @cm.setSize("100%", "100%")
       @cm?.swapDoc(@doc[@selected])
       @cm.setOption("mode", getCompilerSetting(@mode[@selected]).mode)
-      if @selected is "compiled"
+      if @selected is "compile"
       then @cm.setOption("readOnly", true)
       else @cm.setOption("readOnly", false)
     setTimeout => @cm?.refresh()

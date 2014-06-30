@@ -17,7 +17,10 @@ html(lang='ja' manifest="manifest.appcache")
       div.home-menu.pure-menu.pure-menu-open.pure-menu-horizontal.pure-menu-fixed
         ul#menu-page-tab
           li.selected(data-target="#box-config") altjsdoit
-          li(data-target="#box-editor") Editor
+          li(data-target="#box-editor" data-tab="script") Script
+          li(data-target="#box-editor" data-tab="markup") Markup
+          li(data-target="#box-editor" data-tab="style") Style
+          li(data-target="#box-editor" data-tab="compile") Compile
           li(data-target="#box-sandbox") Run
     div#main
       section#box-config.active
@@ -37,10 +40,6 @@ html(lang='ja' manifest="manifest.appcache")
                 a.pure-button(target="_blank" href="/") New Project
                 | &nbsp;
                 span#config-project-twitter
-            p
-              label
-                | CodeMirror:
-                input#config-editor-codemirror(type='checkbox' checked="checked")
           fieldset
             legend Compiler
             p
@@ -97,6 +96,9 @@ html(lang='ja' manifest="manifest.appcache")
           fieldset
             legend Debug
             label
+              | use CodeMirror:
+              input#config-editor-codemirror(type='checkbox' checked="checked")
+            label
               | use blobCache:
               input(data-config='enableBlobCache' type='checkbox')
             label
@@ -119,14 +121,7 @@ html(lang='ja' manifest="manifest.appcache")
               | &nbsp;
               a.pure-button(target='_blank' href="https://twitter.com/search?q=%23altjsdoit") Twitter
       section#box-editor
-        div.home-menu.pure-menu.pure-menu-open.pure-menu-horizontal.pure-menu-fixed
-          ul#box-editor-tab
-            li.selected(data-tab="script") Script
-            li(data-tab="markup") Markup
-            li(data-tab="style") Style
-            li(data-tab="compiled") Compiled
-        div#box-editor-content
-          textarea#box-editor-textarea(wrap='off')
+        textarea#box-editor-textarea(wrap='off')
       section#box-sandbox
         iframe#box-sandbox-iframe
     script(src='./thirdparty/zepto/zepto.min.js')
