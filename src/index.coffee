@@ -176,10 +176,10 @@ Editor = Backbone.View.extend
     @enableCodeMirror = true
     @selected = "script"
     @mode =
-      script: "javascript"
-      markup: "xml"
-      style:  "css"
-      compiled: "xml"
+      script: "JavaScript"
+      markup: "HTML"
+      style:  "CSS"
+      compiled: "HTML"
     @doc =
       script: new CodeMirror.Doc("")
       markup: new CodeMirror.Doc("")
@@ -199,13 +199,13 @@ Editor = Backbone.View.extend
   render: ->
     opt = @model.toJSON()
     tmp = $("#box-editor-tab")
-    tmp.find("[data-tab='script']").html(opt.altjs)
-    tmp.find("[data-tab='markup']").html(opt.althtml)
-    tmp.find("[data-tab='style']").html(opt.altcss)
+    tmp.find("[data-tab='script']").html(@mode.script=opt.altjs)
+    tmp.find("[data-tab='markup']").html(@mode.markup=opt.althtml)
+    tmp.find("[data-tab='style']").html(@mode.style=opt.altcss)
     if @enableCodeMirror
       @cm.setSize("100%", "100%")
       @cm?.swapDoc(@doc[@selected])
-      @cm.setOption("mode", @mode[@selected])
+      @cm.setOption("mode", getCompilerSetting(@mode[@selected]).mode)
       if @selected is "compiled"
       then @cm.setOption("readOnly", true)
       else @cm.setOption("readOnly", false)
