@@ -1,0 +1,10 @@
+script
+  | try{
+  |   document.write("<p>waiting message</p>");
+  |   document.write("<p><a target='_blank' href='"+location.href+"'>"+location.href+"</a></p>");
+  |   window.onmessage = function(ev){
+  |     document.write(ev.data);
+  |   }
+  | }catch(err){
+  |   document.write(JSON.stringify(err))
+  | }

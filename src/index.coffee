@@ -11,7 +11,7 @@ $ ->
 class Main
   constructor: ->
     config = loadDOM($("#box-config")[0])
-    uriData = loadURI(location)
+    uriData = dir loadURI(location)
     @model = new Model()
     @model.set(_.extend(config, uriData.config))
     @config = new Config({@model})
@@ -170,8 +170,12 @@ Editor = Backbone.View.extend
       compile: new CodeMirror.Doc("")
     @cm = CodeMirror.fromTextArea($("#box-editor-textarea")[0], @option)
     @originDoc = @cm.swapDoc(@doc.script)
+    @initialized = false
     @render()
   setValues: ({script, markup, style})->
+    if not @initialized
+      $("#box-editor-textarea").val(script)
+    @initialized = true
     @doc.script.setValue(script) if script?
     @doc.markup.setValue(markup) if markup?
     @doc.style.setValue(style)   if style?
